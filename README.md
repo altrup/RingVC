@@ -37,7 +37,7 @@ Guide on hosting the bot yourself
 - Clone repository
   
   ```bash
-  git clone https://github.com/EricL521/RingVC.git
+  git clone https://github.com/altrup/RingVC.git
   ```
 - Enter newly created folder
   

@@ -11,8 +11,6 @@ lerna-debug.log*
 # VSCode iDE
 .vs
 
-# ignore config.json
-config.json
 # ignore data.txt
 data.txt
 

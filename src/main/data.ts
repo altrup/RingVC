@@ -10,8 +10,8 @@ import { DiscordUser, userOnModifyFunctions } from '@main/classes/commands/disco
 import { VoiceChat, voiceChatOnModifyFunctions } from '@main/classes/commands/voice-chat';
 import { Filter, filterOnModifyFunctions } from '@main/classes/commands/filter';
 
-const tempDataPath = path.join(process.cwd(), "data.txt.tmp");
-const dataPath = path.join(process.cwd(), "data.txt");
+const tempDataPath = path.join(process.cwd(), "data", "data.tmp.txt");
+const dataPath = path.join(process.cwd(), "data", "data.txt");
 
 // stolen from https://stackoverflow.com/questions/29085197/how-do-you-json-stringify-an-es6-map
 const replacer = (key: string, value: any) => {

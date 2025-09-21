@@ -11,8 +11,8 @@ lerna-debug.log*
 # VSCode iDE
 .vs
 
-# ignore data.txt
-data.txt
+# ignore data
+data
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json

@@ -1,8 +1,9 @@
-const { SlashCommandBuilder } = require('discord.js');
+import { ChatInputCommandInteraction, MessageFlags, SlashCommandBuilder } from "discord.js";
 
-const { DiscordUser } = require('../../main/classes/commands/discord-user.js');
+import { DiscordUser } from "@main/classes/commands/discord-user";
+import { DataType } from "@main/data";
 
-module.exports = {
+export const getFilter = {
 	data: new SlashCommandBuilder()
 		.setName('get_filter')
 		.setDescription('Gets the type and list of users of a filter')
@@ -11,18 +12,18 @@ module.exports = {
 			.setDescription('Get this voice channel\'s filter. Leave blank to get global filter')
 			.addChannelTypes(2)
 			.setRequired(false)),
-	async execute(data, interaction) {
+	async execute(data: DataType, interaction: ChatInputCommandInteraction) {
 		const currentUser = interaction.user; // user who started the command
 		const channel = interaction.options.getChannel("channel");
 		if (channel) {
 			const discordUser = data.users.get(currentUser.id);
-			if (!discordUser || !discordUser.hasVoiceChannel(channel.id))
+			const filter = discordUser?.getFilter(channel.id);
+			if (!filter)
 				interaction.reply({
 					content: `You have not yet signed up for ${channel}`,
-					ephemeral: true
+					flags: [MessageFlags.Ephemeral]
 				}).catch(console.error);
 			else {
-				const filter = discordUser.getFilter(channel.id);
 				let userList = "";
 				filter.getList().forEach((value, key, map) => {
 					userList += `<@${key}>\n`;
@@ -30,7 +31,7 @@ module.exports = {
 				
 				interaction.reply({
 					content: `__List of people in your ${filter.getType()} for ${channel}__\n${userList? userList: "None"}`,
-					ephemeral: true
+					flags: [MessageFlags.Ephemeral]
 				}).catch(console.error);
 			}
 		}
@@ -47,7 +48,7 @@ module.exports = {
 				
 				interaction.reply({
 					content: `__List of people in your global ${filter.getType()}__\n${userList? userList: "None"}`,
-					ephemeral: true
+					flags: [MessageFlags.Ephemeral]
 				}).catch(console.error);
 			}
 		}

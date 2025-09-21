@@ -1,17 +1,20 @@
-// import fs
-const fs = require('fs');
+import * as fs from 'fs';
+import * as path from 'path';
 
 // get setting
-const {saveCooldown} = require("../config.json");
+import { SAVE_COOLDOWN } from '@src/config';
 
 // get classes
-const {WatcherMap} = require('./classes/storage/watcher-map.js');
-const {DiscordUser, userOnModifyFunctions} = require('./classes/commands/discord-user.js');
-const {VoiceChat, voiceChatOnModifyFunctions} = require('./classes/commands/voice-chat.js');
-const {Filter, filterOnModifyFunctions} = require('./classes/commands/filter.js');
+import { WatcherMap } from '@main/classes/storage/watcher-map';
+import { DiscordUser, userOnModifyFunctions } from '@main/classes/commands/discord-user';
+import { VoiceChat, voiceChatOnModifyFunctions } from '@main/classes/commands/voice-chat';
+import { Filter, filterOnModifyFunctions } from '@main/classes/commands/filter';
+
+const tempDataPath = path.join(process.cwd(), "data.txt.tmp");
+const dataPath = path.join(process.cwd(), "data.txt");
 
 // stolen from https://stackoverflow.com/questions/29085197/how-do-you-json-stringify-an-es6-map
-const replacer = (key, value) => {
+const replacer = (key: string, value: any) => {
 	if(value instanceof Map)
 		return {
 			dataType: 'Map',
@@ -21,35 +24,35 @@ const replacer = (key, value) => {
 		return {
 			dataType: 'DiscordUser',
 			value: {
-				userId: value.userId,
-				voiceChannels: value.voiceChannels,
-				globalFilter: value.globalFilter,
-				mode: value.mode
+				userId: value.getUserId(),
+				voiceChannels: value.getVoiceChannels(),
+				globalFilter: value.getGlobalFilter(),
+				mode: value.getMode()
 			}
 		};
 	else if (value instanceof VoiceChat)
 		return {
 			dataType: 'VoiceChat',
 			value: {
-				channelId: value.channelId,
-				userIds: value.userIds
+				channelId: value.getChannelId(),
+				userIds: value.getUserIds()
 			}
 		};
 	else if (value instanceof Filter)
 		return {
 			dataType: 'VoiceChannelFilter',
 			value: {
-				isWhitelist: value.isWhitelist,
-				list: value.list
+				isWhitelist: value.getIsWhitelist(),
+				list: value.getList()
 			}
 		};
 	else
 		return value;
 };
-const reviver = (key, value) => {
+const reviver = (key: string, value: any) => {
 	if(typeof value === 'object' && value !== null) {
 		if (value.dataType === 'Map')
-			return value.value.reduce((map, object) => {
+			return value.value.reduce((map: WatcherMap<unknown, unknown>, object: [unknown, unknown]) => {
 				map.set(object[0], object[1]);
 				return map;
 			}, new WatcherMap(onModify, null));
@@ -72,26 +75,24 @@ const reviver = (key, value) => {
 let updated = false;
 
 let lastSave = new Date();
-let timeout; // used to store timeout for saving during cooldown
-let saved; // a promise that resolves when data is saved
-const saveData = () => {
+let timeout: NodeJS.Timeout; // used to store timeout for saving during cooldown
+let saved: Promise<void>; // a promise that resolves when data is saved
+const saveData = (): Promise<void> => {
 	return new Promise((resolve, reject) => {
 		// update variables
 		lastSave = new Date();
 		updated = false;
 
 		console.log("DO NOT QUIT!!! saving ...");
-		const tempPath = "./main/data.txt.tmp";
-		const finalPath = "./main/data.txt";
 
-		fs.writeFile(tempPath, JSON.stringify(data, replacer), (err) => {
+		fs.writeFile(tempDataPath, JSON.stringify(data, replacer), (err) => {
 			if (err) {
 				console.log("error saving data to temp file");
 				reject(err);
 				return;
 			}
 			
-			fs.rename(tempPath, finalPath, (err) => {
+			fs.rename(tempDataPath, dataPath, (err) => {
 				if (err) {
 					console.log("error renaming temp file");
 					reject(err);
@@ -107,10 +108,10 @@ const onModify = () => {
 	// if it is already updated, then we don't need to do anything
 	if (!updated) {
 		updated = true;
-		if (new Date() - lastSave >= saveCooldown * 1000) // saveCooldown is in seconds
+		if (new Date().getTime() - lastSave.getTime() >= SAVE_COOLDOWN * 1000) // SAVE_COOLDOWN is in seconds
 			timeout = setTimeout(() => {saved = saveData()}, 10); // save after a short delay (sometimes multiple things are changed at once)
 		else
-			timeout = setTimeout(() => {saved = saveData()}, (saveCooldown * 1000) - (new Date() - lastSave));
+			timeout = setTimeout(() => {saved = saveData()}, (SAVE_COOLDOWN * 1000) - (new Date().getTime() - lastSave.getTime()));
 	}
 };
 const cancelSave = () => {
@@ -122,13 +123,17 @@ userOnModifyFunctions.push(onModify);
 voiceChatOnModifyFunctions.push(onModify);
 filterOnModifyFunctions.push(onModify);
 
-const data = {
+export type DataType = {
+	voiceChats: WatcherMap<string, VoiceChat>;
+	users: WatcherMap<string, DiscordUser>;
+}
+export const data: DataType = {
 	voiceChats: VoiceChat.voiceChats,
 	users: DiscordUser.users,
 };
 // read data.txt
-if (fs.existsSync('./main/data.txt')) { 
-	const storedText = fs.readFileSync('./main/data.txt');
+if (fs.existsSync(dataPath)) { 
+	const storedText = fs.readFileSync(dataPath).toString();
 	if (storedText != "") {
 		JSON.parse(storedText, reviver); // parse text with reviver
 		// OnModify is called when each object is created, so we need to cancel the save
@@ -144,7 +149,7 @@ if (fs.existsSync('./main/data.txt')) {
 // if data.txt doesn't exist
 else {
 	// create file
-	fs.writeFileSync('./main/data.txt', "");
+	fs.writeFileSync(dataPath, "");
 	console.log("data.txt was empty, so data will be reset to default");
 	saveData();
 }
@@ -167,7 +172,3 @@ else {
 		process.exit(0);
 	});
 });
-
-module.exports = {
-	data: data
-};

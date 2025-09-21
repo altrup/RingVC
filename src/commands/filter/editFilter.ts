@@ -1,8 +1,9 @@
-const { SlashCommandBuilder } = require('discord.js');
+import { ChannelType, ChatInputCommandInteraction, MessageFlags, SlashCommandBuilder } from "discord.js";
 
-const { DiscordUser } = require('../../main/classes/commands/discord-user.js');
+import { DiscordUser } from "@main/classes/commands/discord-user";
+import { DataType } from "@main/data";
 
-module.exports = {
+export const editFilter = {
 	data: new SlashCommandBuilder()
 		.setName('edit_filter')
 		.setDescription('Edit your filter for a voice chat')
@@ -42,28 +43,28 @@ module.exports = {
 				.setDescription("Which channel's filter to modify. Leave blank to edit your global filter")
 				.addChannelTypes(2)
 				.setRequired(false))),
-	async execute(data, interaction) {
+	async execute(data: DataType, interaction: ChatInputCommandInteraction) {
 		// modifying users list
 		if (interaction.options.getSubcommand() === "users") {
 			const currentUser = interaction.user; // user who started the command
 			const channel = interaction.options.getChannel("channel");
-			const addOrRemove = interaction.options.getInteger("add_or_remove"); // 1 for add 0 for remove
-			const user = interaction.options.getUser("user");
+			const addOrRemove = interaction.options.getInteger("add_or_remove", true); // 1 for add 0 for remove
+			const user = interaction.options.getUser("user", true);
 			if (channel) {
 				const discordUser = data.users.get(currentUser.id);
 				// if user doesn't exist or hasn't signed up for that voice channel
-				if (!discordUser || !discordUser.hasVoiceChannel(channel.id)) 
+				const filter = discordUser?.getFilter(channel.id);
+				if (!filter) 
 					interaction.reply({
 						content: `You have not yet signed up for ${channel}`,
-						ephemeral: true
+						flags: [MessageFlags.Ephemeral]
 					}).catch(console.error);
 				else {
-					const filter = discordUser.getFilter(channel.id);
 					if (addOrRemove === 1) {
 						filter.addUser(user.id);
 						interaction.reply({
 							content: `Added ${user} to your ${filter.getType()} for ${channel}`,
-							ephemeral: true
+							flags: [MessageFlags.Ephemeral]
 						}).catch(console.error);
 					}
 					else {
@@ -71,13 +72,13 @@ module.exports = {
 							filter.removeUser(user.id);
 							interaction.reply({
 								content: `Removed ${user} from your ${filter.getType()} for ${channel}`,
-								ephemeral: true
+								flags: [MessageFlags.Ephemeral]
 							}).catch(console.error);
 						}
 						else
 							interaction.reply({
 								content: `${user} was not in your ${filter.getType()} for ${channel}`,
-								ephemeral: true
+								flags: [MessageFlags.Ephemeral]
 							}).catch(console.error);
 					}
 				}
@@ -92,7 +93,7 @@ module.exports = {
 						filter.addUser(user.id);
 						interaction.reply({
 							content: `Added ${user} to your global ${filter.getType()}`,
-							ephemeral: true
+							flags: [MessageFlags.Ephemeral]
 						}).catch(console.error);
 					}
 					else {
@@ -100,51 +101,50 @@ module.exports = {
 							filter.removeUser(user.id);
 							interaction.reply({
 								content: `Removed ${user} from your global ${filter.getType()}`,
-								ephemeral: true
+								flags: [MessageFlags.Ephemeral]
 							}).catch(console.error);
 						}
 						else
 							interaction.reply({
 								content: `${user} was not in your global ${filter.getType()}`,
-								ephemeral: true
+								flags: [MessageFlags.Ephemeral]
 							}).catch(console.error);
 					}
 				}
 			}
-
 		}
 		else if (interaction.options.getSubcommand() === "type") {
 			const currentUser = interaction.user; // user who started the command
 			const channel = interaction.options.getChannel("channel");
-			const type = interaction.options.getString("filter_type"); // string of either "whitelist" or "blacklist"
+			const type = interaction.options.getString("filter_type", true); // string of either "whitelist" or "blacklist"
 			if (channel) {
-				if (!channel.isVoiceBased()) {
+				if (channel.type !== ChannelType.GuildVoice) {
 					interaction.reply({
 						content: `Filters are only available on voice channels`,
-						ephemeral: true
+						flags: [MessageFlags.Ephemeral]
 					}).catch(console.error);
 					return; // stop the rest of function
 				}
 
 				const discordUser = data.users.get(currentUser.id);
+				const filter = discordUser?.getFilter(channel.id);
 				// if user doesn't exist or hasn't signed up for that voice channel
-				if (!discordUser || !discordUser.hasVoiceChannel(channel.id)) 
+				if (!filter) 
 					interaction.reply({
 						content: `You have not yet signed up for ${channel}`,
-						ephemeral: true
+						flags: [MessageFlags.Ephemeral]
 					}).catch(console.error);
 				else {
-					const filter = discordUser.getFilter(channel.id);
 					if (filter.getType() === type)
 						interaction.reply({
 							content: `Your filter for ${channel} is already a ${type}`,
-							ephemeral: true
+							flags: [MessageFlags.Ephemeral]
 						}).catch(console.error);
 					else {
 						filter.setType(type);
 						interaction.reply({
 							content: `Your filter for ${channel} was reset and changed to a ${type}`,
-							ephemeral: true
+							flags: [MessageFlags.Ephemeral]
 						}).catch(console.error);
 					}
 
@@ -159,13 +159,13 @@ module.exports = {
 					if (filter.getType() === type)
 						interaction.reply({
 							content: `Your global filter is already a ${type}`,
-							ephemeral: true
+							flags: [MessageFlags.Ephemeral]
 						}).catch(console.error);
 					else {
 						filter.setType(type);
 						interaction.reply({
 							content: `Your global filter was reset and changed to a ${type}`,
-							ephemeral: true
+							flags: [MessageFlags.Ephemeral]
 						}).catch(console.error);
 					}
 

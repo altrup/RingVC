@@ -1,8 +1,9 @@
-const { SlashCommandBuilder, MessageEmbed } = require('discord.js');
+import { ChatInputCommandInteraction, GuildMember, MessageFlags, SlashCommandBuilder } from "discord.js";
 
-const {DiscordUser} = require('../main/classes/commands/discord-user.js');
+import { DiscordUser } from "@main/classes/commands/discord-user";
+import { DataType } from "@main/data";
 
-module.exports = {
+export const ring = {
 	data: new SlashCommandBuilder()
 		.setName('ring')
 		.setDescription('Rings a user')
@@ -10,24 +11,24 @@ module.exports = {
 			option.setName('user')
 				.setDescription('Select a user')
 				.setRequired(true)),
-	async execute(data, interaction) {
+	async execute(data: DataType, interaction: ChatInputCommandInteraction) {
 		// command must be run in a guild
 		if (!interaction.member) {
 			interaction.reply({
 				content: `This command must be run in a Discord server`,
-				ephemeral: true
+				flags: [MessageFlags.Ephemeral]
 			}).catch(console.error);
 			return;
 		}
 
-		const user = interaction.options.getUser('user');
-		const channel = interaction.member.voice.channel;
+		const user = interaction.options.getUser('user', true);
+		const channel = (interaction.member as GuildMember).voice.channel;
 		// if channel doesn't exist (user not in call)
 		if (!channel) {
 			// don't send dm
 			interaction.reply({
 				content: `Please join a vc first`,
-				ephemeral: true
+				flags: [MessageFlags.Ephemeral]
 			}).catch(console.error);
 			return;
 		}
@@ -36,7 +37,7 @@ module.exports = {
 		const discordUser = data.users.get(user.id);
 		// send the user an invite link to the voice channel or text channel that the interaction creator is in
 		Promise.allSettled([
-			interaction.deferReply({ ephemeral: true }),
+			interaction.deferReply({ flags: [MessageFlags.Ephemeral] }),
 			discordUser? discordUser.ring(channel, interaction.user, "wants you to join"):
 				DiscordUser.ring(channel, interaction.user, "wants you to join", user.id)
 		]).then((results) => {
@@ -46,13 +47,11 @@ module.exports = {
 			if (results[1].status === "fulfilled") {
 				interaction.editReply({
 					content: `Notified ${user}`,
-					ephemeral: true
 				}).catch(console.error);
 			}
 			else {
 				interaction.editReply({
 					content: `Can't notify ${user} because ${results[1].reason}`,
-					ephemeral: true
 				}).catch(console.error);
 			}
 		});

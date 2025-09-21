@@ -1,9 +1,8 @@
-FROM node:22
+FROM node:22-slim
 WORKDIR /app
 
 COPY . .
-RUN npm install
+RUN [ "npm", "install" ]
+RUN [ "npm", "run", "build" ]
 
-RUN node deploy-commands.js
-
-CMD ["node", "index.js"]
+CMD [ "npm", "run", "deploy-and-start" ]

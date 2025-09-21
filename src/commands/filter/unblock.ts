@@ -1,8 +1,9 @@
-const { SlashCommandBuilder } = require('discord.js');
+import { ChatInputCommandInteraction, MessageFlags, SlashCommandBuilder } from "discord.js";
 
-const {DiscordUser} = require('../../main/classes/commands/discord-user.js');
+import { DiscordUser } from "@main/classes/commands/discord-user";
+import { DataType } from "@src/main/data";
 
-module.exports = {
+export const unblock = {
 	data: new SlashCommandBuilder()
 		.setName('unblock')
 		.setDescription('Unblocks a user from ringing you, globally')
@@ -10,20 +11,16 @@ module.exports = {
 			option.setName('user')
 				.setDescription('Select a user to unblock')
 				.setRequired(true)),
-	async execute(data, interaction) {
+	async execute(data: DataType, interaction: ChatInputCommandInteraction) {
 		const user = interaction.user;
-		const blockedUser = interaction.options.getUser('user');
+		const blockedUser = interaction.options.getUser('user', true);
 
-		// if the user has no object yet
-		if (!data.users.has(user.id))
-			new DiscordUser(user.id, []);
-
-		const discordUser = data.users.get(user.id);
+		const discordUser = data.users.get(user.id)?? new DiscordUser(user.id);
 		const globalFilter = discordUser.getFilter();
 		if (!globalFilter.hasUser(blockedUser.id)) {
 			interaction.reply({
 				content: `${blockedUser} isn't blocked`,
-				ephemeral: true
+				flags: [MessageFlags.Ephemeral]
 			}).catch(console.error);
 			return;
 		}
@@ -31,8 +28,7 @@ module.exports = {
 		globalFilter.removeUser(blockedUser.id);
 		interaction.reply({
 			content: `${blockedUser} has been unblocked`,
-			ephemeral: true
+			flags: [MessageFlags.Ephemeral]
 		}).catch(console.error);
-
 	},
 };

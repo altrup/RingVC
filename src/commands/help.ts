@@ -1,10 +1,12 @@
-const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+import { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, MessageFlags } from 'discord.js';
 
-module.exports = {
+import { DataType } from "@main/data";
+
+export const help = {
 	data: new SlashCommandBuilder()
 		.setName('help')
 		.setDescription('Getting started'),
-	async execute(data, interaction) {
+	async execute(data: DataType, interaction: ChatInputCommandInteraction) {
 		interaction.reply({ 
 			embeds: [
 				new EmbedBuilder()
@@ -33,9 +35,9 @@ module.exports = {
 					.setLabel('Support Server')
 					.setStyle(ButtonStyle.Link)
 					.setURL('https://discord.gg/bxBePEnndq')
-				)
+				).toJSON()
 			],
-			ephemeral: true 
+			flags: [MessageFlags.Ephemeral] 
 		}).catch(console.error);
 	},
 };

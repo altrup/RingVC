@@ -1,8 +1,9 @@
-const { SlashCommandBuilder } = require('discord.js');
+import { ChatInputCommandInteraction, MessageFlags, SlashCommandBuilder } from "discord.js";
 
-const {DiscordUser} = require('../../main/classes/commands/discord-user.js');
+import { DiscordUser } from "@main/classes/commands/discord-user";
+import { DataType } from "@src/main/data";
 
-module.exports = {
+export const resetFilter = {
 	data: new SlashCommandBuilder()
 		.setName('reset_filter')
 		.setDescription('Resets a filter. Also resets to blacklist')
@@ -11,24 +12,24 @@ module.exports = {
 			.setDescription('Resets this voice channel\'s filter. Leave blank for your global filter')
 			.addChannelTypes(2)
 			.setRequired(false)),
-	async execute(data, interaction) {
+	async execute(data: DataType, interaction: ChatInputCommandInteraction) {
 		const currentUser = interaction.user; // user who started the command
 		const channel = interaction.options.getChannel("channel");
 		// if they inputted a channel
 		if (channel) {
 			const discordUser = data.users.get(currentUser.id);
-			if (!discordUser || !discordUser.hasVoiceChannel(channel.id))
+			const filter = discordUser?.getFilter(channel.id);
+			if (!filter)
 				interaction.reply({
 					content: `You have not yet signed up for ${channel}`,
-					ephemeral: true
+					flags: [MessageFlags.Ephemeral]
 				}).catch(console.error);
 			else {
-				const filter = discordUser.getFilter(channel.id);
 				filter.setType("blacklist"); // also resets filter
 				
 				interaction.reply({
 					content: `Filter for ${channel} has been reset and is now a ${filter.getType()}`,
-					ephemeral: true
+					flags: [MessageFlags.Ephemeral]
 				}).catch(console.error);
 			}
 		}
@@ -37,12 +38,12 @@ module.exports = {
 			if (!discordUser)
 				discordUser = new DiscordUser(currentUser.id, []);
 			else {
-				const filter = discordUser.globalFilter;
+				const filter = discordUser.getFilter();
 				filter.setType("blacklist"); // also resets filter
 				
 				interaction.reply({
 					content: `Your global filter has been reset and is now a ${filter.getType()}`,
-					ephemeral: true
+					flags: [MessageFlags.Ephemeral]
 				}).catch(console.error);
 			}
 		}

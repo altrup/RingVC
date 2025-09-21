@@ -1,21 +1,28 @@
-// both used to notify data.js
-const onModifyFunctions = [];
-const onModify = () => {
-	for (let i = 0; i < onModifyFunctions.length; i ++)
-		onModifyFunctions[i]();
-};
-const {WatcherMap} = require("../storage/watcher-map.js");
+import { User } from "discord.js";
+import { WatcherMap } from "../storage/watcher-map";
+import { DiscordUser } from "./discord-user";
 
-const {DiscordUser} = require("./discord-user.js");
+// both used to notify data.js
+export const voiceChatOnModifyFunctions: (() => void)[] = [];
+const onModify = () => {
+	for (let i = 0; i < voiceChatOnModifyFunctions.length; i ++)
+		voiceChatOnModifyFunctions[i]?.();
+};
 
 // class for a discord voice chat
-class VoiceChat {
-	static voiceChats = new WatcherMap(onModify);
+export class VoiceChat {
+	static voiceChats: WatcherMap<string, VoiceChat> = new WatcherMap(onModify, null);
 
 	// returns if the voice chat is the default, in which case we don't need to store it
-	static isDefault(userIds) {
+	static isDefault(userIds: string[]) {
 		return Array.from(userIds).length === 0;
 	}
+
+	private channelId: string;
+	private userIds: WatcherMap<string, null>; // the value doesn't actually matter
+
+	public getChannelId() { return this.channelId; }
+	public getUserIds() { return this.userIds; }
 
 	/*
 		channel is the channel object
@@ -23,36 +30,39 @@ class VoiceChat {
 		if skipUserUpdates is true, then this class will NEVER make new users or change existing ones
 			Only used when loading from data.js, because the users already exist with data
 	*/
-	constructor (channelId, userIds, skipUserUpdates) {
+	constructor (channelId: string, userIds: string[], skipUserUpdates: boolean = false) {
 		// update channel map
 		VoiceChat.voiceChats.set(channelId, this);
 
 		this.channelId = channelId;
-		this.userIds = new WatcherMap(onModify);
+		this.userIds = new WatcherMap(onModify, null);
 		let userIdsArray = Array.from(userIds);
 		for (const userId of userIdsArray)
 			this.addUser(userId, skipUserUpdates);
 	}
 
 	// add a user
-	addUser (userId, skipUserUpdates) {
+	addUser (userId: string, skipUserUpdates: boolean = false) {
 		if (!skipUserUpdates) {
-			// create new discord user if needed
-			if (!DiscordUser.users.has(userId))
+			const discordUser = DiscordUser.users.get(userId);
+			if (discordUser) {
+				// update discord user
+				discordUser.addVoiceChannel(this.channelId);
+			} else {
+				// create new discord user if needed
 				new DiscordUser(userId);
-			// update discord user
-			DiscordUser.users.get(userId).addVoiceChannel(this.channelId);
+			}
 		}
 
 		// update userIds
-		this.userIds.set(userId, 0); // the value doesn't actually matter
+		this.userIds.set(userId, null); // the value doesn't actually matter
 	}
 
 	// removes a user
-	removeUser (userId) {
+	removeUser (userId: string) {
 		this.userIds.delete(userId);
 
-		DiscordUser.users.get(userId).removeVoiceChannel(this.channelId);
+		DiscordUser.users.get(userId)?.removeVoiceChannel(this.channelId);
 
 		// delete object if no users
 		if (this.userIds.size == 0)
@@ -60,13 +70,13 @@ class VoiceChat {
 	}
 
 	// returns if it has the user
-	hasUser (userId) {
+	hasUser (userId: string) {
 		return this.userIds.has(userId);
 	}
 
 	// on someone joining a call
 	// user is the person who just joined the call
-	async onJoin (startedUser) {
+	async onJoin (startedUser?: User) {
 		if (!startedUser) return;
 		
 		// if the channel cache does not contain the channel 
@@ -74,6 +84,7 @@ class VoiceChat {
 			await startedUser.client.channels.fetch(this.channelId);
 		
 		const channel = startedUser.client.channels.resolve(this.channelId);
+		if (!channel?.isVoiceBased()) return;
 		
 		const startedDiscordUser = DiscordUser.users.get(startedUser.id);
 		// if user is in stealth mode, don't send message
@@ -81,9 +92,10 @@ class VoiceChat {
 			return;
 
 		Promise.allSettled(
-			Array.from(this.userIds.keys()).map(key => new Promise((resolve, reject) => {
+			Array.from(this.userIds.keys()).map(key => new Promise<DiscordUser>((resolve, reject) => {
 				const discordUser = DiscordUser.users.get(key);
-				discordUser.shouldRing(channel, startedUser, false).then(async () => {
+				if (!discordUser) { return reject("User does not exist"); }
+				discordUser.shouldRing(channel, startedUser).then(async () => {
 					if (discordUser.filter(
 						startedDiscordUser?.getFilter(channel.id), 
 						discordUser.filter(discordUser.getFilter(channel.id), Array.from(channel.members.keys()))
@@ -102,19 +114,14 @@ class VoiceChat {
 			const filterResults = results.filter(result => result.status === "fulfilled").map(result => result.value);
 			if (filterResults.length > 0)
 				channel.send({
-					content: `\`@${channel.guild.members.resolve(startedUser.id).displayName}\` just joined \`#${channel.name}\`, ${
+					content: `\`@${channel.guild.members.resolve(startedUser.id)?.displayName}\` just joined \`#${channel.name}\`, ${
 						filterResults.length >= 2?
 							`${filterResults.slice(0, filterResults.length - 1).join(", ")} and ${filterResults[filterResults.length - 1]}`
 						: `${filterResults[0]}`
 					}`,
-					allowedMentions: {users: filterResults.map(value => value.userId)}
+					allowedMentions: {users: filterResults.map(value => value.getUserId())}
 				})
 				.catch(() => {}); // do nothing for now (discord permission error)
 		});
 	}
-}
-
-module.exports = {
-	VoiceChat: VoiceChat,
-	voiceChatOnModifyFunctions: onModifyFunctions
 }

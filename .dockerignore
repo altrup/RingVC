@@ -1,0 +1,17 @@
+.env
+.env.example
+data.txt
+
+.gitignore
+node_modules
+dist
+Dockerfile
+compose.yaml
+
+icon.png
+icon.svg
+
+LICENSE
+Privacy.md
+README.md
+Terms&Conditions.md

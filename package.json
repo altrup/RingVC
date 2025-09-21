@@ -1,8 +1,29 @@
 {
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "deploy-commands": "tsx src/deploy-commands.ts",
+    "build": "tsup src/index.ts --minify && tsup src/deploy-commands.ts --minify",
+    "start": "node dist/index.js",
+    "deploy-commands:production": "node dist/deploy-commands.js",
+    "deploy-and-start": "npm run deploy-commands && npm run start"
+  },
   "dependencies": {
-    "discord.js": "^14.11.0",
-    "eslint": "^8.0.1",
+    "discord.js": "^14.22.1",
+    "dotenv": "^17.2.2",
     "is-online": "^11.0.0",
     "node": "^20.2.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.36.0",
+    "@types/node": "^24.5.2",
+    "@typescript-eslint/eslint-plugin": "^8.44.0",
+    "@typescript-eslint/parser": "^8.44.0",
+    "eslint": "^9.36.0",
+    "globals": "^16.4.0",
+    "jiti": "^2.5.1",
+    "tsup": "^8.5.0",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.44.0"
   }
 }

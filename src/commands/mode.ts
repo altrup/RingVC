@@ -1,8 +1,9 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+import { SlashCommandBuilder, EmbedBuilder, ChatInputCommandInteraction, MessageFlags } from 'discord.js';
 
-const { DiscordUser } = require('../main/classes/commands/discord-user.js');
+import { DataType } from '@main/data';
+import { DiscordUser } from '@main/classes/commands/discord-user';
 
-module.exports = {
+export const mode = {
 	data: new SlashCommandBuilder()
 		.setName('mode')
 		.setDescription('Change modes between invis, normal, and auto')
@@ -24,7 +25,7 @@ module.exports = {
 		.addSubcommand(subcommand =>
 			subcommand.setName("get")
 			.setDescription("Displays your current mode")),
-	async execute(data, interaction) {
+	async execute(data: DataType, interaction: ChatInputCommandInteraction) {
 		// display help message
 		if (interaction.options.getSubcommand() === "help") {
 			interaction.reply({
@@ -39,16 +40,13 @@ module.exports = {
 						{ name: 'Auto', value: 'Sets mode to Stealth, if you are Invisible on Discord, and Normal otherwise' }
 					)
 				], 
-				ephemeral: true
+				flags: [MessageFlags.Ephemeral]
 			}).catch(console.error);
 		}
 		// set mode
 		else if (interaction.options.getSubcommand() === "set") {
 			const user = interaction.user;
-			// if the user has no object yet
-			if (!data.users.has(user.id))
-				new DiscordUser(user.id, []);
-			const discordUser = data.users.get(user.id);
+			const discordUser = data.users.get(user.id)?? new DiscordUser(user.id, []);
 
 			const mode = interaction.options.getString("mode");
 			discordUser.setMode(mode);
@@ -58,7 +56,7 @@ module.exports = {
 					(mode === "stealth")? "You will not ring anyone when you join a voice channel":
 					"You will ring all applicable users when you join a voice channel"
 				}`,
-				ephemeral: true
+				flags: [MessageFlags.Ephemeral]
 			}).catch(console.error);
 		}
 		// get mode
@@ -73,7 +71,7 @@ module.exports = {
 					(mode === "stealth")? "You will not ring anyone when you join a voice channel":
 					"You will ring all applicable users when you join a voice channel"
 				}`,
-				ephemeral: true
+				flags: [MessageFlags.Ephemeral]
 			}).catch(console.error);
 		}
 	},

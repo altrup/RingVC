@@ -1,8 +1,10 @@
 // literally the same as signup.js but with a different name
-const { SlashCommandBuilder } = require('discord.js');
-const unsignup = require('./unsignup.js');
+import { ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
 
-module.exports = {
+import { DataType } from "@main/data";
+import { unsignup } from "@commands/unsignup";
+
+export const quit = {
 	data: new SlashCommandBuilder()
 		.setName('quit')
 		.setDescription('Stop being "rung" for a voice chat')
@@ -11,7 +13,7 @@ module.exports = {
 				.setDescription('Select the call to stop being "rung" for, or type command in voice channel')
 				.addChannelTypes(2)
 				.setRequired(false)),
-	async execute(data, interaction) {
+	async execute(data: DataType, interaction: ChatInputCommandInteraction) {
 		unsignup.execute(data, interaction);
 	},
 };

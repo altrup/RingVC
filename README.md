@@ -44,25 +44,10 @@ Guide on hosting the bot yourself
   ```bash
   cd RingVC
   ```
-- Create `config.json` in root directory with the following values:
-  ```JSON
-  {
-    "token": "Your custom Discord bot token",
-    "clientId": "Your custom Discord bot's client ID"
-
-    "saveCooldown": "How often new data should be saved, in seconds"
-  }
+- Copy [`.env.example`](.env.example) to `.env` in root directory and replace the values
+  ```bash
+  cp .env.example .env
   ```
-  - Example (with an invalid token; you'll need your own):
-    
-    ```JSON
-    {
-      "token": "MTE4MjM0NTY3ODkwMTIzNDU2.Gh7Kj9.dQw4w9WgXcQ_WxYz1234567890AbCdEfGhIjKlM",
-      "clientId": "963163591003628162"
-
-      "saveCooldown": "60"
-    }
-    ```
 - Start bot in Docker
 
   ```bash

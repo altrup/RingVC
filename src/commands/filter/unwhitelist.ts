@@ -3,41 +3,41 @@ import { ChatInputCommandInteraction, MessageFlags, SlashCommandBuilder } from "
 import { DiscordUser } from "@main/classes/commands/discord-user";
 import { DataType } from "@src/main/data";
 
-export const unblock = {
+export const unwhitelist = {
 	data: new SlashCommandBuilder()
-		.setName('unblock')
-		.setDescription('Unblocks a user from ringing you, globally')
+		.setName('unwhitelist')
+		.setDescription('Removes a user from your global whitelist')
 		.addUserOption(option => 
 			option.setName('user')
-				.setDescription('Select a user to unblock')
+				.setDescription('Select a user to unwhitelist')
 				.setRequired(true)),
 	async execute(data: DataType, interaction: ChatInputCommandInteraction) {
 		const user = interaction.user;
-		const blockedUser = interaction.options.getUser('user', true);
+		const whitelistUser = interaction.options.getUser('user', true);
 
 		const discordUser = data.users.get(user.id)?? new DiscordUser(user.id);
 		const globalFilter = discordUser.getFilter();
 
-		if (globalFilter.getIsWhitelist()) {
+		if (!globalFilter.getIsWhitelist()) {
 			interaction.reply({
-				content: `Your global filter is a whitelist. Either change it to a blacklist (\`/edit_filter type Blacklist\`) or use \`/unwhitelist\` instead`,
+				content: `Your global filter is not a whitelist. Either change it to a whitelist (\`/edit_filter type Whitelist\`) or use \`/unblock\` instead`,
 				flags: [MessageFlags.Ephemeral]
 			}).catch(console.error);
 			return;
 		}
 
-		if (!globalFilter.hasUser(blockedUser.id)) {
+		if (!globalFilter.hasUser(whitelistUser.id)) {
 			interaction.reply({
-				content: `${blockedUser} isn't blocked`,
+				content: `${whitelistUser} isn't whitelisted`,
 				flags: [MessageFlags.Ephemeral]
 			}).catch(console.error);
 			return;
 		}
 
 		// otherwise, add the user to the global filter
-		globalFilter.removeUser(blockedUser.id);
+		globalFilter.removeUser(whitelistUser.id);
 		interaction.reply({
-			content: `${blockedUser} has been unblocked`,
+			content: `${whitelistUser} has been unwhitelisted`,
 			flags: [MessageFlags.Ephemeral]
 		}).catch(console.error);
 	},

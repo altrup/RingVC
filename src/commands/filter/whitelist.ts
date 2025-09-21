@@ -3,41 +3,41 @@ import { ChatInputCommandInteraction, MessageFlags, SlashCommandBuilder } from '
 import { DiscordUser } from '@main/classes/commands/discord-user';
 import { DataType } from '@main/data';
 
-export const block = {
+export const whitelist = {
 	data: new SlashCommandBuilder()
-		.setName('block')
-		.setDescription('Blocks a user from ringing you, globally')
+		.setName('whitelist')
+		.setDescription('Adds a user to your global whitelist')
 		.addUserOption(option => 
 			option.setName('user')
-				.setDescription('Select a user to block')
+				.setDescription('Select a user to whitelist')
 				.setRequired(true)),
 	async execute(data: DataType, interaction: ChatInputCommandInteraction) {
 		const user = interaction.user;
-		const blockedUser = interaction.options.getUser('user', true);
+		const whitelistedUser = interaction.options.getUser('user', true);
 
 		const discordUser = data.users.get(user.id)?? new DiscordUser(user.id);
 		const globalFilter = discordUser.getFilter();
 
-		if (globalFilter.getIsWhitelist()) {
+		if (!globalFilter.getIsWhitelist()) {
 			interaction.reply({
-				content: `Your global filter is a whitelist. Either change it to a blacklist (\`/edit_filter type Blacklist\`) or use \`/whitelist\` instead`,
+				content: `Your global filter is not a whitelist. Either change it to a whitelist (\`/edit_filter type Whitelist\`) or use \`/block\` instead`,
 				flags: [MessageFlags.Ephemeral]
 			}).catch(console.error);
 			return;
 		}
 
-		if (globalFilter.hasUser(blockedUser.id)) {
+		if (globalFilter.hasUser(whitelistedUser.id)) {
 			interaction.reply({
-				content: `${blockedUser} is already blocked`,
+				content: `${whitelistedUser} is already whitelisted`,
 				flags: [MessageFlags.Ephemeral]
 			}).catch(console.error);
 			return;
 		}
 
 		// otherwise, add the user to the global filter
-		globalFilter.addUser(blockedUser.id);
+		globalFilter.addUser(whitelistedUser.id);
 		interaction.reply({
-			content: `${blockedUser} has been blocked`,
+			content: `${whitelistedUser} has been whitelisted`,
 			flags: [MessageFlags.Ephemeral]
 		}).catch(console.error);
 	},

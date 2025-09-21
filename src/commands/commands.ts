@@ -10,6 +10,8 @@ import { quit } from "@commands/quit";
 import { mode } from "@commands/mode";
 import { block } from "@commands/filter/block";
 import { unblock } from "@commands/filter/unblock";
+import { whitelist } from "@commands/filter/whitelist";
+import { unwhitelist } from "@commands/filter/unwhitelist";
 import { editFilter } from "@commands/filter/editFilter";
 import { getFilter } from "@commands/filter/getFilter";
 import { resetFilter } from "@commands/filter/resetFilter";
@@ -29,6 +31,8 @@ export const commands: CommandImplementation[] = [
 	// filter commamnds
 	block,
 	unblock,
+	whitelist,
+	unwhitelist,
 	editFilter,
 	getFilter,
 	resetFilter,

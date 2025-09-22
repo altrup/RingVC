@@ -25,7 +25,7 @@ export const editFilter = {
 			.addChannelOption(option =>
 				option.setName("channel")
 				.setDescription("Which channel's filter to modify. Leave blank to edit your global filter")
-				.addChannelTypes(2)
+				.addChannelTypes(ChannelType.GuildVoice)
 				.setRequired(false)))
 		.addSubcommand(subcommand => 
 			subcommand.setName("type")
@@ -41,7 +41,7 @@ export const editFilter = {
 			.addChannelOption(option =>
 				option.setName("channel")
 				.setDescription("Which channel's filter to modify. Leave blank to edit your global filter")
-				.addChannelTypes(2)
+				.addChannelTypes(ChannelType.GuildVoice)
 				.setRequired(false))),
 	async execute(data: DataType, interaction: ChatInputCommandInteraction) {
 		// modifying users list
@@ -51,36 +51,29 @@ export const editFilter = {
 			const addOrRemove = interaction.options.getInteger("add_or_remove", true); // 1 for add 0 for remove
 			const user = interaction.options.getUser("user", true);
 			if (channel) {
-				const discordUser = data.users.get(currentUser.id);
-				// if user doesn't exist or hasn't signed up for that voice channel
-				const filter = discordUser?.getFilter(channel.id);
-				if (!filter) 
+				const discordUser = data.users.get(currentUser.id)?? new DiscordUser(currentUser.id);
+				const filter = discordUser.getFilter(channel.id)?? discordUser.addFilter(channel.id);
+				
+				if (addOrRemove === 1) {
+					filter.addUser(user.id);
 					interaction.reply({
-						content: `You have not yet signed up for ${channel}`,
+						content: `Added ${user} to your ${filter.getType()} for ${channel}`,
 						flags: [MessageFlags.Ephemeral]
 					}).catch(console.error);
+				}
 				else {
-					if (addOrRemove === 1) {
-						filter.addUser(user.id);
+					if (filter.hasUser(user.id)) {
+						filter.removeUser(user.id);
 						interaction.reply({
-							content: `Added ${user} to your ${filter.getType()} for ${channel}`,
+							content: `Removed ${user} from your ${filter.getType()} for ${channel}`,
 							flags: [MessageFlags.Ephemeral]
 						}).catch(console.error);
 					}
-					else {
-						if (filter.hasUser(user.id)) {
-							filter.removeUser(user.id);
-							interaction.reply({
-								content: `Removed ${user} from your ${filter.getType()} for ${channel}`,
-								flags: [MessageFlags.Ephemeral]
-							}).catch(console.error);
-						}
-						else
-							interaction.reply({
-								content: `${user} was not in your ${filter.getType()} for ${channel}`,
-								flags: [MessageFlags.Ephemeral]
-							}).catch(console.error);
-					}
+					else
+						interaction.reply({
+							content: `${user} was not in your ${filter.getType()} for ${channel}`,
+							flags: [MessageFlags.Ephemeral]
+						}).catch(console.error);
 				}
 			}
 			else {
@@ -126,28 +119,20 @@ export const editFilter = {
 					return; // stop the rest of function
 				}
 
-				const discordUser = data.users.get(currentUser.id);
-				const filter = discordUser?.getFilter(channel.id);
-				// if user doesn't exist or hasn't signed up for that voice channel
-				if (!filter) 
+				const discordUser = data.users.get(currentUser.id)?? new DiscordUser(currentUser.id);
+				const filter = discordUser.getFilter(channel.id)?? discordUser.addFilter(channel.id);
+				
+				if (filter.getType() === type)
 					interaction.reply({
-						content: `You have not yet signed up for ${channel}`,
+						content: `Your filter for ${channel} is already a ${type}`,
 						flags: [MessageFlags.Ephemeral]
 					}).catch(console.error);
 				else {
-					if (filter.getType() === type)
-						interaction.reply({
-							content: `Your filter for ${channel} is already a ${type}`,
-							flags: [MessageFlags.Ephemeral]
-						}).catch(console.error);
-					else {
-						filter.setType(type);
-						interaction.reply({
-							content: `Your filter for ${channel} was reset and changed to a ${type}`,
-							flags: [MessageFlags.Ephemeral]
-						}).catch(console.error);
-					}
-
+					filter.setType(type);
+					interaction.reply({
+						content: `Your filter for ${channel} was reset and changed to a ${type}`,
+						flags: [MessageFlags.Ephemeral]
+					}).catch(console.error);
 				}
 			}
 			else {

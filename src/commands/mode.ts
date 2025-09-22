@@ -46,7 +46,7 @@ export const mode = {
 		// set mode
 		else if (interaction.options.getSubcommand() === "set") {
 			const user = interaction.user;
-			const discordUser = data.users.get(user.id)?? new DiscordUser(user.id, []);
+			const discordUser = data.users.get(user.id)?? new DiscordUser(user.id);
 
 			const mode = interaction.options.getString("mode");
 			discordUser.setMode(mode);

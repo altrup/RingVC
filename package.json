@@ -1,5 +1,6 @@
 {
   "scripts": {
+    "lint": "npx eslint --config src/eslint.config.mts src",
     "dev": "tsx watch src/index.ts",
     "deploy-commands": "tsx src/deploy-commands.ts",
     "build": "tsup src/index.ts --minify && tsup src/deploy-commands.ts --minify",

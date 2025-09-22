@@ -11,6 +11,10 @@ export type FilterType = "whitelist" | "blacklist";
 
 // class for whitelist or blacklist
 export class Filter {
+	static isDefault(isWhitelist: boolean = false, list: WatcherMap<string, null> = new WatcherMap(onModify, null)) {
+		return isWhitelist === false && list.size === 0;
+	}
+
 	private isWhitelist: boolean;
 	private list: WatcherMap<string, null>; // value doesn't matter, just using map for easy lookup
 
@@ -19,27 +23,17 @@ export class Filter {
 
 	/* 
 		isWhitelist is a boolean
-		list is the whitelist or blacklist
-		list is an array of userIds
+		list is the set of userIds
 	*/
-	constructor(isWhitelist: boolean, list?: string[]) {
+	constructor(isWhitelist: boolean = false, list: WatcherMap<string, null> = new WatcherMap(onModify, null)) {
 		this.isWhitelist = isWhitelist;
-
-		this.list = new WatcherMap(onModify, null);
-		if (list) {
-			let listArray = Array.from(list);
-			for (const userId of listArray)
-				this.list.set(userId, null); // value doesn't matter
-		}
+		this.list = list;
 	}
 
 	// whether or not a user passes the filter
-	filter(userId: string) {
-		let listContainsUser = this.list.has(userId);
-
-		return this.isWhitelist === listContainsUser;
+	passesFilter(userId: string) {
+		return this.isWhitelist === this.list.has(userId);
 	}
-	
 
 	// return whitelist or blacklist
 	getType(): FilterType {

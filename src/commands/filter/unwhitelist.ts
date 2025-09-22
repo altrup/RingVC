@@ -1,7 +1,7 @@
 import { ChatInputCommandInteraction, MessageFlags, SlashCommandBuilder } from "discord.js";
 
 import { DiscordUser } from "@main/classes/commands/discord-user";
-import { DataType } from "@src/main/data";
+import { DataType } from "@main/data";
 
 export const unwhitelist = {
 	data: new SlashCommandBuilder()

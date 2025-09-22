@@ -9,8 +9,8 @@ export const signup = {
 		.setDescription('Sign up to get "rung" when someone starts a call')
 		.addChannelOption(option => 
 			option.setName('channel')
-				.setDescription('Select the call to be "rung" for, or type command in voice channel')
-				.addChannelTypes(2)
+				.setDescription('Select the channel to be "rung" for')
+				.addChannelTypes(ChannelType.GuildVoice)
 				.setRequired(false)),
 	async execute(data: DataType, interaction: ChatInputCommandInteraction) {
 		const channel = interaction.options.getChannel('channel') || interaction.channel;

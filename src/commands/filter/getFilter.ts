@@ -1,6 +1,5 @@
-import { ChatInputCommandInteraction, MessageFlags, SlashCommandBuilder } from "discord.js";
+import { ChannelType, ChatInputCommandInteraction, MessageFlags, SlashCommandBuilder } from "discord.js";
 
-import { DiscordUser } from "@main/classes/commands/discord-user";
 import { DataType } from "@main/data";
 
 export const getFilter = {
@@ -10,7 +9,7 @@ export const getFilter = {
 		.addChannelOption(option => 
 			option.setName('channel')
 			.setDescription('Get this voice channel\'s filter. Leave blank to get global filter')
-			.addChannelTypes(2)
+			.addChannelTypes(ChannelType.GuildVoice)
 			.setRequired(false)),
 	async execute(data: DataType, interaction: ChatInputCommandInteraction) {
 		const currentUser = interaction.user; // user who started the command
@@ -18,14 +17,14 @@ export const getFilter = {
 		if (channel) {
 			const discordUser = data.users.get(currentUser.id);
 			const filter = discordUser?.getFilter(channel.id);
-			if (!filter)
+			if (!filter) {
 				interaction.reply({
-					content: `You have not yet signed up for ${channel}`,
+					content: `__List of people in your blacklist for ${channel}__\nNone`,
 					flags: [MessageFlags.Ephemeral]
 				}).catch(console.error);
-			else {
+			} else {
 				let userList = "";
-				filter.getList().forEach((value, key, map) => {
+				filter.getList().forEach((_, key) => {
 					userList += `<@${key}>\n`;
 				});
 				
@@ -36,13 +35,16 @@ export const getFilter = {
 			}
 		}
 		else {
-			let discordUser = data.users.get(currentUser.id);
-			if (!discordUser)
-				discordUser = new DiscordUser(currentUser.id, []);
-			else {
+			const discordUser = data.users.get(currentUser.id);
+			if (!discordUser) {
+				interaction.reply({
+					content: `__List of people in your global blacklist__\nNone`,
+					flags: [MessageFlags.Ephemeral]
+				}).catch(console.error);
+			} else {
 				const filter = discordUser.getFilter();
 				let userList = "";
-				filter.getList().forEach((value, key, map) => {
+				filter.getList().forEach((_, key) => {
 					userList += `<@${key}>\n`;
 				});
 				

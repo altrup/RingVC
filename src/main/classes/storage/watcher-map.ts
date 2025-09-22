@@ -23,6 +23,12 @@ class WatcherMap<K, V> extends Map<K, V> {
 		return returnVal;
 	}
 
+	clear(...args: Parameters<Map<K, V>["clear"]>) {
+		const returnVal = super.clear(...args);
+		this.onModify();
+		return returnVal;
+	}
+
 	get(...args: Parameters<Map<K, V>["get"]>) {
 		const returnVal = super.get(...args);
 		this.onGet();

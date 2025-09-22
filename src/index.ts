@@ -1,10 +1,8 @@
 // data is updated basically in every file
 import { data } from "./main/data";
-import * as fs from 'fs';
-import * as path from 'path';
-import { Client, Collection, GatewayIntentBits, MessageFlags, Partials } from 'discord.js';
+import { ChatInputCommandInteraction, Client, Collection, GatewayIntentBits, MessageFlags, Partials } from 'discord.js';
 import { DISCORD_TOKEN } from "./config";
-import { commands as commandsArray } from "./commands/commands";
+import { CommandImplementation, commands as commandsArray } from "./commands/commands";
 
 const client = new Client({
 	intents: [
@@ -16,7 +14,7 @@ const client = new Client({
 });
 
 // load commands
-const commands = new Collection<string, any>();
+const commands = new Collection<string, CommandImplementation>();
 for (const command of commandsArray) {
 	commands.set(command.data.name, command);
 }
@@ -45,22 +43,23 @@ client.on('interactionCreate', async interaction => {
 	if (!command) return;
 
 	try {
-		await command.execute(data, interaction);
+		if (interaction instanceof ChatInputCommandInteraction) {
+			await command.execute(data, interaction);
+		}
 	} catch (error) {
 		console.error(error);
 		await interaction.reply({ content: 'There was an error while executing this command!', flags: [MessageFlags.Ephemeral] });
 	}
 });
 
-client.on('voiceStateUpdate', (oldState, newState) => {
+client.on('voiceStateUpdate', async (oldState, newState) => {
 	// first condition is to check if user has joined a channel
 	// second condition is to check if user is joining a new channel
 	// third condition is to check if the channel has a voiceChat object
 	try {
-		if (newState?.channel && (!oldState || oldState.channelId !== newState.channelId) && data.voiceChats.has(newState.channelId?? ""))
-			data.voiceChats.get(newState.channelId?? "")?.onJoin(newState.member?.user);
-	}
-	catch (error) {
+		if (newState?.channel && (!oldState || oldState.channelId !== newState.channelId) && data.voiceChats.has(newState.channelId?? "") && newState.member?.user)
+			await data.voiceChats.get(newState.channelId?? "")?.onJoin(newState.member?.user);
+	} catch (error) {
 		console.error(error);
 	}
 });

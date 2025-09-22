@@ -15,6 +15,7 @@ import { unwhitelist } from "@commands/filter/unwhitelist";
 import { editFilter } from "@commands/filter/editFilter";
 import { getFilter } from "@commands/filter/getFilter";
 import { resetFilter } from "@commands/filter/resetFilter";
+import { defaultRingRecipients } from "@commands/defaultRingRecipient";
 
 export type CommandImplementation = {
 	data: SharedSlashCommand;
@@ -36,4 +37,6 @@ export const commands: CommandImplementation[] = [
 	editFilter,
 	getFilter,
 	resetFilter,
+	// default ring recipients
+	defaultRingRecipients,
 ];

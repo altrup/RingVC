@@ -8,8 +8,8 @@ export const unsignup = {
 		.setDescription('Stop being "rung" for a voice chat')
 		.addChannelOption(option => 
 			option.setName('channel')
-				.setDescription('Select the call to stop being "rung" for, or type command in voice channel')
-				.addChannelTypes(2)
+				.setDescription('Select the channel to stop being "rung" for')
+				.addChannelTypes(ChannelType.GuildVoice)
 				.setRequired(false)),
 	async execute(data: DataType, interaction: ChatInputCommandInteraction) {
 		const channel = interaction.options.getChannel('channel')?? interaction.channel;

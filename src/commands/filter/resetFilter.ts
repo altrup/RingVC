@@ -1,7 +1,7 @@
-import { ChatInputCommandInteraction, MessageFlags, SlashCommandBuilder } from "discord.js";
+import { ChannelType, ChatInputCommandInteraction, MessageFlags, SlashCommandBuilder } from "discord.js";
 
-import { DiscordUser } from "@main/classes/commands/discord-user";
-import { DataType } from "@src/main/data";
+import { DataType } from "@main/data";
+import { Filter } from "@main/classes/commands/filter";
 
 export const resetFilter = {
 	data: new SlashCommandBuilder()
@@ -10,18 +10,17 @@ export const resetFilter = {
 		.addChannelOption(option => 
 			option.setName('channel')
 			.setDescription('Resets this voice channel\'s filter. Leave blank for your global filter')
-			.addChannelTypes(2)
+			.addChannelTypes(ChannelType.GuildVoice)
 			.setRequired(false)),
 	async execute(data: DataType, interaction: ChatInputCommandInteraction) {
 		const currentUser = interaction.user; // user who started the command
 		const channel = interaction.options.getChannel("channel");
 		// if they inputted a channel
 		if (channel) {
-			const discordUser = data.users.get(currentUser.id);
-			const filter = discordUser?.getFilter(channel.id);
-			if (!filter)
+			const filter = data.users.get(currentUser.id)?.getFilter(channel.id);
+			if (!filter || Filter.isDefault(filter.getIsWhitelist(), filter.getList()))
 				interaction.reply({
-					content: `You have not yet signed up for ${channel}`,
+					content: `Your filter for ${channel} is already the default (blacklist with no users)`,
 					flags: [MessageFlags.Ephemeral]
 				}).catch(console.error);
 			else {
@@ -34,11 +33,13 @@ export const resetFilter = {
 			}
 		}
 		else {
-			let discordUser = data.users.get(currentUser.id);
-			if (!discordUser)
-				discordUser = new DiscordUser(currentUser.id, []);
-			else {
-				const filter = discordUser.getFilter();
+			const filter = data.users.get(currentUser.id)?.getFilter();
+			if (!filter || Filter.isDefault(filter.getIsWhitelist(), filter.getList())) {
+				interaction.reply({
+					content: `Your global filter is already the default (blacklist with no users)`,
+					flags: [MessageFlags.Ephemeral]
+				}).catch(console.error);
+			} else {
 				filter.setType("blacklist"); // also resets filter
 				
 				interaction.reply({

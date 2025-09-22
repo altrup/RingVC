@@ -14,8 +14,8 @@ export class VoiceChat {
 	static voiceChats: WatcherMap<string, VoiceChat> = new WatcherMap(onModify, null);
 
 	// returns if the voice chat is the default, in which case we don't need to store it
-	static isDefault(userIds: string[]) {
-		return Array.from(userIds).length === 0;
+	static isDefault(userIds: WatcherMap<string, null> = new WatcherMap(onModify, null)) {
+		return userIds.size === 0;
 	}
 
 	private channelId: string;
@@ -27,33 +27,24 @@ export class VoiceChat {
 	/*
 		channel is the channel object
 		userIds is an array of userIds
-		if skipUserUpdates is true, then this class will NEVER make new users or change existing ones
-			Only used when loading from data.js, because the users already exist with data
 	*/
-	constructor (channelId: string, userIds: string[], skipUserUpdates: boolean = false) {
+	constructor (channelId: string, userIds: WatcherMap<string, null> | Iterable<string> = new WatcherMap(onModify, null)) {
 		// update channel map
 		VoiceChat.voiceChats.set(channelId, this);
 
 		this.channelId = channelId;
 		this.userIds = new WatcherMap(onModify, null);
-		let userIdsArray = Array.from(userIds);
-		for (const userId of userIdsArray)
-			this.addUser(userId, skipUserUpdates);
+		if (userIds instanceof WatcherMap) {
+			this.userIds = userIds;
+		} else {
+			for (const userId of userIds) {
+				this.userIds.set(userId, null);
+			}
+		}
 	}
 
 	// add a user
-	addUser (userId: string, skipUserUpdates: boolean = false) {
-		if (!skipUserUpdates) {
-			const discordUser = DiscordUser.users.get(userId);
-			if (discordUser) {
-				// update discord user
-				discordUser.addVoiceChannel(this.channelId);
-			} else {
-				// create new discord user if needed
-				new DiscordUser(userId);
-			}
-		}
-
+	addUser (userId: string) {
 		// update userIds
 		this.userIds.set(userId, null); // the value doesn't actually matter
 	}
@@ -62,7 +53,7 @@ export class VoiceChat {
 	removeUser (userId: string) {
 		this.userIds.delete(userId);
 
-		DiscordUser.users.get(userId)?.removeVoiceChannel(this.channelId);
+		DiscordUser.users.get(userId)?.removeFilter(this.channelId);
 
 		// delete object if no users
 		if (this.userIds.size == 0)
@@ -76,52 +67,52 @@ export class VoiceChat {
 
 	// on someone joining a call
 	// user is the person who just joined the call
-	async onJoin (startedUser?: User) {
-		if (!startedUser) return;
-		
+	async onJoin (ringerUser: User) {
 		// if the channel cache does not contain the channel 
-		if (!startedUser.client.channels.resolve(this.channelId))
-			await startedUser.client.channels.fetch(this.channelId);
+		if (!ringerUser.client.channels.resolve(this.channelId))
+			await ringerUser.client.channels.fetch(this.channelId);
 		
-		const channel = startedUser.client.channels.resolve(this.channelId);
+		const channel = ringerUser.client.channels.resolve(this.channelId);
 		if (!channel?.isVoiceBased()) return;
 		
-		const startedDiscordUser = DiscordUser.users.get(startedUser.id);
-		// if user is in stealth mode, don't send message
-		if (startedDiscordUser && startedDiscordUser.getRealMode(channel) === "stealth")
-			return;
+		const ringerDiscordUser = DiscordUser.users.get(ringerUser.id);
+		// if user is in stealth mode, don't send messageringerUser
+		if (ringerDiscordUser && ringerDiscordUser.getRealMode(channel) === "stealth") return;
 
-		Promise.allSettled(
-			Array.from(this.userIds.keys()).map(key => new Promise<DiscordUser>((resolve, reject) => {
-				const discordUser = DiscordUser.users.get(key);
-				if (!discordUser) { return reject("User does not exist"); }
-				discordUser.shouldRing(channel, startedUser).then(async () => {
-					if (discordUser.filter(
-						startedDiscordUser?.getFilter(channel.id), 
-						discordUser.filter(discordUser.getFilter(channel.id), Array.from(channel.members.keys()))
-					).filter(userId => {
-						return DiscordUser.users.get(userId)?.getRealMode(channel) !== "stealth";
-					}).length === 1) { // if the user is the only person who passes the filter
-						resolve(discordUser);
-					} else {
-						reject("User has already been pinged for this call");
-					}
-				}).catch((error) => {
-					reject(error);
-				});
-			}))
-		).then((results) => {
-			const filterResults = results.filter(result => result.status === "fulfilled").map(result => result.value);
-			if (filterResults.length > 0)
-				channel.send({
-					content: `\`@${channel.guild.members.resolve(startedUser.id)?.displayName}\` just joined \`#${channel.name}\`, ${
-						filterResults.length >= 2?
-							`${filterResults.slice(0, filterResults.length - 1).join(", ")} and ${filterResults[filterResults.length - 1]}`
-						: `${filterResults[0]}`
-					}`,
-					allowedMentions: {users: filterResults.map(value => value.getUserId())}
-				})
-				.catch(() => {}); // do nothing for now (discord permission error)
+		const userIdsToRing: string[] = Array.from(this.userIds.keys()).filter(ringeeUserId => {
+			try {
+				// if ring is valid
+				DiscordUser.validateRing(channel, ringerUser.id, ringeeUserId);
+
+				let onlyOnePersonPassing = true;
+				// check if anyone else in the call passes the filter of the person joining
+				for (const userId of channel.members.keys()) {
+					if (userId === ringerUser.id) continue;
+					
+					try {
+						DiscordUser.validateRing(channel, userId, ringeeUserId);
+
+						if (DiscordUser.users.get(userId)?.getRealMode(channel) !== "stealth") {
+							onlyOnePersonPassing = false;
+							break;
+						}
+					} catch { /* do nothing */ }
+				}
+				
+				return onlyOnePersonPassing;
+			} catch {
+				return false;
+			}
 		});
+
+		if (userIdsToRing.length > 0)
+			await channel.send({
+				content: `\`@${channel.guild.members.resolve(ringerUser.id)?.displayName}\` just joined \`#${channel.name}\`, ${
+					userIdsToRing.length >= 2?
+						`${userIdsToRing.slice(0, userIdsToRing.length - 1).map(userId => DiscordUser.toString(userId)).join(", ")} and ${DiscordUser.toString(userIdsToRing[userIdsToRing.length - 1]?? "")}`
+					: `${DiscordUser.toString(userIdsToRing[0]?? "")}`
+				}`,
+				allowedMentions: {users: userIdsToRing}
+			})
 	}
 }

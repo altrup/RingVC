@@ -6,7 +6,7 @@ import { SAVE_COOLDOWN } from '@src/config';
 
 // get classes
 import { WatcherMap } from '@main/classes/storage/watcher-map';
-import { DiscordUser, userOnModifyFunctions } from '@main/classes/commands/discord-user';
+import { DiscordUser, isDiscordUserMode, userOnModifyFunctions } from '@main/classes/commands/discord-user';
 import { VoiceChat, voiceChatOnModifyFunctions } from '@main/classes/commands/voice-chat';
 import { Filter, filterOnModifyFunctions } from '@main/classes/commands/filter';
 
@@ -14,7 +14,7 @@ const tempDataPath = path.join(process.cwd(), "data", "data.tmp.txt");
 const dataPath = path.join(process.cwd(), "data", "data.txt");
 
 // stolen from https://stackoverflow.com/questions/29085197/how-do-you-json-stringify-an-es6-map
-const replacer = (key: string, value: any) => {
+const replacer = (key: string, value: unknown) => {
 	if(value instanceof Map)
 		return {
 			dataType: 'Map',
@@ -25,9 +25,11 @@ const replacer = (key: string, value: any) => {
 			dataType: 'DiscordUser',
 			value: {
 				userId: value.getUserId(),
-				voiceChannels: value.getVoiceChannels(),
+				voiceChannels: value.getVoiceChannelFilters(),
 				globalFilter: value.getGlobalFilter(),
-				mode: value.getMode()
+				mode: value.getMode(),
+				defaultRingeeUserIds: value.getChannelDefaultRingeeUserIds(),
+				globalDefaultRingeeUserIds: value.getGlobalDefaultRingeeUserIds(),
 			}
 		};
 	else if (value instanceof VoiceChat)
@@ -49,26 +51,46 @@ const replacer = (key: string, value: any) => {
 	else
 		return value;
 };
-const reviver = (key: string, value: any) => {
-	if(typeof value === 'object' && value !== null) {
-		if (value.dataType === 'Map')
-			return value.value.reduce((map: WatcherMap<unknown, unknown>, object: [unknown, unknown]) => {
-				map.set(object[0], object[1]);
-				return map;
-			}, new WatcherMap(onModify, null));
-		else if (value.dataType === 'DiscordUser') {
-			if (value.value.userId && value.value.voiceChannels && value.value.globalFilter && value.value.mode
-					&& !DiscordUser.isDefault(value.value.voiceChannels, value.value.globalFilter, value.value.mode))
-				return new DiscordUser(value.value.userId, value.value.voiceChannels.entries(), value.value.globalFilter, value.value.mode);
-		}
-		else if (value.dataType === 'VoiceChat') {
-			if (!VoiceChat.isDefault(value.value.userIds.keys()))
-				return new VoiceChat(value.value.channelId, value.value.userIds.keys(), true);
-		}
-		else if (value.dataType === 'VoiceChannelFilter')
-			return new Filter(value.value.isWhitelist, value.value.list.keys());
+const reviver = (key: string, rawValue: unknown) => {
+	if (
+		!rawValue || !(rawValue instanceof Object) || 
+		!("dataType" in rawValue) || !("value" in rawValue) || 
+		typeof rawValue.dataType !== 'string' || !(rawValue.value instanceof Object)
+	) {
+		return rawValue
 	}
-	return value;
+
+	const { dataType, value } = rawValue;
+	if (dataType === 'Map' && Array.isArray(value))
+		return value.reduce((map: WatcherMap<unknown, unknown>, object: [unknown, unknown]) => {
+			map.set(object[0], object[1]);
+			return map;
+		}, new WatcherMap(onModify, null));
+	else if (
+		dataType === 'DiscordUser' && "userId" in value && typeof value.userId === 'string' &&
+		"voiceChannels" in value && value.voiceChannels instanceof WatcherMap &&
+		"globalFilter" in value && (value.globalFilter === undefined || value.globalFilter instanceof Filter) &&
+		"mode" in value && typeof value.mode === 'string' && isDiscordUserMode(value.mode) &&
+		"defaultRingeeUserIds" in value && value.defaultRingeeUserIds instanceof WatcherMap &&
+		"globalDefaultRingeeUserIds" in value && value.globalDefaultRingeeUserIds instanceof WatcherMap
+	) {
+		if (value.userId && !DiscordUser.isDefault(value.voiceChannels, value.globalFilter, value.mode, value.defaultRingeeUserIds, value.globalDefaultRingeeUserIds))
+			return new DiscordUser(value.userId, value.voiceChannels, value.globalFilter, value.mode, value.defaultRingeeUserIds, value.globalDefaultRingeeUserIds);
+	}
+	else if (
+		dataType === 'VoiceChat' && "channelId" in value && typeof value.channelId === 'string' &&
+		"userIds" in value && value.userIds instanceof WatcherMap
+	) {
+		if (!VoiceChat.isDefault(value.userIds))
+			return new VoiceChat(value.channelId, value.userIds);
+	}
+	else if (
+		dataType === 'VoiceChannelFilter' && "isWhitelist" in value && typeof value.isWhitelist === 'boolean' &&
+		"list" in value && value.list instanceof WatcherMap
+	)
+		return new Filter(value.isWhitelist, value.list);
+	
+	return rawValue;
 };
 
 // whether or not data has been updated
@@ -149,6 +171,7 @@ if (fs.existsSync(dataPath)) {
 // if data.txt doesn't exist
 else {
 	// create file
+	fs.mkdirSync(path.dirname(dataPath), { recursive: true });
 	fs.writeFileSync(dataPath, "");
 	console.log("data.txt was empty, so data will be reset to default");
 	saveData();

@@ -79,16 +79,29 @@ export class DiscordUser {
 		voiceChannels: WatcherMap<string, Filter> = new WatcherMap(onModify, null),
 		globalFilter: Filter = new Filter(), 
 		mode: string = "normal",
+		channelAutoRingEnabled: WatcherMap<string, boolean> = new WatcherMap(onModify, null),
+		globalAutoRingEnabled: boolean = false,
 		defaultRingUserIds: WatcherMap<string, null> = new WatcherMap(onModify, null),
 		globalDefaultRingUserIds: WatcherMap<string, null> = new WatcherMap(onModify, null)
 	) {
-		return voiceChannels.size === 0 && globalFilter.getList().size === 0 && mode === "normal" && defaultRingUserIds.size === 0 && globalDefaultRingUserIds.size === 0;
+		return (
+			voiceChannels.size === 0 && 
+			globalFilter.getList().size === 0 && 
+			mode === "normal" && 
+			channelAutoRingEnabled.size === 0 && 
+			globalAutoRingEnabled === false &&
+			defaultRingUserIds.size === 0 && 
+			globalDefaultRingUserIds.size === 0
+		);
 	}
 
 	private userId: string;
 	private voiceChannelFilters: WatcherMap<string, Filter>;
 	private globalFilter: Filter;
 	private mode: DiscordUserMode;
+	// channelId -> boolean
+	private channelAutoRingEnabled: WatcherMap<string, boolean>;
+	private globalAutoRingEnabled: boolean;
 	// channelId -> userId -> null
 	private channelDefaultRingeeUserIds: WatcherMap<string, WatcherMap<string, null>>;
 	private globalDefaultRingeeUserIds: WatcherMap<string, null>;
@@ -97,6 +110,8 @@ export class DiscordUser {
 	public getVoiceChannelFilters() { return this.voiceChannelFilters; }
 	public getGlobalFilter() { return this.globalFilter; }
 	public getMode() { return this.mode; }
+	public getChannelAutoRingEnabled() { return this.channelAutoRingEnabled; }
+	public getGlobalAutoRingEnabled() { return this.globalAutoRingEnabled; }
 	public getChannelDefaultRingeeUserIds() { return this.channelDefaultRingeeUserIds; }
 	public getGlobalDefaultRingeeUserIds() { return this.globalDefaultRingeeUserIds; }
 
@@ -107,6 +122,8 @@ export class DiscordUser {
 		voiceChannels: WatcherMap<string, Filter> = new WatcherMap(onModify, null),
 		globalFilter: Filter = new Filter(), 
 		mode: DiscordUserMode = "normal", 
+		channelAutoRingEnabled: WatcherMap<string, boolean> = new WatcherMap(onModify, null),
+		globalAutoRingEnabled: boolean = false,
 		defaultRingeeUserIds: WatcherMap<string, WatcherMap<string, null>> = new WatcherMap(onModify, null), 
 		globalDefaultRingeeUserIds: WatcherMap<string, null> = new WatcherMap(onModify, null)
 	) {
@@ -117,6 +134,8 @@ export class DiscordUser {
 		this.voiceChannelFilters = voiceChannels;
 		this.globalFilter = globalFilter;
 		this.mode = mode;
+		this.channelAutoRingEnabled = channelAutoRingEnabled;
+		this.globalAutoRingEnabled = globalAutoRingEnabled;
 		this.channelDefaultRingeeUserIds = defaultRingeeUserIds;
 		this.globalDefaultRingeeUserIds = globalDefaultRingeeUserIds;
 	}
@@ -181,6 +200,29 @@ export class DiscordUser {
 		onModify();
 	}
 
+	isAutoRingEnabled(channelId: string | undefined): boolean {
+		if (channelId !== undefined && this.channelAutoRingEnabled.has(channelId)) {
+			return this.channelAutoRingEnabled.get(channelId)?? false;
+		}
+		return this.globalAutoRingEnabled;
+	}
+	// returns whether or not the value changed
+	setAutoRingEnabled(channelId: string | undefined, enabled: boolean): boolean {
+		if (channelId === undefined) {
+			if (this.globalAutoRingEnabled === enabled) return false;
+			
+			this.globalAutoRingEnabled = enabled;
+			onModify();
+			return true;
+		}
+
+		if (this.channelAutoRingEnabled.get(channelId) === enabled) return false;
+
+		this.channelAutoRingEnabled.set(channelId, enabled);
+		onModify();
+		return true;
+	}
+
 	// if channelId is undefined, then default to global default ring
 	getDefaultRingeeUserIds(channelId: string | undefined): WatcherMap<string, null> | undefined;
 	getDefaultRingeeUserIds(channelId?: undefined): WatcherMap<string, null>;
@@ -194,7 +236,7 @@ export class DiscordUser {
 	getAllDefaultRingeeUserIds(channelId: string | undefined) {
 		return [
 			...this.globalDefaultRingeeUserIds.keys(),
-			...(this.channelDefaultRingeeUserIds.get(channelId ?? "")?.keys()?? [])
+			...(channelId? this.channelDefaultRingeeUserIds.get(channelId)?.keys()?? []: [])
 		];
 	}
 	// adds a userId to a default ring list, returns true if added, false if already there
@@ -277,6 +319,15 @@ export class DiscordUser {
 		} else {
 			throw new Error(`no default users for whom you passed each other's filters`);
 		}
+	}
+
+	async onJoin(channel: VoiceBasedChannel) {
+		// ringDefaultUsers if autoRingEnabled
+		if (!this.isAutoRingEnabled(channel.id)) {
+			return;
+		}
+
+		await this.ringDefaultUsers(channel, "wants you to join");
 	}
 
 	// returns a string that pings this discordUser

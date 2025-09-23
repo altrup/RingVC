@@ -57,8 +57,12 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
 	// second condition is to check if user is joining a new channel
 	// third condition is to check if the channel has a voiceChat object
 	try {
-		if (newState?.channel && (!oldState || oldState.channelId !== newState.channelId) && data.voiceChats.has(newState.channelId?? "") && newState.member?.user)
-			await data.voiceChats.get(newState.channelId?? "")?.onJoin(newState.member?.user);
+		if (newState?.channel && (!oldState || oldState.channelId !== newState.channelId) && data.voiceChats.has(newState.channelId?? "") && newState.member?.user) {
+			await Promise.all([
+				data.voiceChats.get(newState.channelId?? "")?.onJoin(newState.member.user),
+				data.users.get(newState.member.user.id)?.onJoin(newState.channel)
+			]);
+		}
 	} catch (error) {
 		console.error(error);
 	}

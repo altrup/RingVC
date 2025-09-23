@@ -28,7 +28,9 @@ const replacer = (key: string, value: unknown) => {
 				voiceChannels: value.getVoiceChannelFilters(),
 				globalFilter: value.getGlobalFilter(),
 				mode: value.getMode(),
-				defaultRingeeUserIds: value.getChannelDefaultRingeeUserIds(),
+				channelAutoRingEnabled: value.getChannelAutoRingEnabled(),
+				globalAutoRingEnabled: value.getGlobalAutoRingEnabled(),
+				channelDefaultRingeeUserIds: value.getChannelDefaultRingeeUserIds(),
 				globalDefaultRingeeUserIds: value.getGlobalDefaultRingeeUserIds(),
 			}
 		};
@@ -60,35 +62,43 @@ const reviver = (key: string, rawValue: unknown) => {
 		return rawValue
 	}
 
-	const { dataType, value } = rawValue;
+	const { dataType, value } = rawValue as {dataType: string, value: Record<string, unknown> | Array<unknown>};
 	if (dataType === 'Map' && Array.isArray(value))
-		return value.reduce((map: WatcherMap<unknown, unknown>, object: [unknown, unknown]) => {
+		return value.reduce((map: WatcherMap<unknown, unknown>, object: unknown) => {
+			if (!Array.isArray(object) || object.length !== 2)
+				return map;
 			map.set(object[0], object[1]);
 			return map;
 		}, new WatcherMap(onModify, null));
 	else if (
-		dataType === 'DiscordUser' && "userId" in value && typeof value.userId === 'string' &&
-		"voiceChannels" in value && value.voiceChannels instanceof WatcherMap &&
-		"globalFilter" in value && (value.globalFilter === undefined || value.globalFilter instanceof Filter) &&
-		"mode" in value && typeof value.mode === 'string' && isDiscordUserMode(value.mode) &&
-		"defaultRingeeUserIds" in value && value.defaultRingeeUserIds instanceof WatcherMap &&
-		"globalDefaultRingeeUserIds" in value && value.globalDefaultRingeeUserIds instanceof WatcherMap
+		dataType === 'DiscordUser' && !Array.isArray(value) &&
+		(value.userId === undefined || typeof value.userId === 'string') &&
+		(value.voiceChannels === undefined || value.voiceChannels instanceof WatcherMap) &&
+		(value.globalFilter === undefined || value.globalFilter instanceof Filter) &&
+		(value.mode === undefined || (typeof value.mode === 'string' && isDiscordUserMode(value.mode))) &&
+		(value.channelAutoRingEnabled === undefined || value.channelAutoRingEnabled instanceof WatcherMap) &&
+		(value.globalAutoRingEnabled === undefined || typeof value.globalAutoRingEnabled === 'boolean') &&
+		(value.channelDefaultRingeeUserIds === undefined || value.channelDefaultRingeeUserIds instanceof WatcherMap) &&
+		(value.globalDefaultRingeeUserIds === undefined || value.globalDefaultRingeeUserIds instanceof WatcherMap)
 	) {
-		if (value.userId && !DiscordUser.isDefault(value.voiceChannels, value.globalFilter, value.mode, value.defaultRingeeUserIds, value.globalDefaultRingeeUserIds))
-			return new DiscordUser(value.userId, value.voiceChannels, value.globalFilter, value.mode, value.defaultRingeeUserIds, value.globalDefaultRingeeUserIds);
+		if (value.userId && !DiscordUser.isDefault(value.voiceChannels, value.globalFilter, value.mode, value.channelAutoRingEnabled, value.globalAutoRingEnabled, value.channelDefaultRingeeUserIds, value.globalDefaultRingeeUserIds))
+			return new DiscordUser(value.userId, value.voiceChannels, value.globalFilter, value.mode, value.channelAutoRingEnabled, value.globalAutoRingEnabled, value.channelDefaultRingeeUserIds, value.globalDefaultRingeeUserIds);
 	}
 	else if (
-		dataType === 'VoiceChat' && "channelId" in value && typeof value.channelId === 'string' &&
-		"userIds" in value && value.userIds instanceof WatcherMap
+		dataType === 'VoiceChat' && !Array.isArray(value) &&
+		typeof value.channelId === 'string' &&
+		(value.userIds === undefined || value.userIds instanceof WatcherMap)
 	) {
 		if (!VoiceChat.isDefault(value.userIds))
 			return new VoiceChat(value.channelId, value.userIds);
 	}
 	else if (
-		dataType === 'VoiceChannelFilter' && "isWhitelist" in value && typeof value.isWhitelist === 'boolean' &&
-		"list" in value && value.list instanceof WatcherMap
-	)
+		dataType === 'VoiceChannelFilter' && !Array.isArray(value) &&
+		(value.isWhitelist === undefined || typeof value.isWhitelist === 'boolean') &&
+		(value.list === undefined || value.list instanceof WatcherMap)
+	) {
 		return new Filter(value.isWhitelist, value.list);
+	}
 	
 	return rawValue;
 };

@@ -16,7 +16,7 @@ export const defaultRingRecipients = {
 						.setRequired(true))
 				.addChannelOption(option =>
 					option.setName('channel')
-						.setDescription('The channel to add the user as a default ring recipient for')
+						.setDescription('The channel to add the user as a default ring recipient for (global if not specified)')
 						.addChannelTypes(ChannelType.GuildVoice)
 						.setRequired(false)))
 		.addSubcommand(subcommand =>
@@ -28,7 +28,7 @@ export const defaultRingRecipients = {
 						.setRequired(true))
 				.addChannelOption(option =>
 					option.setName('channel')
-						.setDescription('The channel to remove the user as a default ring recipient for')
+						.setDescription('The channel to remove the user as a default ring recipient for (global if not specified)')
 						.addChannelTypes(ChannelType.GuildVoice)
 						.setRequired(false)))
 		.addSubcommand(subcommand =>
@@ -36,7 +36,7 @@ export const defaultRingRecipients = {
 				.setDescription('List your default ring recipients')
 				.addChannelOption(option =>
 					option.setName('channel')
-						.setDescription('The channel to list the default ring recipients for')
+						.setDescription('The channel to list the default ring recipients for (global if not specified)')
 						.addChannelTypes(ChannelType.GuildVoice)
 						.setRequired(false)))
 		.addSubcommand(subcommand =>
@@ -46,7 +46,30 @@ export const defaultRingRecipients = {
 					option.setName('channel')
 						.setDescription('The channel to clear the default ring recipients for')
 						.addChannelTypes(ChannelType.GuildVoice)
-						.setRequired(false))),
+						.setRequired(false)))
+		.addSubcommandGroup(subcommand =>
+			subcommand.setName('auto_ring')
+				.setDescription('Configure automatic ringing when you join a voice channel')
+				.addSubcommand(subcommand =>
+					subcommand.setName('set')
+						.setDescription('Set the automatic ringing options')
+						.addBooleanOption(option =>
+							option.setName('enabled')
+								.setDescription('Whether or not to enable automatic ringing')
+								.setRequired(true))
+						.addChannelOption(option =>
+							option.setName('channel')
+								.setDescription('The channel to set automatic ringing for (global if not specified)')
+								.addChannelTypes(ChannelType.GuildVoice)
+								.setRequired(false)))
+				.addSubcommand(subcommand =>
+					subcommand.setName('get')
+						.setDescription('View your automatic ringing settings')
+						.addChannelOption(option =>
+							option.setName('channel')
+								.setDescription('The channel to view automatic ringing settings for (global if not specified)')
+								.addChannelTypes(ChannelType.GuildVoice)
+								.setRequired(false)))),
 	async execute(data: DataType, interaction: ChatInputCommandInteraction) {
 		const subcommand = interaction.options.getSubcommand();
 		if (subcommand === "add") {
@@ -114,6 +137,34 @@ export const defaultRingRecipients = {
 					flags: [MessageFlags.Ephemeral]
 				}).catch(console.error);
 			}
+		} else if (subcommand === "set") {
+			// Enable/disable auto ringing
+			const enabled = interaction.options.getBoolean('enabled', true);
+			const channel = interaction.options.getChannel('channel');
+
+			const discordUser = data.users.get(interaction.user.id) ?? new DiscordUser(interaction.user.id);
+			if (discordUser.setAutoRingEnabled(channel?.id, enabled)) {
+				interaction.reply({
+					content: `Automatic ringing when you join a voice channel is now \`${enabled ? "enabled" : "disabled"}\`.\n
+					WARNING: This will cause you to ring all of your default ring recipients every time you join a voice channel, even if you are in \`stealth\` mode.`,
+					flags: [MessageFlags.Ephemeral]
+				}).catch(console.error);
+			} else {
+				interaction.reply({
+					content: `Automatic ringing when you join a voice channel is already \`${enabled ? "enabled" : "disabled"}\`.`,
+					flags: [MessageFlags.Ephemeral]
+				}).catch(console.error);
+			}
+		} else if (subcommand === "get") {
+			// Get auto ringing status
+			const channel = interaction.options.getChannel('channel');
+
+			const discordUser = data.users.get(interaction.user.id);
+			const autoRingEnabled = discordUser?.isAutoRingEnabled(channel?.id);
+			interaction.reply({
+				content: `Automatic ringing when you join a voice channel is \`${autoRingEnabled ? "enabled" : "disabled"}\`${channel ? ` for ${channel}` : " globally"}.`,
+				flags: [MessageFlags.Ephemeral]
+			}).catch(console.error);
 		}
 	},
 };

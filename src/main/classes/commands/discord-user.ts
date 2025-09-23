@@ -207,6 +207,15 @@ export class DiscordUser {
 		return this.globalAutoRingEnabled;
 	}
 	// returns whether or not the value changed
+	unsetAutoRingEnabled(channelId: string): boolean {
+		if (this.channelAutoRingEnabled.has(channelId)) {
+			this.channelAutoRingEnabled.delete(channelId);
+			onModify();
+			return true;
+		}
+		return false;
+	}
+	// returns whether or not the value changed
 	setAutoRingEnabled(channelId: string | undefined, enabled: boolean): boolean {
 		if (channelId === undefined) {
 			if (this.globalAutoRingEnabled === enabled) return false;

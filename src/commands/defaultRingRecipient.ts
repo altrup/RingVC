@@ -1,4 +1,4 @@
-import { ChannelType, ChatInputCommandInteraction, MessageFlags, SlashCommandBuilder } from "discord.js";
+import { ChannelType, ChatInputCommandInteraction, EmbedBuilder, MessageFlags, SlashCommandBuilder } from "discord.js";
 
 import { DataType } from "@main/data";
 import { DiscordUser } from "@main/classes/commands/discord-user";
@@ -7,6 +7,9 @@ export const defaultRingRecipients = {
 	data: new SlashCommandBuilder()
 		.setName('default_ring_recipients')
 		.setDescription('Configure your default ring recipients')
+		.addSubcommand(subcommand =>
+			subcommand.setName('help')
+				.setDescription('Show information for the default_ring_recipients command'))
 		.addSubcommand(subcommand =>
 			subcommand.setName('add')
 				.setDescription('Add a user to your default ring recipients')
@@ -52,7 +55,7 @@ export const defaultRingRecipients = {
 				.setDescription('Configure automatic ringing when you join a voice channel')
 				.addSubcommand(subcommand =>
 					subcommand.setName('set')
-						.setDescription('Set the automatic ringing options')
+						.setDescription('Set automatic ringing for a channel or globally')
 						.addBooleanOption(option =>
 							option.setName('enabled')
 								.setDescription('Whether or not to enable automatic ringing')
@@ -63,6 +66,14 @@ export const defaultRingRecipients = {
 								.addChannelTypes(ChannelType.GuildVoice)
 								.setRequired(false)))
 				.addSubcommand(subcommand =>
+					subcommand.setName('unset')
+						.setDescription('Unset automatic ringing override for a channel')
+						.addChannelOption(option =>
+							option.setName('channel')
+								.setDescription('The channel to unset automatic ringing')
+								.addChannelTypes(ChannelType.GuildVoice)
+								.setRequired(true)))
+				.addSubcommand(subcommand =>
 					subcommand.setName('get')
 						.setDescription('View your automatic ringing settings')
 						.addChannelOption(option =>
@@ -72,7 +83,28 @@ export const defaultRingRecipients = {
 								.setRequired(false)))),
 	async execute(data: DataType, interaction: ChatInputCommandInteraction) {
 		const subcommand = interaction.options.getSubcommand();
-		if (subcommand === "add") {
+		if (subcommand === "help") {
+			// Show help information
+			interaction.reply({
+				embeds: [
+					new EmbedBuilder()
+					.setColor('#747ac5')
+					.setTitle('/default_ring_recipients')
+					.setDescription('This command allows you to configure your default ring recipients, which are used when running `/ring default` or if you have automatic ringing enabled')
+					.addFields(
+						{ name: 'help', value: 'Show this help message' },
+						{ name: 'add', value: 'Set a user as a default ring recipient, either globally, or for a specified channel' },
+						{ name: 'remove', value: 'Unset a user as a default ring recipient, either globally, or for a specified channel' },
+						{ name: 'list', value: 'View all default ring recipients, either globally, or for a specified channel' },
+						{ name: 'clear', value: 'Clear all default ring recipients, either globally, or for a specified channel' },
+						{ name: 'auto_ring set', value: 'Turn automatic ringing on or off, either globally, or for a specified channel. If a channel is specified, then global auto_ring is overridden for that channel' },
+						{ name: 'auto_ring unset', value: 'Unset automatic ringing override for a channel' },
+						{ name: 'auto_ring get', value: 'View your automatic ringing settings, either globally, or for a specified channel' },
+					)
+				],
+				flags: [MessageFlags.Ephemeral]
+			});
+		} else if (subcommand === "add") {
 			// Add user to default ring recipients
 			const userToAdd = interaction.options.getUser('user', true);
 			const channel = interaction.options.getChannel('channel');
@@ -145,13 +177,29 @@ export const defaultRingRecipients = {
 			const discordUser = data.users.get(interaction.user.id) ?? new DiscordUser(interaction.user.id);
 			if (discordUser.setAutoRingEnabled(channel?.id, enabled)) {
 				interaction.reply({
-					content: `Automatic ringing when you join a voice channel is now \`${enabled ? "enabled" : "disabled"}\`.\n
-					WARNING: This will cause you to ring all of your default ring recipients every time you join a voice channel, even if you are in \`stealth\` mode.`,
+					content: `Automatic ringing when you join a voice channel is now \`${enabled ? "enabled" : "disabled"}\`.\n\n` +
+					`WARNING: This will cause you to ring all of your default ring recipients every time you join a voice channel, even if you are in \`stealth\` mode.`,
 					flags: [MessageFlags.Ephemeral]
 				}).catch(console.error);
 			} else {
 				interaction.reply({
 					content: `Automatic ringing when you join a voice channel is already \`${enabled ? "enabled" : "disabled"}\`.`,
+					flags: [MessageFlags.Ephemeral]
+				}).catch(console.error);
+			}
+		} else if (subcommand === "unset") {
+			// Unset auto ringing override for a channel
+			const channel = interaction.options.getChannel('channel', true);
+
+			const discordUser = data.users.get(interaction.user.id);
+			if (discordUser?.unsetAutoRingEnabled(channel.id)) {
+				interaction.reply({
+					content: `Automatic ringing override for ${channel} has been unset. Your global automatic ringing setting will now be used.`,
+					flags: [MessageFlags.Ephemeral]
+				}).catch(console.error);
+			} else {
+				interaction.reply({
+					content: `You do not have an automatic ringing override set for ${channel}.`,
 					flags: [MessageFlags.Ephemeral]
 				}).catch(console.error);
 			}
@@ -162,7 +210,7 @@ export const defaultRingRecipients = {
 			const discordUser = data.users.get(interaction.user.id);
 			const autoRingEnabled = discordUser?.isAutoRingEnabled(channel?.id);
 			interaction.reply({
-				content: `Automatic ringing when you join a voice channel is \`${autoRingEnabled ? "enabled" : "disabled"}\`${channel ? ` for ${channel}` : " globally"}.`,
+				content: `Default ring will${autoRingEnabled ? "" : " not"} run automatically ${channel ? `for ${channel}` : "globally"}.`,
 				flags: [MessageFlags.Ephemeral]
 			}).catch(console.error);
 		}

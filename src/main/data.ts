@@ -25,7 +25,7 @@ const replacer = (key: string, value: unknown) => {
 			dataType: 'DiscordUser',
 			value: {
 				userId: value.getUserId(),
-				voiceChannels: value.getVoiceChannelFilters(),
+				voiceChannels: value.getChannelFilters(),
 				globalFilter: value.getGlobalFilter(),
 				mode: value.getMode(),
 				channelAutoRingEnabled: value.getChannelAutoRingEnabled(),

@@ -96,7 +96,7 @@ export class DiscordUser {
 	}
 
 	private userId: string;
-	private voiceChannelFilters: WatcherMap<string, Filter>;
+	private channelFilters: WatcherMap<string, Filter>;
 	private globalFilter: Filter;
 	private mode: DiscordUserMode;
 	// channelId -> boolean
@@ -107,7 +107,7 @@ export class DiscordUser {
 	private globalDefaultRingeeUserIds: WatcherMap<string, null>;
 
 	public getUserId() { return this.userId; }
-	public getVoiceChannelFilters() { return this.voiceChannelFilters; }
+	public getChannelFilters() { return this.channelFilters; }
 	public getGlobalFilter() { return this.globalFilter; }
 	public getMode() { return this.mode; }
 	public getChannelAutoRingEnabled() { return this.channelAutoRingEnabled; }
@@ -131,7 +131,7 @@ export class DiscordUser {
 		DiscordUser.users.set(userId, this);
 
 		this.userId = userId;
-		this.voiceChannelFilters = voiceChannels;
+		this.channelFilters = voiceChannels;
 		this.globalFilter = globalFilter;
 		this.mode = mode;
 		this.channelAutoRingEnabled = channelAutoRingEnabled;
@@ -145,7 +145,7 @@ export class DiscordUser {
 	// returns filter object
 	addFilter(channelId: string, filter?: Filter) {
 		const newFilter = filter?? new Filter();
-		this.voiceChannelFilters.set(
+		this.channelFilters.set(
 			channelId, newFilter
 		);
 		return newFilter;
@@ -153,12 +153,12 @@ export class DiscordUser {
 
 	// removes a voice channel filter
 	removeFilter(channelId: string) {
-		this.voiceChannelFilters.delete(channelId);
+		this.channelFilters.delete(channelId);
 	}
 
 	// if the user has signed up for a voice channel
 	hasFilter(channelId: string) {
-		return this.voiceChannelFilters.has(channelId);
+		return this.channelFilters.has(channelId);
 	}
 
 	// get the filter for a channelId
@@ -167,13 +167,13 @@ export class DiscordUser {
 	getFilter(channelId?: null): Filter;
 	getFilter(channelId?: string | null) {
 		if (channelId)
-			return this.voiceChannelFilters.get(channelId);
+			return this.channelFilters.get(channelId);
 		return this.globalFilter;
 	}
 
 	// whether or not a user passes the filter (and global filter)
 	passesFilter(channelId: string, userId: string) {
-		const filter = this.voiceChannelFilters.get(channelId);
+		const filter = this.channelFilters.get(channelId);
 		// if filter doesn't exist, it passes
 		return (!filter || filter.passesFilter(userId)) && this.globalFilter.passesFilter(userId);
 	}

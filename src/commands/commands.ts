@@ -12,9 +12,7 @@ import { block } from "@commands/filter/block";
 import { unblock } from "@commands/filter/unblock";
 import { whitelist } from "@commands/filter/whitelist";
 import { unwhitelist } from "@commands/filter/unwhitelist";
-import { editFilter } from "@commands/filter/editFilter";
-import { getFilter } from "@commands/filter/getFilter";
-import { resetFilter } from "@commands/filter/resetFilter";
+import { filter } from "@commands/filter/filter";
 import { defaultRingRecipients } from "@commands/defaultRingRecipient";
 
 export type CommandImplementation = {
@@ -34,9 +32,7 @@ export const commands: CommandImplementation[] = [
 	unblock,
 	whitelist,
 	unwhitelist,
-	editFilter,
-	getFilter,
-	resetFilter,
+	filter,
 	// default ring recipients
 	defaultRingRecipients,
 ];

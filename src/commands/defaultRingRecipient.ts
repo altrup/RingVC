@@ -99,7 +99,7 @@ export const defaultRingRecipients = {
 						{ name: 'clear', value: 'Clear all default ring recipients, either globally, or for a specified channel' },
 						{ name: 'auto_ring set', value: 'Turn automatic ringing on or off, either globally, or for a specified channel. If a channel is specified, then global auto_ring is overridden for that channel' },
 						{ name: 'auto_ring unset', value: 'Unset automatic ringing override for a channel' },
-						{ name: 'auto_ring get', value: 'View your automatic ringing settings, either globally, or for a specified channel' },
+						{ name: 'auto_ring get', value: 'View whether automatic ringing is enabled, either globally, or for a specified channel' },
 					)
 				],
 				flags: [MessageFlags.Ephemeral]

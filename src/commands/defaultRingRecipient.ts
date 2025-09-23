@@ -50,8 +50,8 @@ export const defaultRingRecipients = {
 						.setDescription('The channel to clear the default ring recipients for')
 						.addChannelTypes(ChannelType.GuildVoice)
 						.setRequired(false)))
-		.addSubcommandGroup(subcommand =>
-			subcommand.setName('auto_ring')
+		.addSubcommandGroup(group =>
+			group.setName('auto_ring')
 				.setDescription('Configure automatic ringing when you join a voice channel')
 				.addSubcommand(subcommand =>
 					subcommand.setName('set')

@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 // get setting
-import { SAVE_COOLDOWN } from '@src/config';
+import { SAVE_COOLDOWN } from '@config';
 
 // get classes
 import { WatcherMap } from '@main/classes/storage/watcher-map';

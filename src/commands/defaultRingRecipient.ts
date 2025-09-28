@@ -11,27 +11,23 @@ export const defaultRingRecipients = {
 			subcommand.setName('help')
 				.setDescription('Show information for the default_ring_recipients command'))
 		.addSubcommand(subcommand =>
-			subcommand.setName('add')
-				.setDescription('Add a user to your default ring recipients')
+			subcommand.setName('edit')
+				.setDescription('Edit your default ring recipients')
+				.addIntegerOption(option =>
+					option.setName("action")
+					.setDescription("Choose to add or remove a default ring recipient")
+					.addChoices(
+						{name: "Add", value: 1},
+						{name: "Remove", value: 0}
+					)
+					.setRequired(true))
 				.addUserOption(option =>
 					option.setName('user')
-						.setDescription('The user to add to your default ring recipients')
+						.setDescription('The user to add/remove as a default ring recipient')
 						.setRequired(true))
 				.addChannelOption(option =>
 					option.setName('channel')
-						.setDescription('The channel to add the user as a default ring recipient for (global if not specified)')
-						.addChannelTypes(ChannelType.GuildVoice)
-						.setRequired(false)))
-		.addSubcommand(subcommand =>
-			subcommand.setName('remove')
-				.setDescription('Remove a user from your default ring recipients')
-				.addUserOption(option =>
-					option.setName('user')
-						.setDescription('The user to remove from your default ring recipients')
-						.setRequired(true))
-				.addChannelOption(option =>
-					option.setName('channel')
-						.setDescription('The channel to remove the user as a default ring recipient for (global if not specified)')
+						.setDescription('The channel to add/remove the default ring recipient for (global if not specified)')
 						.addChannelTypes(ChannelType.GuildVoice)
 						.setRequired(false)))
 		.addSubcommand(subcommand =>
@@ -104,41 +100,38 @@ export const defaultRingRecipients = {
 				],
 				flags: [MessageFlags.Ephemeral]
 			});
-		} else if (subcommand === "add") {
+		} else if (subcommand === "edit") {
 			// Add user to default ring recipients
-			const userToAdd = interaction.options.getUser('user', true);
+			const userToAddOrRemove = interaction.options.getUser('user', true);
 			const channel = interaction.options.getChannel('channel');
+			const action = interaction.options.getInteger('action', true);
 
-			const discordUser = data.users.get(interaction.user.id) ?? new DiscordUser(interaction.user.id);
-
-			if (discordUser.addDefaultRingeeUserId(channel?.id, userToAdd.id)) {
-				interaction.reply({
-					content: `${userToAdd} is now a${!channel ? " global" : ""} default ring recipients${channel ? ` for ${channel}` : ""}`,
-					flags: [MessageFlags.Ephemeral]
-				}).catch(console.error);
+			if (action === 1) {
+				const discordUser = data.users.get(interaction.user.id) ?? new DiscordUser(interaction.user.id);
+				if (discordUser.addDefaultRingeeUserId(channel?.id, userToAddOrRemove.id)) {
+					interaction.reply({
+						content: `${userToAddOrRemove} is now a${!channel ? " global" : ""} default ring recipient${channel ? ` for ${channel}` : ""}`,
+						flags: [MessageFlags.Ephemeral]
+					}).catch(console.error);
+				} else {
+					interaction.reply({
+						content: `${userToAddOrRemove} is a${!channel ? " global" : ""} default ring recipient${channel ? ` for ${channel}` : ""}`,
+						flags: [MessageFlags.Ephemeral]
+					}).catch(console.error);
+				}
 			} else {
-				interaction.reply({
-					content: `${userToAdd} is a${!channel ? " global" : ""} default ring recipient${channel ? ` for ${channel}` : ""}`,
-					flags: [MessageFlags.Ephemeral]
-				}).catch(console.error);
-			}
-		} else if (subcommand === "remove") {
-			// Remove user from default ring recipients
-			const userToRemove = interaction.options.getUser('user', true);
-			const channel = interaction.options.getChannel('channel');
-
-			const discordUser = data.users.get(interaction.user.id) ?? new DiscordUser(interaction.user.id);
-
-			if (discordUser.removeDefaultRingeeUserId(channel?.id, userToRemove.id)) {
-				interaction.reply({
-					content: `${userToRemove} is no longer a${!channel ? " global" : ""} default ring recipient${channel ? ` for ${channel}` : ""}`,
-					flags: [MessageFlags.Ephemeral]
-				}).catch(console.error);
-			} else {
-				interaction.reply({
-					content: `${userToRemove} is not a${!channel ? " global" : ""} default ring recipient${channel ? ` for ${channel}` : ""}`,
-					flags: [MessageFlags.Ephemeral]
-				}).catch(console.error);
+				const discordUser = data.users.get(interaction.user.id);
+				if (discordUser?.removeDefaultRingeeUserId(channel?.id, userToAddOrRemove.id)) {
+					interaction.reply({
+						content: `${userToAddOrRemove} is no longer a${!channel ? " global" : ""} default ring recipient${channel ? ` for ${channel}` : ""}`,
+						flags: [MessageFlags.Ephemeral]
+					}).catch(console.error);
+				} else {
+					interaction.reply({
+						content: `${userToAddOrRemove} is not a${!channel ? " global" : ""} default ring recipient${channel ? ` for ${channel}` : ""}`,
+						flags: [MessageFlags.Ephemeral]
+					}).catch(console.error);
+				}
 			}
 		} else if (subcommand === "list") {
 			// List default ring recipients

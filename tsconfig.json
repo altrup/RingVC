@@ -5,7 +5,7 @@
     "rootDir": "./src",
     "outDir": "./dist",
     "paths": {
-      "@src/*": ["./src/*"],
+      "@config": ["./src/config"],
       "@commands/*": ["./src/commands/*"],
       "@main/*": ["./src/main/*"],
     },

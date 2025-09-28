@@ -34,7 +34,7 @@ export const filter = {
 					subcommand.setName("users")
 					.setDescription("Add or remove a user from the filter list")
 					.addIntegerOption(option =>
-						option.setName("add_or_remove")
+						option.setName("action")
 						.setDescription("Choose to add or remove users")
 						.addChoices(
 							{name: "Add", value: 1},
@@ -132,7 +132,7 @@ export const filter = {
 		// modifying users list
 			const currentUser = interaction.user; // user who started the command
 			const channel = interaction.options.getChannel("channel");
-			const addOrRemove = interaction.options.getInteger("add_or_remove", true); // 1 for add 0 for remove
+			const addOrRemove = interaction.options.getInteger("action", true); // 1 for add 0 for remove
 			const user = interaction.options.getUser("user", true);
 			if (channel) {
 				const discordUser = data.users.get(currentUser.id)?? new DiscordUser(currentUser.id);

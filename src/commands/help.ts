@@ -20,7 +20,7 @@ export const help = {
 					{ name: 'Blocking people', value: 'Don\'t want to be rung by someone? Use `/block` to block people, and `/unblock` to unblock them. *This means you won\'t be pinged if they "start" a voice call, however, once an unblocked person joins, you will be pinged*' },
 					{ name: 'Modes', value: 'Allows you to not ping people when joining a voice channel. Use `/mode help` for more info' },
 					{ name: 'Auto and Default Ringing', value: 'To configure your default ring recipients and auto ring, see `/default_ring_recipients help`' },
-					{ name: 'Other commands', value: 'Other than the basics above, you can use `/filter` to manage your filters more in depth'},
+					{ name: 'Other commands', value: 'Other than the basics above, see `/filter help` to manage your filters more in depth'},
 					{ name: 'Support Server', value: 'If something isn\'t working for you, or you\'d like to suggest some new features, feel free to join the support server linked below! Or just say hello :)' },
 					{ name: 'Github', value: 'Check out the github linked below if you want to host your own version of this bot, or just view the code' }
 				)

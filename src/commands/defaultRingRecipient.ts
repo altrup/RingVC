@@ -177,13 +177,13 @@ export const defaultRingRecipients = {
 			const discordUser = data.users.get(interaction.user.id) ?? new DiscordUser(interaction.user.id);
 			if (discordUser.setAutoRingEnabled(channel?.id, enabled)) {
 				interaction.reply({
-					content: `Automatic ringing when you join a voice channel is now \`${enabled ? "enabled" : "disabled"}\`.\n\n` +
-					`WARNING: This will cause you to ring all of your default ring recipients every time you join a voice channel, even if you are in \`stealth\` mode.`,
+					content: `Automatic ringing when you join a voice channel is now \`${enabled ? "enabled" : "disabled"}\`.` +
+					(enabled? `\n\nWARNING: This will cause you to ring all of your default ring recipients every time you join ${channel?? "a voice channel"}, even if you are in \`stealth\` mode.` : ""),
 					flags: [MessageFlags.Ephemeral]
 				}).catch(console.error);
 			} else {
 				interaction.reply({
-					content: `Automatic ringing when you join a voice channel is already \`${enabled ? "enabled" : "disabled"}\`.`,
+					content: `Automatic ringing for ${channel?? "voice channels"} is already \`${enabled ? "enabled" : "disabled"}\`.`,
 					flags: [MessageFlags.Ephemeral]
 				}).catch(console.error);
 			}
@@ -208,9 +208,12 @@ export const defaultRingRecipients = {
 			const channel = interaction.options.getChannel('channel');
 
 			const discordUser = data.users.get(interaction.user.id);
+			const autoRingOverride = channel? discordUser?.getChannelAutoRingEnableds().get(channel.id): undefined;
 			const autoRingEnabled = discordUser?.isAutoRingEnabled(channel?.id);
 			interaction.reply({
-				content: `Default ring will${autoRingEnabled ? "" : " not"} run automatically ${channel ? `for ${channel}` : "globally"}.`,
+				content: `Default ring will${autoRingEnabled ? "" : " not"} run automatically ${channel ? `for ${channel}` : "globally"} because ` +
+				(channel && autoRingOverride !== undefined ? `your override for ${channel} is set to \`${autoRingOverride ? "enabled" : "disabled"}\``: 
+				((channel? `you have no override for ${channel} and `: "") + `your global auto ring is \`${autoRingEnabled ? "enabled" : "disabled"}\``)),
 				flags: [MessageFlags.Ephemeral]
 			}).catch(console.error);
 		}

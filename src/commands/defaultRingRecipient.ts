@@ -89,8 +89,7 @@ export const defaultRingRecipients = {
 					.setDescription('This command allows you to configure your default ring recipients, which are used when running `/ring default` or if you have automatic ringing enabled')
 					.addFields(
 						{ name: 'help', value: 'Show this help message' },
-						{ name: 'add', value: 'Set a user as a default ring recipient, either globally, or for a specified channel' },
-						{ name: 'remove', value: 'Unset a user as a default ring recipient, either globally, or for a specified channel' },
+						{ name: 'edit', value: 'Add/remove a user as a default ring recipient, either globally, or for a specified channel' },
 						{ name: 'list', value: 'View all default ring recipients, either globally, or for a specified channel' },
 						{ name: 'clear', value: 'Clear all default ring recipients, either globally, or for a specified channel' },
 						{ name: 'auto_ring set', value: 'Turn automatic ringing on or off, either globally, or for a specified channel. If a channel is specified, then global auto_ring is overridden for that channel' },

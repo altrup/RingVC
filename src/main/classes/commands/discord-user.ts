@@ -100,7 +100,7 @@ export class DiscordUser {
 	private globalFilter: Filter;
 	private mode: DiscordUserMode;
 	// channelId -> boolean
-	private channelAutoRingEnabled: WatcherMap<string, boolean>;
+	private channelAutoRingEnableds: WatcherMap<string, boolean>;
 	private globalAutoRingEnabled: boolean;
 	// channelId -> userId -> null
 	private channelDefaultRingeeUserIds: WatcherMap<string, WatcherMap<string, null>>;
@@ -110,7 +110,7 @@ export class DiscordUser {
 	public getChannelFilters() { return this.channelFilters; }
 	public getGlobalFilter() { return this.globalFilter; }
 	public getMode() { return this.mode; }
-	public getChannelAutoRingEnabled() { return this.channelAutoRingEnabled; }
+	public getChannelAutoRingEnableds() { return this.channelAutoRingEnableds; }
 	public getGlobalAutoRingEnabled() { return this.globalAutoRingEnabled; }
 	public getChannelDefaultRingeeUserIds() { return this.channelDefaultRingeeUserIds; }
 	public getGlobalDefaultRingeeUserIds() { return this.globalDefaultRingeeUserIds; }
@@ -134,7 +134,7 @@ export class DiscordUser {
 		this.channelFilters = voiceChannels;
 		this.globalFilter = globalFilter;
 		this.mode = mode;
-		this.channelAutoRingEnabled = channelAutoRingEnabled;
+		this.channelAutoRingEnableds = channelAutoRingEnabled;
 		this.globalAutoRingEnabled = globalAutoRingEnabled;
 		this.channelDefaultRingeeUserIds = defaultRingeeUserIds;
 		this.globalDefaultRingeeUserIds = globalDefaultRingeeUserIds;
@@ -201,15 +201,15 @@ export class DiscordUser {
 	}
 
 	isAutoRingEnabled(channelId: string | undefined): boolean {
-		if (channelId !== undefined && this.channelAutoRingEnabled.has(channelId)) {
-			return this.channelAutoRingEnabled.get(channelId)?? false;
+		if (channelId !== undefined && this.channelAutoRingEnableds.has(channelId)) {
+			return this.channelAutoRingEnableds.get(channelId)?? false;
 		}
 		return this.globalAutoRingEnabled;
 	}
 	// returns whether or not the value changed
 	unsetAutoRingEnabled(channelId: string): boolean {
-		if (this.channelAutoRingEnabled.has(channelId)) {
-			this.channelAutoRingEnabled.delete(channelId);
+		if (this.channelAutoRingEnableds.has(channelId)) {
+			this.channelAutoRingEnableds.delete(channelId);
 			onModify();
 			return true;
 		}
@@ -225,9 +225,9 @@ export class DiscordUser {
 			return true;
 		}
 
-		if (this.channelAutoRingEnabled.get(channelId) === enabled) return false;
+		if (this.channelAutoRingEnableds.get(channelId) === enabled) return false;
 
-		this.channelAutoRingEnabled.set(channelId, enabled);
+		this.channelAutoRingEnableds.set(channelId, enabled);
 		onModify();
 		return true;
 	}

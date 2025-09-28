@@ -25,10 +25,10 @@ const replacer = (key: string, value: unknown) => {
 			dataType: 'DiscordUser',
 			value: {
 				userId: value.getUserId(),
-				voiceChannels: value.getChannelFilters(),
+				channelFilters: value.getChannelFilters(),
 				globalFilter: value.getGlobalFilter(),
 				mode: value.getMode(),
-				channelAutoRingEnabled: value.getChannelAutoRingEnabled(),
+				channelAutoRingEnableds: value.getChannelAutoRingEnableds(),
 				globalAutoRingEnabled: value.getGlobalAutoRingEnabled(),
 				channelDefaultRingeeUserIds: value.getChannelDefaultRingeeUserIds(),
 				globalDefaultRingeeUserIds: value.getGlobalDefaultRingeeUserIds(),
@@ -73,16 +73,16 @@ const reviver = (key: string, rawValue: unknown) => {
 	else if (
 		dataType === 'DiscordUser' && !Array.isArray(value) &&
 		(value.userId === undefined || typeof value.userId === 'string') &&
-		(value.voiceChannels === undefined || value.voiceChannels instanceof WatcherMap) &&
+		(value.channelFilters === undefined || value.channelFilters instanceof WatcherMap) &&
 		(value.globalFilter === undefined || value.globalFilter instanceof Filter) &&
 		(value.mode === undefined || (typeof value.mode === 'string' && isDiscordUserMode(value.mode))) &&
-		(value.channelAutoRingEnabled === undefined || value.channelAutoRingEnabled instanceof WatcherMap) &&
+		(value.channelAutoRingEnableds === undefined || value.channelAutoRingEnableds instanceof WatcherMap) &&
 		(value.globalAutoRingEnabled === undefined || typeof value.globalAutoRingEnabled === 'boolean') &&
 		(value.channelDefaultRingeeUserIds === undefined || value.channelDefaultRingeeUserIds instanceof WatcherMap) &&
 		(value.globalDefaultRingeeUserIds === undefined || value.globalDefaultRingeeUserIds instanceof WatcherMap)
 	) {
-		if (value.userId && !DiscordUser.isDefault(value.voiceChannels, value.globalFilter, value.mode, value.channelAutoRingEnabled, value.globalAutoRingEnabled, value.channelDefaultRingeeUserIds, value.globalDefaultRingeeUserIds))
-			return new DiscordUser(value.userId, value.voiceChannels, value.globalFilter, value.mode, value.channelAutoRingEnabled, value.globalAutoRingEnabled, value.channelDefaultRingeeUserIds, value.globalDefaultRingeeUserIds);
+		if (value.userId && !DiscordUser.isDefault(value.channelFilters, value.globalFilter, value.mode, value.channelAutoRingEnableds, value.globalAutoRingEnabled, value.channelDefaultRingeeUserIds, value.globalDefaultRingeeUserIds))
+			return new DiscordUser(value.userId, value.channelFilters, value.globalFilter, value.mode, value.channelAutoRingEnableds, value.globalAutoRingEnabled, value.channelDefaultRingeeUserIds, value.globalDefaultRingeeUserIds);
 	}
 	else if (
 		dataType === 'VoiceChat' && !Array.isArray(value) &&

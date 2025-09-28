@@ -70,19 +70,19 @@ const reviver = (key: string, rawValue: unknown) => {
 			map.set(object[0], object[1]);
 			return map;
 		}, new WatcherMap(onModify, null));
-	else if (
-		dataType === 'DiscordUser' && !Array.isArray(value) &&
-		(value.userId === undefined || typeof value.userId === 'string') &&
-		(value.channelFilters === undefined || value.channelFilters instanceof WatcherMap) &&
+	else if (dataType === 'DiscordUser' && !Array.isArray(value)) {
+		const channelFilters = value.channelFilters?? value.voiceChannels; // legacy support
+		if ((typeof value.userId === 'string') &&
+		(channelFilters === undefined || channelFilters instanceof WatcherMap) &&
 		(value.globalFilter === undefined || value.globalFilter instanceof Filter) &&
 		(value.mode === undefined || (typeof value.mode === 'string' && isDiscordUserMode(value.mode))) &&
 		(value.channelAutoRingEnableds === undefined || value.channelAutoRingEnableds instanceof WatcherMap) &&
 		(value.globalAutoRingEnabled === undefined || typeof value.globalAutoRingEnabled === 'boolean') &&
 		(value.channelDefaultRingeeUserIds === undefined || value.channelDefaultRingeeUserIds instanceof WatcherMap) &&
-		(value.globalDefaultRingeeUserIds === undefined || value.globalDefaultRingeeUserIds instanceof WatcherMap)
-	) {
-		if (value.userId && !DiscordUser.isDefault(value.channelFilters, value.globalFilter, value.mode, value.channelAutoRingEnableds, value.globalAutoRingEnabled, value.channelDefaultRingeeUserIds, value.globalDefaultRingeeUserIds))
-			return new DiscordUser(value.userId, value.channelFilters, value.globalFilter, value.mode, value.channelAutoRingEnableds, value.globalAutoRingEnabled, value.channelDefaultRingeeUserIds, value.globalDefaultRingeeUserIds);
+		(value.globalDefaultRingeeUserIds === undefined || value.globalDefaultRingeeUserIds instanceof WatcherMap) && 
+		(!DiscordUser.isDefault(channelFilters, value.globalFilter, value.mode, value.channelAutoRingEnableds, value.globalAutoRingEnabled, value.channelDefaultRingeeUserIds, value.globalDefaultRingeeUserIds))) {
+				return new DiscordUser(value.userId, channelFilters, value.globalFilter, value.mode, value.channelAutoRingEnableds, value.globalAutoRingEnabled, value.channelDefaultRingeeUserIds, value.globalDefaultRingeeUserIds);
+		}
 	}
 	else if (
 		dataType === 'VoiceChat' && !Array.isArray(value) &&

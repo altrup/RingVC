@@ -56,7 +56,7 @@ export class DiscordUser {
 				allowedMentions: {users: [userId]}
 			});
 		} catch (err) {
-			throw new Error(`the ring message to ${DiscordUser.toString(userId)} failed to send${DiscordUser.getErrorMessage(err)}`);
+			throw new Error(`the ring message to ${DiscordUser.toString(userId)} failed to send: \`${DiscordUser.getErrorMessage(err)}\``);
 		}
 	}
 	// helper functions
@@ -323,7 +323,7 @@ export class DiscordUser {
 					allowedMentions: {users: userIdsToRing}
 				})
 			} catch (err) {
-				throw new Error(`the ring message failed to send${DiscordUser.getErrorMessage(err)}`);
+				throw new Error(`the ring message failed to send: \`${DiscordUser.getErrorMessage(err)}\``);
 			}
 		} else {
 			throw new Error(`no default users for whom you passed each other's filters`);

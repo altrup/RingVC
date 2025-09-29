@@ -63,8 +63,8 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
 				data.users.get(newState.member.user.id)?.onJoin(newState.channel)
 			]);
 		}
-	} catch (error) {
-		console.error(error);
+	} catch {
+		// do nothing (these are all permission errors)
 	}
 });
 

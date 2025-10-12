@@ -30,7 +30,7 @@ export const help = {
 					new ButtonBuilder()
 					.setLabel('Github')
 					.setStyle(ButtonStyle.Link)
-					.setURL('https://github.com/EricL521/RingVC')
+					.setURL('https://github.com/altrup/RingVC')
 				).addComponents(
 					new ButtonBuilder()
 					.setLabel('Support Server')

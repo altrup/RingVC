@@ -204,13 +204,13 @@ export const filter = {
 				
 				if (filter.getType() === type) {
 					interaction.reply({
-						content: `Your filter for ${channel} is already a ${type}`,
+						content: `Your filter for ${channel} is already a \`${type}\``,
 						flags: [MessageFlags.Ephemeral]
 					}).catch(console.error);
 				} else {
 					filter.setType(type);
 					interaction.reply({
-						content: `Your filter for ${channel} was reset and changed to a ${type}`,
+						content: `Your filter for ${channel} was reset and changed to a \`${type}\``,
 						flags: [MessageFlags.Ephemeral]
 					}).catch(console.error);
 				}
@@ -222,13 +222,13 @@ export const filter = {
 					const filter = discordUser.getFilter();
 					if (filter.getType() === type) {
 						interaction.reply({
-							content: `Your global filter is already a ${type}`,
+							content: `Your global filter is already a \`${type}\``,
 							flags: [MessageFlags.Ephemeral]
 						}).catch(console.error);
 					} else {
 						filter.setType(type);
 						interaction.reply({
-							content: `Your global filter was reset and changed to a ${type}`,
+							content: `Your global filter was reset and changed to a \`${type}\``,
 							flags: [MessageFlags.Ephemeral]
 						}).catch(console.error);
 					}

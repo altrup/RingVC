@@ -2,22 +2,23 @@ import { ChatInputCommandInteraction, GuildMember, MessageFlags, SlashCommandBui
 
 import { DiscordUser } from "@main/classes/commands/discord-user";
 import { DataType } from "@main/data";
+import { CommandName } from "@commands/commandNames";
 
 export const ring = {
 	data: new SlashCommandBuilder()
 		.setName('ring')
 		.setDescription('Rings specified user(s)')
-		.addSubcommand(subcommand => 
+		.addSubcommand(subcommand =>
 			subcommand.setName('user')
 				.setDescription('Ring a user')
-				.addUserOption(option => 
+				.addUserOption(option =>
 					option.setName('user')
 						.setDescription('Select a user')
 						.setRequired(true)))
-		.addSubcommand(subcommand => 
+		.addSubcommand(subcommand =>
 			subcommand.setName('default')
 				.setDescription('Ring all of your default ring recipients')),
-	async execute(data: DataType, interaction: ChatInputCommandInteraction) {
+	async execute(data: DataType, interaction: ChatInputCommandInteraction, commandIds: Map<CommandName, string>) {
 		// command must be run in a guild
 		if (!interaction.member) {
 			interaction.reply({
@@ -63,7 +64,7 @@ export const ring = {
 			const discordUser = data.users.get(interaction.user.id);
 			if (!discordUser) {
 				interaction.reply({
-					content: `You have no default ring recipients. Use \`/default_ring_recipients add\` to add some`,
+					content: `You have no default ring recipients. Use </default_ring_recipients edit:${commandIds.get("default_ring_recipients")}> to add some`,
 					flags: [MessageFlags.Ephemeral]
 				}).catch(console.error);
 				return;
@@ -83,7 +84,12 @@ export const ring = {
 					}).catch(console.error);
 				} else {
 					interaction.editReply({
-						content: `Can't notify default users because ${results[1].reason.message}`,
+						content: `Can't notify default users because ${results[1].reason.message}`
+							+ (
+								["no default users to ring", "no default users for whom you passed each other's filters"]
+									.includes(results[1].reason.message) ?
+									`. Use </default_ring_recipients edit:${commandIds.get("default_ring_recipients")}> to add some` : ""
+							),
 					}).catch(console.error);
 				}
 			});

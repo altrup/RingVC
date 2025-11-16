@@ -2,6 +2,7 @@ import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, ChatInputCom
 
 import { DataType } from "@main/data";
 import { VoiceChat } from '@main/classes/commands/voice-chat';
+import { CommandName } from '@commands/commandNames';
 
 export const signup = {
 	data: new SlashCommandBuilder()
@@ -12,7 +13,7 @@ export const signup = {
 				.setDescription('Select the channel to be "rung" for')
 				.addChannelTypes(ChannelType.GuildVoice)
 				.setRequired(false)),
-	async execute(data: DataType, interaction: ChatInputCommandInteraction) {
+	async execute(data: DataType, interaction: ChatInputCommandInteraction, commandIds: Map<CommandName, string>) {
 		const channel = interaction.options.getChannel('channel') || interaction.channel;
 		const user = interaction.user;
 		if (!channel || channel.type !== ChannelType.GuildVoice) {
@@ -35,7 +36,7 @@ export const signup = {
 			// if voice chat already has them
 			if (voiceChat?.hasUser(user.id)) {
 				interaction.reply({
-					content: `You are already signed up for <#${channel.id}>. Use /unsignup to unsignup`,
+					content: `You are already signed up for <#${channel.id}>. Use </unsignup:${commandIds.get("unsignup")}> to unsignup`,
 					flags: [MessageFlags.Ephemeral]
 				}).catch(console.error);
 				return; // stops the rest of the function
@@ -46,7 +47,7 @@ export const signup = {
 			new VoiceChat(channel.id, [user.id]);
 		
 		interaction.reply({
-			content: `Signed up for <#${channel.id}>. Use /unsignup to unsignup`,
+			content: `Signed up for <#${channel.id}>. Use </unsignup:${commandIds.get("unsignup")}> to unsignup`,
 			flags: [MessageFlags.Ephemeral]
 		}).catch(console.error);
 	},

@@ -2,6 +2,7 @@ import { ChatInputCommandInteraction, MessageFlags, SlashCommandBuilder } from '
 
 import { DiscordUser } from '@main/classes/commands/discord-user';
 import { DataType } from '@main/data';
+import { CommandName } from '@commands/commandNames';
 
 export const whitelist = {
 	data: new SlashCommandBuilder()
@@ -11,7 +12,7 @@ export const whitelist = {
 			option.setName('user')
 				.setDescription('Select a user to whitelist')
 				.setRequired(true)),
-	async execute(data: DataType, interaction: ChatInputCommandInteraction) {
+	async execute(data: DataType, interaction: ChatInputCommandInteraction, commandIds: Map<CommandName, string>) {
 		const user = interaction.user;
 		const whitelistedUser = interaction.options.getUser('user', true);
 
@@ -20,7 +21,7 @@ export const whitelist = {
 
 		if (!globalFilter.getIsWhitelist()) {
 			interaction.reply({
-				content: `Your global filter is not a whitelist. Either change it to a whitelist (\`/edit_filter type Whitelist\`) or use \`/block\` instead`,
+				content: `Your global filter is not a whitelist. Either change it to a whitelist (</filter edit type:${commandIds.get("filter")}>) or use </block:${commandIds.get("block")}> instead`,
 				flags: [MessageFlags.Ephemeral]
 			}).catch(console.error);
 			return;

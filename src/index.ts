@@ -4,7 +4,6 @@ import { ChatInputCommandInteraction, Client, Collection, GatewayIntentBits, Mes
 import { DISCORD_TOKEN } from "./config";
 import { CommandImplementation, commands as commandsArray } from "@commands/commands";
 import { CommandName, isCommandName } from "@commands/commandNames";
-import isOnline from "is-online";
 
 const client = new Client({
 	intents: [
@@ -81,14 +80,17 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
 
 // wait until online to log in
 // otherwise program will error out
-const checkOnline = async () => {
-	console.log("Checking for internet...");
-	if (await isOnline()) {
-		console.log("Online. Connecting to server");
-		client.login(DISCORD_TOKEN);
-	} else {
-		console.log("Offline. Checking again in 5 seconds");
-		setTimeout(checkOnline, 5000);
-	}
-};
-checkOnline();
+// NOTE: dynamic import is required here
+import("is-online").then(({ default: isOnline }) => {
+	const checkOnline = async () => {
+		console.log("Checking for internet...");
+		if (await isOnline()) {
+			console.log("Online. Connecting to server");
+			client.login(DISCORD_TOKEN);
+		} else {
+			console.log("Offline. Checking again in 5 seconds");
+			setTimeout(checkOnline, 5000);
+		}
+	};
+	checkOnline();
+});

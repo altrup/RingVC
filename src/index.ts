@@ -3,6 +3,7 @@ import { data } from "./main/data";
 import { ChatInputCommandInteraction, Client, Collection, GatewayIntentBits, MessageFlags, Partials } from 'discord.js';
 import { DISCORD_TOKEN } from "./config";
 import { CommandImplementation, commands as commandsArray } from "./commands/commands";
+import isOnline from "is-online";
 
 const client = new Client({
 	intents: [
@@ -57,9 +58,9 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
 	// second condition is to check if user is joining a new channel
 	// third condition is to check if the channel has a voiceChat object
 	try {
-		if (newState?.channel && (!oldState || oldState.channelId !== newState.channelId) && data.voiceChats.has(newState.channelId?? "") && newState.member?.user) {
+		if (newState?.channel && (!oldState || oldState.channelId !== newState.channelId) && data.voiceChats.has(newState.channelId ?? "") && newState.member?.user) {
 			await Promise.all([
-				data.voiceChats.get(newState.channelId?? "")?.onJoin(newState.member.user),
+				data.voiceChats.get(newState.channelId ?? "")?.onJoin(newState.member.user),
 				data.users.get(newState.member.user.id)?.onJoin(newState.channel)
 			]);
 		}
@@ -70,16 +71,14 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
 
 // wait until online to log in
 // otherwise program will error out
-import('is-online').then(({default: isOnline}) => {
-    const check = async () => {
-        console.log("Checking for internet...");
-        if (await isOnline()) {
-            console.log("Online. Connecting to server");
-            client.login(DISCORD_TOKEN);
-        } else {
-            console.log("Offline. Checking again in 5 seconds");
-            setTimeout(check, 5000);
-        }
-    };
-    check();
-});
+const check = async () => {
+	console.log("Checking for internet...");
+	if (await isOnline()) {
+		console.log("Online. Connecting to server");
+		client.login(DISCORD_TOKEN);
+	} else {
+		console.log("Offline. Checking again in 5 seconds");
+		setTimeout(check, 5000);
+	}
+};
+check();

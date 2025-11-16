@@ -2,6 +2,7 @@ import { SlashCommandBuilder, EmbedBuilder, ChatInputCommandInteraction, Message
 
 import { DataType } from '@main/data';
 import { DiscordUser } from '@main/classes/commands/discord-user';
+import { CommandName } from '@commands/commandNames';
 
 export const mode = {
 	data: new SlashCommandBuilder()
@@ -25,7 +26,7 @@ export const mode = {
 		.addSubcommand(subcommand =>
 			subcommand.setName("get")
 			.setDescription("Displays your current mode")),
-	async execute(data: DataType, interaction: ChatInputCommandInteraction) {
+	async execute(data: DataType, interaction: ChatInputCommandInteraction, commandIds: Map<CommandName, string>) {
 		// display help message
 		if (interaction.options.getSubcommand() === "help") {
 			interaction.reply({
@@ -33,7 +34,7 @@ export const mode = {
 					new EmbedBuilder()
 					.setColor('#F5853F')
 					.setTitle('Mode Info')
-					.setDescription('Use /mode set to change your mode, and /mode get to see your current mode. \n Modes determine what happens when you join a voice channel')
+					.setDescription(`Use </mode set:${commandIds.get("mode")}> to change your mode, and </mode get:${commandIds.get("mode")}> to see your current mode. \n Modes determine what happens when you join a voice channel`)
 					.addFields(
 						{ name: 'Normal', value: 'Joining a voice channel will ring all applicable users' },
 						{ name: 'Stealth', value: 'Joining a voice channel will not ring anyone' },

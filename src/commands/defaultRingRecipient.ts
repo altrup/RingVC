@@ -2,6 +2,7 @@ import { ChannelType, ChatInputCommandInteraction, EmbedBuilder, MessageFlags, S
 
 import { DataType } from "@main/data";
 import { DiscordUser } from "@main/classes/commands/discord-user";
+import { CommandName } from "@commands/commandNames";
 
 export const defaultRingRecipients = {
 	data: new SlashCommandBuilder()
@@ -77,7 +78,7 @@ export const defaultRingRecipients = {
 								.setDescription('The channel to view automatic ringing settings for (global if not specified)')
 								.addChannelTypes(ChannelType.GuildVoice)
 								.setRequired(false)))),
-	async execute(data: DataType, interaction: ChatInputCommandInteraction) {
+	async execute(data: DataType, interaction: ChatInputCommandInteraction, commandIds: Map<CommandName, string>) {
 		const subcommand = interaction.options.getSubcommand();
 		if (subcommand === "help") {
 			// Show help information
@@ -86,7 +87,7 @@ export const defaultRingRecipients = {
 					new EmbedBuilder()
 					.setColor('#747ac5')
 					.setTitle('/default_ring_recipients')
-					.setDescription('This command allows you to configure your default ring recipients, which are used when running `/ring default` or if you have automatic ringing enabled')
+					.setDescription(`This command allows you to configure your default ring recipients, which are used when running </ring default:${commandIds.get("ring")}> or if you have automatic ringing enabled`)
 					.addFields(
 						{ name: 'help', value: 'Show this help message' },
 						{ name: 'edit', value: 'Add/remove a user as a default ring recipient, either globally, or for a specified channel' },

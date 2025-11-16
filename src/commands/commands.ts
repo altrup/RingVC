@@ -1,6 +1,7 @@
 import { ChatInputCommandInteraction, SharedSlashCommand } from "discord.js";
 
 import { DataType } from "@main/data";
+import { CommandName } from "@commands/commandNames";
 
 import { help } from "@commands/help";
 import { ring } from "@commands/ring";
@@ -17,7 +18,7 @@ import { defaultRingRecipients } from "@commands/defaultRingRecipient";
 
 export type CommandImplementation = {
 	data: SharedSlashCommand;
-	execute: (data: DataType, interaction: ChatInputCommandInteraction) => Promise<void>;
+	execute: (data: DataType, interaction: ChatInputCommandInteraction, commandIds: Map<CommandName, string>) => Promise<void>;
 };
 
 export const commands: CommandImplementation[] = [

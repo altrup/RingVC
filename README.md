@@ -27,7 +27,7 @@ Guide on hosting the bot yourself
 
 ### Prerequisites
 - Docker Compose ([installation guide](https://docs.docker.com/compose/install/))
-- Have a Discord bot created ([guide](https://discordjs.guide/preparations/setting-up-a-bot-application.html#creating-your-bot))
+- Have a Discord bot created ([guide](https://discordjs.guide/legacy/preparations/app-setup))
 - Enable required permissions (for [auto mode](#mode))
 	- Under settings, on the left side, select Bot
 	- Scroll down to Privileged Gateway Intents
@@ -53,7 +53,7 @@ Guide on hosting the bot yourself
   ```bash
   docker compose up -d
   ```
-- Invite bot to your server ([guide](https://discordjs.guide/preparations/adding-your-bot-to-servers.html#creating-and-using-your-invite-link))
+- Invite bot to your server ([guide](https://discordjs.guide/legacy/preparations/adding-your-app))
   - Select `bot`, `applications.commands` and `Send Messages` permissions
 - To stop, run
 

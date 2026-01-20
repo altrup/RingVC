@@ -3,6 +3,8 @@ export const commandNamesList = [
 	"ring",
 	"signup",
 	"unsignup",
+	"signuprole",
+	"unsignuprole",
 	"quit",
 	"mode",
 	"block",

@@ -16,6 +16,7 @@ export const help = {
 				.setDescription('RingVC is a bot which tries to replicate Group Chat Voice Calls in Discord Servers')
 				.addFields(
 					{ name: 'Signing up', value: `Use </signup:${commandIds.get("signup")}> to start being rung when someone "starts" a call in the specified voice channel` },
+					{ name: 'Role signups', value: `Admins can use </signuprole:${commandIds.get("signuprole")}> to sign up an entire role for a voice channel. When someone joins, the role gets pinged. Use </unsignuprole:${commandIds.get("unsignuprole")}> to remove a role. *Individual signups won't double-ping users who have a signed-up role*` },
 					{ name: 'Quitting', value: `Use </quit:${commandIds.get("quit")}> or </unsignup:${commandIds.get("unsignup")}> to stop being rung for a voice channel` },
 					{ name: 'Ringing', value: `What the bot was named after. Use </ring user:${commandIds.get("ring")}> to ping someone to join once you're in a voice channel` },
 					{ name: 'Blocking people', value: `Don't want to be rung by someone? Use </block:${commandIds.get("block")}> to block people, and </unblock:${commandIds.get("unblock")}> to unblock them. *This means you won't be pinged if they "start" a voice call, however, once an unblocked person joins, you will be pinged*` },

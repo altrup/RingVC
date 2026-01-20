@@ -132,14 +132,12 @@ export class VoiceChat {
 				let existingMemberHasRole = false;
 				for (const [memberId] of channel.members) {
 					if (memberId === ringerUser.id) continue; // skip the person who just joined
-					const member = channel.members.get(memberId);
-					if (member?.roles.cache.has(roleId)) {
-						// Check if they're in stealth mode
-						const memberDiscordUser = DiscordUser.users.get(memberId);
-						if (!memberDiscordUser || memberDiscordUser.getRealMode(channel) !== "stealth") {
-							existingMemberHasRole = true;
-							break;
-						}
+					
+					// Check if they're in stealth mode
+					const memberDiscordUser = DiscordUser.users.get(memberId);
+					if (!memberDiscordUser || memberDiscordUser.getRealMode(channel) !== "stealth") {
+						existingMemberHasRole = true;
+						break;
 					}
 				}
 				

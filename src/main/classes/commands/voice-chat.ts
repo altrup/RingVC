@@ -121,13 +121,33 @@ export class VoiceChat {
 		// if user is in stealth mode, don't send message
 		if (ringerDiscordUser && ringerDiscordUser.getRealMode(channel) === "stealth") return;
 
-		// Collect all user IDs that will be pinged via roles
+		// Collect roles to ping - only ping a role if no one else in the channel has it
+		// (similar to how individual pings only happen when someone "starts" a call)
 		const roleMemberIds = new Set<string>();
 		const roleIdsToRing: string[] = [];
 		for (const roleId of this.roleIds.keys()) {
 			const role = channel.guild.roles.resolve(roleId);
 			if (role) {
-				roleIdsToRing.push(roleId);
+				// Check if any existing member in the channel (besides the one who just joined) has this role
+				let existingMemberHasRole = false;
+				for (const [memberId] of channel.members) {
+					if (memberId === ringerUser.id) continue; // skip the person who just joined
+					const member = channel.members.get(memberId);
+					if (member?.roles.cache.has(roleId)) {
+						// Check if they're in stealth mode
+						const memberDiscordUser = DiscordUser.users.get(memberId);
+						if (!memberDiscordUser || memberDiscordUser.getRealMode(channel) !== "stealth") {
+							existingMemberHasRole = true;
+							break;
+						}
+					}
+				}
+				
+				// Only ping this role if no existing member has it
+				if (!existingMemberHasRole) {
+					roleIdsToRing.push(roleId);
+				}
+				// Always collect role members for duplicate ping prevention
 				role.members.forEach(member => roleMemberIds.add(member.id));
 			}
 		}

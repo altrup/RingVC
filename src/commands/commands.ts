@@ -7,6 +7,8 @@ import { help } from "@commands/help";
 import { ring } from "@commands/ring";
 import { signup } from "@commands/signup";
 import { unsignup } from "@commands/unsignup";
+import { signuprole } from "@commands/signuprole";
+import { unsignuprole } from "@commands/unsignuprole";
 import { quit } from "@commands/quit";
 import { mode } from "@commands/mode";
 import { block } from "@commands/filter/block";
@@ -26,6 +28,8 @@ export const commands: CommandImplementation[] = [
 	ring,
 	signup,
 	unsignup,
+	signuprole,
+	unsignuprole,
 	quit,
 	mode,
 	// filter commamnds

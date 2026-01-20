@@ -39,7 +39,8 @@ const replacer = (key: string, value: unknown) => {
 			dataType: 'VoiceChat',
 			value: {
 				channelId: value.getChannelId(),
-				userIds: value.getUserIds()
+				userIds: value.getUserIds(),
+				roleIds: value.getRoleIds()
 			}
 		};
 	else if (value instanceof Filter)
@@ -87,10 +88,11 @@ const reviver = (key: string, rawValue: unknown) => {
 	else if (
 		dataType === 'VoiceChat' && !Array.isArray(value) &&
 		typeof value.channelId === 'string' &&
-		(value.userIds === undefined || value.userIds instanceof WatcherMap)
+		(value.userIds === undefined || value.userIds instanceof WatcherMap) &&
+		(value.roleIds === undefined || value.roleIds instanceof WatcherMap)
 	) {
-		if (!VoiceChat.isDefault(value.userIds))
-			return new VoiceChat(value.channelId, value.userIds);
+		if (!VoiceChat.isDefault(value.userIds, value.roleIds))
+			return new VoiceChat(value.channelId, value.userIds, value.roleIds);
 	}
 	else if (
 		dataType === 'VoiceChannelFilter' && !Array.isArray(value) &&

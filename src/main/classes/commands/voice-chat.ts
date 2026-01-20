@@ -14,21 +14,31 @@ export class VoiceChat {
 	static voiceChats: WatcherMap<string, VoiceChat> = new WatcherMap(onModify, null);
 
 	// returns if the voice chat is the default, in which case we don't need to store it
-	static isDefault(userIds: WatcherMap<string, null> = new WatcherMap(onModify, null)) {
-		return userIds.size === 0;
+	static isDefault(
+		userIds: WatcherMap<string, null> = new WatcherMap(onModify, null),
+		roleIds: WatcherMap<string, null> = new WatcherMap(onModify, null)
+	) {
+		return userIds.size === 0 && roleIds.size === 0;
 	}
 
 	private channelId: string;
 	private userIds: WatcherMap<string, null>; // the value doesn't actually matter
+	private roleIds: WatcherMap<string, null>; // role IDs to ping
 
 	public getChannelId() { return this.channelId; }
 	public getUserIds() { return this.userIds; }
+	public getRoleIds() { return this.roleIds; }
 
 	/*
 		channel is the channel object
 		userIds is an array of userIds
+		roleIds is an array of roleIds
 	*/
-	constructor (channelId: string, userIds: WatcherMap<string, null> | Iterable<string> = new WatcherMap(onModify, null)) {
+	constructor (
+		channelId: string,
+		userIds: WatcherMap<string, null> | Iterable<string> = new WatcherMap(onModify, null),
+		roleIds: WatcherMap<string, null> | Iterable<string> = new WatcherMap(onModify, null)
+	) {
 		// update channel map
 		VoiceChat.voiceChats.set(channelId, this);
 
@@ -39,6 +49,14 @@ export class VoiceChat {
 		} else {
 			for (const userId of userIds) {
 				this.userIds.set(userId, null);
+			}
+		}
+		this.roleIds = new WatcherMap(onModify, null);
+		if (roleIds instanceof WatcherMap) {
+			this.roleIds = roleIds;
+		} else {
+			for (const roleId of roleIds) {
+				this.roleIds.set(roleId, null);
 			}
 		}
 	}
@@ -55,14 +73,38 @@ export class VoiceChat {
 
 		DiscordUser.users.get(userId)?.removeFilter(this.channelId);
 
-		// delete object if no users
-		if (this.userIds.size == 0)
+		// delete object if no users and no roles
+		if (this.userIds.size === 0 && this.roleIds.size === 0)
 			VoiceChat.voiceChats.delete(this.channelId);
 	}
 
 	// returns if it has the user
 	hasUser (userId: string) {
 		return this.userIds.has(userId);
+	}
+
+	// add a role
+	addRole (roleId: string) {
+		this.roleIds.set(roleId, null);
+	}
+
+	// removes a role
+	removeRole (roleId: string) {
+		this.roleIds.delete(roleId);
+
+		// delete object if no users and no roles
+		if (this.userIds.size === 0 && this.roleIds.size === 0)
+			VoiceChat.voiceChats.delete(this.channelId);
+	}
+
+	// returns if it has the role
+	hasRole (roleId: string) {
+		return this.roleIds.has(roleId);
+	}
+
+	// helper to convert role id to mention string
+	static roleToString(roleId: string) {
+		return `<@&${roleId}>`;
 	}
 
 	// on someone joining a call
@@ -76,13 +118,29 @@ export class VoiceChat {
 		if (!channel?.isVoiceBased()) return;
 		
 		const ringerDiscordUser = DiscordUser.users.get(ringerUser.id);
-		// if user is in stealth mode, don't send messageringerUser
+		// if user is in stealth mode, don't send message
 		if (ringerDiscordUser && ringerDiscordUser.getRealMode(channel) === "stealth") return;
+
+		// Collect all user IDs that will be pinged via roles
+		const roleMemberIds = new Set<string>();
+		const roleIdsToRing: string[] = [];
+		for (const roleId of this.roleIds.keys()) {
+			const role = channel.guild.roles.resolve(roleId);
+			if (role) {
+				roleIdsToRing.push(roleId);
+				role.members.forEach(member => roleMemberIds.add(member.id));
+			}
+		}
 
 		const userIdsToRing: string[] = Array.from(this.userIds.keys()).filter(ringeeUserId => {
 			try {
 				// if ring is valid
 				DiscordUser.validateRing(channel, ringerUser.id, ringeeUserId);
+
+				// Skip this user if they will be pinged via a role (prevent duplicate pings)
+				if (roleMemberIds.has(ringeeUserId)) {
+					return false;
+				}
 
 				let onlyOnePersonPassing = true;
 				// check if anyone else in the call passes the filter of the person joining
@@ -105,14 +163,21 @@ export class VoiceChat {
 			}
 		});
 
-		if (userIdsToRing.length > 0)
+		// Build the mentions list (users first, then roles)
+		const mentions: string[] = [
+			...userIdsToRing.map(userId => DiscordUser.toString(userId)),
+			...roleIdsToRing.map(roleId => VoiceChat.roleToString(roleId))
+		];
+
+		if (mentions.length > 0) {
+			const mentionsText = mentions.length >= 2
+				? `${mentions.slice(0, mentions.length - 1).join(", ")} and ${mentions[mentions.length - 1]}`
+				: mentions[0];
+
 			await channel.send({
-				content: `\`@${channel.guild.members.resolve(ringerUser.id)?.displayName}\` just joined \`#${channel.name}\`, ${
-					userIdsToRing.length >= 2?
-						`${userIdsToRing.slice(0, userIdsToRing.length - 1).map(userId => DiscordUser.toString(userId)).join(", ")} and ${DiscordUser.toString(userIdsToRing[userIdsToRing.length - 1]?? "")}`
-					: `${DiscordUser.toString(userIdsToRing[0]?? "")}`
-				}`,
-				allowedMentions: {users: userIdsToRing}
-			})
+				content: `\`@${channel.guild.members.resolve(ringerUser.id)?.displayName}\` just joined \`#${channel.name}\`, ${mentionsText}`,
+				allowedMentions: { users: userIdsToRing, roles: roleIdsToRing }
+			});
+		}
 	}
 }

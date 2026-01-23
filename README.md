@@ -65,3 +65,16 @@ Guide on hosting the bot yourself
   ```bash
   docker compose build
   ```
+
+### Development
+- For development, it may be easier to use `npm` directly instead of docker
+- To deploy commands, run
+
+  ```bash
+  npm run deploy-commands
+  ```
+- To start bot with hot reloading, run
+
+  ```bash
+  npm run dev
+  ```

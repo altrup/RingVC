@@ -37,7 +37,7 @@ export const deleteData = {
 		const confirmation = await response.awaitMessageComponent({
 			filter: (i) => i.user.id === interaction.user.id,
 			time: 60_000 
-		});
+		}).catch(() => ({ customId: 'cancel-delete-data' }));
 		
 		let hadUserData = false; // check if there even was any user data to begin with
 		if (confirmation.customId === 'confirm-delete-data') {
@@ -50,12 +50,12 @@ export const deleteData = {
 			});
 		}
 
-		await confirmation.update({
+		await interaction.editReply({
 			embeds: [
 				new EmbedBuilder()
 				.setColor('#ca2b2b')
 				.setTitle('Delete all Data')
-				.setDescription('Are you sure you want to delete all your data? This will remove all your filters, signups, and other account settings. This is irreversible')
+				.setDescription('Are you sure you want to delete all your data? This will remove all your filters, signups, and other account settings. This is irreversible.')
 			],
 			components: [
 				new ActionRowBuilder().addComponents(

@@ -37,7 +37,7 @@ export const deleteData = {
 		const confirmation = await response.awaitMessageComponent({
 			filter: (i) => i.user.id === interaction.user.id,
 			time: 60_000 
-		}).catch(() => ({ customId: 'cancel-delete-data' }));
+		}).catch(() => ({ customId: 'cancel-delete-data', update: interaction.editReply }));
 		
 		let hadUserData = false; // check if there even was any user data to begin with
 		if (confirmation.customId === 'confirm-delete-data') {
@@ -50,7 +50,7 @@ export const deleteData = {
 			});
 		}
 
-		await interaction.editReply({
+		await confirmation.update({
 			embeds: [
 				new EmbedBuilder()
 				.setColor('#ca2b2b')

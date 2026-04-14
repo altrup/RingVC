@@ -1,6 +1,6 @@
 # RingVC Privacy Policy
 - Only data necessary for the functioning of the bot is collected and stored
-- See [`data.js`](/main/data.js) for exactly what is stored
+- See [`data.ts`](/src/main/data.ts) for exactly what is stored
 ## Stored Data
 - User IDs of users who use block or filter commands to set up a filter of who can ring them, and the User IDs of the people that they block
 - Voice Channel IDs and User IDs when a user is signed up for a Voice Channel

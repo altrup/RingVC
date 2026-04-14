@@ -7,5 +7,4 @@
 ## Temporary Data
 - Status (online, offline) of users who are using `/mode set auto`
 ## Deleting Data
-- There is currently no easy way to delete data
-- To delete data, manually remove all your filters and Voice Channel signups, which will automatically delete your User ID as well
+- Run `/delete_data` to delete all of your data

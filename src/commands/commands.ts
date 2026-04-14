@@ -4,6 +4,7 @@ import { DataType } from "@main/data";
 import { CommandName } from "@commands/commandNames";
 
 import { help } from "@commands/help";
+import { deleteData } from "@commands/deleteData";
 import { ring } from "@commands/ring";
 import { signup } from "@commands/signup";
 import { unsignup } from "@commands/unsignup";
@@ -25,6 +26,7 @@ export type CommandImplementation = {
 
 export const commands: CommandImplementation[] = [
 	help,
+	deleteData,
 	ring,
 	signup,
 	unsignup,

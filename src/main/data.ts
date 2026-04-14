@@ -82,7 +82,7 @@ const reviver = (key: string, rawValue: unknown) => {
 		(value.channelDefaultRingeeUserIds === undefined || value.channelDefaultRingeeUserIds instanceof WatcherMap) &&
 		(value.globalDefaultRingeeUserIds === undefined || value.globalDefaultRingeeUserIds instanceof WatcherMap) && 
 		(!DiscordUser.isDefault(channelFilters, value.globalFilter, value.mode, value.channelAutoRingEnableds, value.globalAutoRingEnabled, value.channelDefaultRingeeUserIds, value.globalDefaultRingeeUserIds))) {
-				return new DiscordUser(value.userId, channelFilters, value.globalFilter, value.mode, value.channelAutoRingEnableds, value.globalAutoRingEnabled, value.channelDefaultRingeeUserIds, value.globalDefaultRingeeUserIds);
+			return new DiscordUser(value.userId, channelFilters, value.globalFilter, value.mode, value.channelAutoRingEnableds, value.globalAutoRingEnabled, value.channelDefaultRingeeUserIds, value.globalDefaultRingeeUserIds);
 		}
 	}
 	else if (
@@ -173,7 +173,7 @@ if (fs.existsSync(dataPath)) {
 		// OnModify is called when each object is created, so we need to cancel the save
 		cancelSave();
 
-		console.log("data succesfully restored from data.txt");
+		console.log("data successfully restored from data.txt");
 	}
 	else {
 		saved = saveData();

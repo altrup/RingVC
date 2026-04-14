@@ -68,14 +68,16 @@ export class VoiceChat {
 	}
 
 	// removes a user
-	removeUser (userId: string) {
-		this.userIds.delete(userId);
+	removeUser (userId: string): boolean {
+		const removedUser = this.userIds.delete(userId);
 
 		DiscordUser.users.get(userId)?.removeFilter(this.channelId);
 
 		// delete object if no users and no roles
 		if (this.userIds.size === 0 && this.roleIds.size === 0)
 			VoiceChat.voiceChats.delete(this.channelId);
+		
+		return removedUser;
 	}
 
 	// returns if it has the user

@@ -1,5 +1,6 @@
 export const commandNamesList = [
 	"help",
+	"delete_data",
 	"ring",
 	"signup",
 	"unsignup",

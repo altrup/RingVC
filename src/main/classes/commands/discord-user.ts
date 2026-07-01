@@ -1,11 +1,15 @@
-import { VoiceBasedChannel, PermissionsBitField, DiscordAPIError } from "discord.js";
+import {
+	VoiceBasedChannel,
+	PermissionsBitField,
+	DiscordAPIError,
+} from "discord.js";
 import { WatcherMap } from "@main/classes/storage/watcher-map";
 import { Filter } from "@main/classes/commands/filter";
 
 // both used to notify data.js
 export const userOnModifyFunctions: (() => void)[] = [];
 const onModify = () => {
-	for (let i = 0; i < userOnModifyFunctions.length; i ++)
+	for (let i = 0; i < userOnModifyFunctions.length; i++)
 		userOnModifyFunctions[i]?.();
 };
 
@@ -19,44 +23,69 @@ export class DiscordUser {
 	static users = new WatcherMap<string, DiscordUser>(onModify, null);
 
 	/*
-		* channel: discordjs object of the channel the person is in
-		* ringerUserId: id of the person who started the call / command
-		* ringeeUserId: id of the person who is being invited
-		* 
-		* resolves if should ring, and rejects if not
-		* 
-		* returns if fine, throws error otherwise
-	*/
-	static validateRing(channel: VoiceBasedChannel, ringerUserId: string, ringeeUserId: string) {
+	 * channel: discordjs object of the channel the person is in
+	 * ringerUserId: id of the person who started the call / command
+	 * ringeeUserId: id of the person who is being invited
+	 *
+	 * resolves if should ring, and rejects if not
+	 *
+	 * returns if fine, throws error otherwise
+	 */
+	static validateRing(
+		channel: VoiceBasedChannel,
+		ringerUserId: string,
+		ringeeUserId: string,
+	) {
 		// if both users are the same
 		if (ringerUserId === ringeeUserId)
 			throw new Error(`you can't ring yourself`);
 		// if user can't join channel
-		if (!channel.permissionsFor(ringeeUserId)?.has(PermissionsBitField.Flags.Connect))
-			throw new Error(`${DiscordUser.toString(ringeeUserId)} can't join ${channel}`);
+		if (
+			!channel
+				.permissionsFor(ringeeUserId)
+				?.has(PermissionsBitField.Flags.Connect)
+		)
+			throw new Error(
+				`${DiscordUser.toString(ringeeUserId)} can't join ${channel}`,
+			);
 		// if this user is already in the voice chat
-		if (channel.members.has(ringeeUserId)) 
-			throw new Error(`${DiscordUser.toString(ringeeUserId)} is already in ${channel}`);
+		if (channel.members.has(ringeeUserId))
+			throw new Error(
+				`${DiscordUser.toString(ringeeUserId)} is already in ${channel}`,
+			);
 		// if the ringer has blocked the ringee
 		const ringerDiscordUser = DiscordUser.users.get(ringerUserId);
-		if (ringerDiscordUser && !ringerDiscordUser.passesFilter(channel.id, ringeeUserId))
+		if (
+			ringerDiscordUser &&
+			!ringerDiscordUser.passesFilter(channel.id, ringeeUserId)
+		)
 			throw new Error(`you blocked ${DiscordUser.toString(ringeeUserId)}`);
 		// if the ringee has blocked the ringer
 		const ringeeDiscordUser = DiscordUser.users.get(ringeeUserId);
-		if (ringeeDiscordUser && !ringeeDiscordUser.passesFilter(channel.id, ringerUserId))
+		if (
+			ringeeDiscordUser &&
+			!ringeeDiscordUser.passesFilter(channel.id, ringerUserId)
+		)
 			throw new Error(`${DiscordUser.toString(ringeeUserId)} blocked you`);
 	}
 	// sends a message to ping the user, if validateRing passes
-	static async ring(channel: VoiceBasedChannel, ringerUserId: string, message: string, userId: string) {
+	static async ring(
+		channel: VoiceBasedChannel,
+		ringerUserId: string,
+		message: string,
+		userId: string,
+	) {
 		DiscordUser.validateRing(channel, ringerUserId, userId);
 
 		try {
 			await channel.send({
 				content: `\`@${channel.guild.members.resolve(ringerUserId)?.displayName}\` ${message} \`#${channel.name}\`, ${DiscordUser.toString(userId)}`,
-				allowedMentions: {users: [userId]}
+				allowedMentions: { users: [userId] },
 			});
 		} catch (err) {
-			throw new Error(`the ring message to ${DiscordUser.toString(userId)} failed to send: \`${DiscordUser.getErrorMessage(err)}\``);
+			throw new Error(
+				`the ring message to ${DiscordUser.toString(userId)} failed to send: \`${DiscordUser.getErrorMessage(err)}\``,
+			);
 		}
 	}
 	// helper functions
@@ -66,9 +95,12 @@ export class DiscordUser {
 	static getErrorMessage(err: unknown) {
 		if (err instanceof Error) return err.message;
 		if (err instanceof DiscordAPIError) {
-			if ("message" in err.rawError && typeof err.rawError.message === 'string')
+			if ("message" in err.rawError && typeof err.rawError.message === "string")
 				return err.rawError.message;
-			else if ("error" in err.rawError && typeof err.rawError.error === 'string')
+			else if (
+				"error" in err.rawError &&
+				typeof err.rawError.error === "string"
+			)
 				return err.rawError.error;
 		}
 		return "";
@@ -77,20 +109,29 @@ export class DiscordUser {
 	// returns if user settings are the default, in which case we don't need to store them
 	static isDefault(
 		voiceChannels: WatcherMap<string, Filter> = new WatcherMap(onModify, null),
-		globalFilter: Filter = new Filter(), 
+		globalFilter: Filter = new Filter(),
 		mode: string = "normal",
-		channelAutoRingEnabled: WatcherMap<string, boolean> = new WatcherMap(onModify, null),
+		channelAutoRingEnabled: WatcherMap<string, boolean> = new WatcherMap(
+			onModify,
+			null,
+		),
 		globalAutoRingEnabled: boolean = false,
-		defaultRingUserIds: WatcherMap<string, null> = new WatcherMap(onModify, null),
-		globalDefaultRingUserIds: WatcherMap<string, null> = new WatcherMap(onModify, null)
+		defaultRingUserIds: WatcherMap<string, null> = new WatcherMap(
+			onModify,
+			null,
+		),
+		globalDefaultRingUserIds: WatcherMap<string, null> = new WatcherMap(
+			onModify,
+			null,
+		),
 	) {
 		return (
-			voiceChannels.size === 0 && 
-			globalFilter.getList().size === 0 && 
-			mode === "normal" && 
-			channelAutoRingEnabled.size === 0 && 
+			voiceChannels.size === 0 &&
+			globalFilter.getList().size === 0 &&
+			mode === "normal" &&
+			channelAutoRingEnabled.size === 0 &&
 			globalAutoRingEnabled === false &&
-			defaultRingUserIds.size === 0 && 
+			defaultRingUserIds.size === 0 &&
 			globalDefaultRingUserIds.size === 0
 		);
 	}
@@ -103,29 +144,57 @@ export class DiscordUser {
 	private channelAutoRingEnableds: WatcherMap<string, boolean>;
 	private globalAutoRingEnabled: boolean;
 	// channelId -> userId -> null
-	private channelDefaultRingeeUserIds: WatcherMap<string, WatcherMap<string, null>>;
+	private channelDefaultRingeeUserIds: WatcherMap<
+		string,
+		WatcherMap<string, null>
+	>;
 	private globalDefaultRingeeUserIds: WatcherMap<string, null>;
 
-	public getUserId() { return this.userId; }
-	public getChannelFilters() { return this.channelFilters; }
-	public getGlobalFilter() { return this.globalFilter; }
-	public getMode() { return this.mode; }
-	public getChannelAutoRingEnableds() { return this.channelAutoRingEnableds; }
-	public getGlobalAutoRingEnabled() { return this.globalAutoRingEnabled; }
-	public getChannelDefaultRingeeUserIds() { return this.channelDefaultRingeeUserIds; }
-	public getGlobalDefaultRingeeUserIds() { return this.globalDefaultRingeeUserIds; }
+	public getUserId() {
+		return this.userId;
+	}
+	public getChannelFilters() {
+		return this.channelFilters;
+	}
+	public getGlobalFilter() {
+		return this.globalFilter;
+	}
+	public getMode() {
+		return this.mode;
+	}
+	public getChannelAutoRingEnableds() {
+		return this.channelAutoRingEnableds;
+	}
+	public getGlobalAutoRingEnabled() {
+		return this.globalAutoRingEnabled;
+	}
+	public getChannelDefaultRingeeUserIds() {
+		return this.channelDefaultRingeeUserIds;
+	}
+	public getGlobalDefaultRingeeUserIds() {
+		return this.globalDefaultRingeeUserIds;
+	}
 
 	// voiceChannels is an array of channelID, Filter
 	// defualtRingUserIds is an array of userIDs
-	constructor (
-		userId: string, 
+	constructor(
+		userId: string,
 		voiceChannels: WatcherMap<string, Filter> = new WatcherMap(onModify, null),
-		globalFilter: Filter = new Filter(), 
-		mode: DiscordUserMode = "normal", 
-		channelAutoRingEnabled: WatcherMap<string, boolean> = new WatcherMap(onModify, null),
+		globalFilter: Filter = new Filter(),
+		mode: DiscordUserMode = "normal",
+		channelAutoRingEnabled: WatcherMap<string, boolean> = new WatcherMap(
+			onModify,
+			null,
+		),
 		globalAutoRingEnabled: boolean = false,
-		defaultRingeeUserIds: WatcherMap<string, WatcherMap<string, null>> = new WatcherMap(onModify, null), 
-		globalDefaultRingeeUserIds: WatcherMap<string, null> = new WatcherMap(onModify, null)
+		defaultRingeeUserIds: WatcherMap<
+			string,
+			WatcherMap<string, null>
+		> = new WatcherMap(onModify, null),
+		globalDefaultRingeeUserIds: WatcherMap<string, null> = new WatcherMap(
+			onModify,
+			null,
+		),
 	) {
 		// update userMap
 		DiscordUser.users.set(userId, this);
@@ -144,10 +213,8 @@ export class DiscordUser {
 	// an optional filter object
 	// returns filter object
 	addFilter(channelId: string, filter?: Filter) {
-		const newFilter = filter?? new Filter();
-		this.channelFilters.set(
-			channelId, newFilter
-		);
+		const newFilter = filter ?? new Filter();
+		this.channelFilters.set(channelId, newFilter);
 		return newFilter;
 	}
 
@@ -166,8 +233,7 @@ export class DiscordUser {
 	getFilter(channelId: string): Filter | undefined;
 	getFilter(channelId?: null): Filter;
 	getFilter(channelId?: string | null) {
-		if (channelId)
-			return this.channelFilters.get(channelId);
+		if (channelId) return this.channelFilters.get(channelId);
 		return this.globalFilter;
 	}
 
@@ -175,7 +241,10 @@ export class DiscordUser {
 	passesFilter(channelId: string, userId: string) {
 		const filter = this.channelFilters.get(channelId);
 		// if filter doesn't exist, it passes
-		return (!filter || filter.passesFilter(userId)) && this.globalFilter.passesFilter(userId);
+		return (
+			(!filter || filter.passesFilter(userId)) &&
+			this.globalFilter.passesFilter(userId)
+		);
 	}
 
 	// needs channel to check if user is invisible
@@ -183,7 +252,7 @@ export class DiscordUser {
 		// if mode is auto, check if user is invisible
 		if (this.mode === "auto") {
 			const user = channel.guild.members.resolve(this.userId);
-			if (user && user.presence && user.presence.status === "offline") 
+			if (user && user.presence && user.presence.status === "offline")
 				return "stealth";
 			return "normal";
 		}
@@ -201,8 +270,11 @@ export class DiscordUser {
 	}
 
 	isAutoRingEnabled(channelId: string | undefined): boolean {
-		if (channelId !== undefined && this.channelAutoRingEnableds.has(channelId)) {
-			return this.channelAutoRingEnableds.get(channelId)?? false;
+		if (
+			channelId !== undefined &&
+			this.channelAutoRingEnableds.has(channelId)
+		) {
+			return this.channelAutoRingEnableds.get(channelId) ?? false;
 		}
 		return this.globalAutoRingEnabled;
 	}
@@ -219,7 +291,7 @@ export class DiscordUser {
 	setAutoRingEnabled(channelId: string | undefined, enabled: boolean): boolean {
 		if (channelId === undefined) {
 			if (this.globalAutoRingEnabled === enabled) return false;
-			
+
 			this.globalAutoRingEnabled = enabled;
 			onModify();
 			return true;
@@ -233,7 +305,9 @@ export class DiscordUser {
 	}
 
 	// if channelId is undefined, then default to global default ring
-	getDefaultRingeeUserIds(channelId: string | undefined): WatcherMap<string, null> | undefined;
+	getDefaultRingeeUserIds(
+		channelId: string | undefined,
+	): WatcherMap<string, null> | undefined;
 	getDefaultRingeeUserIds(channelId?: undefined): WatcherMap<string, null>;
 	getDefaultRingeeUserIds(channelId: string | undefined) {
 		if (channelId === undefined) {
@@ -245,16 +319,23 @@ export class DiscordUser {
 	getAllDefaultRingeeUserIds(channelId: string | undefined) {
 		return [
 			...this.globalDefaultRingeeUserIds.keys(),
-			...(channelId? this.channelDefaultRingeeUserIds.get(channelId)?.keys()?? []: [])
+			...(channelId
+				? (this.channelDefaultRingeeUserIds.get(channelId)?.keys() ?? [])
+				: []),
 		];
 	}
 	// adds a userId to a default ring list, returns true if added, false if already there
-	addDefaultRingeeUserId(channelId: string | undefined, userId: string): boolean {
+	addDefaultRingeeUserId(
+		channelId: string | undefined,
+		userId: string,
+	): boolean {
 		if (!channelId) {
 			this.globalDefaultRingeeUserIds.set(userId, null);
 			return true;
 		}
-		const newList = this.channelDefaultRingeeUserIds.get(channelId) ?? new WatcherMap<string, null>(onModify, null);
+		const newList =
+			this.channelDefaultRingeeUserIds.get(channelId) ??
+			new WatcherMap<string, null>(onModify, null);
 		if (newList.has(userId)) return false;
 		// add user to list
 		newList.set(userId, null);
@@ -264,7 +345,10 @@ export class DiscordUser {
 		return true;
 	}
 	// removes a userId from a default ring list, returns true if removed, false if not there
-	removeDefaultRingeeUserId(channelId: string | undefined, userId: string): boolean {
+	removeDefaultRingeeUserId(
+		channelId: string | undefined,
+		userId: string,
+	): boolean {
 		if (!channelId) {
 			return this.globalDefaultRingeeUserIds.delete(userId);
 		}
@@ -294,15 +378,17 @@ export class DiscordUser {
 	}
 
 	getDefaultUserIdsToRing(channel: VoiceBasedChannel) {
-		return this.getAllDefaultRingeeUserIds(channel.id).map(ringeeUserId => {
-			try {
-				DiscordUser.validateRing(channel, this.userId, ringeeUserId)
+		return this.getAllDefaultRingeeUserIds(channel.id)
+			.map((ringeeUserId) => {
+				try {
+					DiscordUser.validateRing(channel, this.userId, ringeeUserId);
 
-				return ringeeUserId;
-			} catch {
-				return null;
-			}
-		}).filter(result => result !== null);
+					return ringeeUserId;
+				} catch {
+					return null;
+				}
+			})
+			.filter((result) => result !== null);
 	}
 	async ringDefaultUsers(channel: VoiceBasedChannel, message: string) {
 		if (this.getAllDefaultRingeeUserIds(channel.id).length === 0) {
@@ -316,17 +402,26 @@ export class DiscordUser {
 			try {
 				await channel.send({
 					content: `\`@${channel.guild.members.resolve(this.userId)?.displayName}\` ${message} \`#${channel.name}\`, ${
-						userIdsToRing.length >= 2?
-							`${userIdsToRing.slice(0, userIdsToRing.length - 1).map(userId => DiscordUser.toString(userId)).join(", ")} and ${DiscordUser.toString(userIdsToRing[userIdsToRing.length - 1]?? "")}`
-						: `${DiscordUser.toString(userIdsToRing[0]?? "")}`
+						userIdsToRing.length >= 2
+							? `${userIdsToRing
+									.slice(0, userIdsToRing.length - 1)
+									.map((userId) => DiscordUser.toString(userId))
+									.join(
+										", ",
+									)} and ${DiscordUser.toString(userIdsToRing[userIdsToRing.length - 1] ?? "")}`
+							: `${DiscordUser.toString(userIdsToRing[0] ?? "")}`
 					}`,
-					allowedMentions: {users: userIdsToRing}
-				})
+					allowedMentions: { users: userIdsToRing },
+				});
 			} catch (err) {
-				throw new Error(`the ring message failed to send: \`${DiscordUser.getErrorMessage(err)}\``);
+				throw new Error(
+					`the ring message failed to send: \`${DiscordUser.getErrorMessage(err)}\``,
+				);
 			}
 		} else {
-			throw new Error(`no default users for whom you passed each other's filters`);
+			throw new Error(
+				`no default users for whom you passed each other's filters`,
+			);
 		}
 	}
 

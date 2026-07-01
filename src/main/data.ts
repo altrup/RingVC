@@ -1,28 +1,35 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from "fs";
+import * as path from "path";
 
 // get setting
-import { SAVE_COOLDOWN } from '@config';
+import { SAVE_COOLDOWN } from "@config";
 
 // get classes
-import { WatcherMap } from '@main/classes/storage/watcher-map';
-import { DiscordUser, isDiscordUserMode, userOnModifyFunctions } from '@main/classes/commands/discord-user';
-import { VoiceChat, voiceChatOnModifyFunctions } from '@main/classes/commands/voice-chat';
-import { Filter, filterOnModifyFunctions } from '@main/classes/commands/filter';
+import { WatcherMap } from "@main/classes/storage/watcher-map";
+import {
+	DiscordUser,
+	isDiscordUserMode,
+	userOnModifyFunctions,
+} from "@main/classes/commands/discord-user";
+import {
+	VoiceChat,
+	voiceChatOnModifyFunctions,
+} from "@main/classes/commands/voice-chat";
+import { Filter, filterOnModifyFunctions } from "@main/classes/commands/filter";
 
 const tempDataPath = path.join(process.cwd(), "data", "data.tmp.txt");
 const dataPath = path.join(process.cwd(), "data", "data.txt");
 
 // stolen from https://stackoverflow.com/questions/29085197/how-do-you-json-stringify-an-es6-map
 const replacer = (key: string, value: unknown) => {
-	if(value instanceof Map)
+	if (value instanceof Map)
 		return {
-			dataType: 'Map',
+			dataType: "Map",
 			value: Array.from(value.entries()), // or with spread: value: [...value]
 		};
 	else if (value instanceof DiscordUser)
 		return {
-			dataType: 'DiscordUser',
+			dataType: "DiscordUser",
 			value: {
 				userId: value.getUserId(),
 				channelFilters: value.getChannelFilters(),
@@ -32,76 +39,109 @@ const replacer = (key: string, value: unknown) => {
 				globalAutoRingEnabled: value.getGlobalAutoRingEnabled(),
 				channelDefaultRingeeUserIds: value.getChannelDefaultRingeeUserIds(),
 				globalDefaultRingeeUserIds: value.getGlobalDefaultRingeeUserIds(),
-			}
+			},
 		};
 	else if (value instanceof VoiceChat)
 		return {
-			dataType: 'VoiceChat',
+			dataType: "VoiceChat",
 			value: {
 				channelId: value.getChannelId(),
 				userIds: value.getUserIds(),
-				roleIds: value.getRoleIds()
-			}
+				roleIds: value.getRoleIds(),
+			},
 		};
 	else if (value instanceof Filter)
 		return {
-			dataType: 'VoiceChannelFilter',
+			dataType: "VoiceChannelFilter",
 			value: {
 				isWhitelist: value.getIsWhitelist(),
-				list: value.getList()
-			}
+				list: value.getList(),
+			},
 		};
-	else
-		return value;
+	else return value;
 };
 const reviver = (key: string, rawValue: unknown) => {
 	if (
-		!rawValue || !(rawValue instanceof Object) || 
-		!("dataType" in rawValue) || !("value" in rawValue) || 
-		typeof rawValue.dataType !== 'string' || !(rawValue.value instanceof Object)
+		!rawValue ||
+		!(rawValue instanceof Object) ||
+		!("dataType" in rawValue) ||
+		!("value" in rawValue) ||
+		typeof rawValue.dataType !== "string" ||
+		!(rawValue.value instanceof Object)
 	) {
-		return rawValue
+		return rawValue;
 	}
 
-	const { dataType, value } = rawValue as {dataType: string, value: Record<string, unknown> | Array<unknown>};
-	if (dataType === 'Map' && Array.isArray(value))
-		return value.reduce((map: WatcherMap<unknown, unknown>, object: unknown) => {
-			if (!Array.isArray(object) || object.length !== 2)
+	const { dataType, value } = rawValue as {
+		dataType: string;
+		value: Record<string, unknown> | Array<unknown>;
+	};
+	if (dataType === "Map" && Array.isArray(value))
+		return value.reduce(
+			(map: WatcherMap<unknown, unknown>, object: unknown) => {
+				if (!Array.isArray(object) || object.length !== 2) return map;
+				map.set(object[0], object[1]);
 				return map;
-			map.set(object[0], object[1]);
-			return map;
-		}, new WatcherMap(onModify, null));
-	else if (dataType === 'DiscordUser' && !Array.isArray(value)) {
-		const channelFilters = value.channelFilters?? value.voiceChannels; // legacy support
-		if ((typeof value.userId === 'string') &&
-		(channelFilters === undefined || channelFilters instanceof WatcherMap) &&
-		(value.globalFilter === undefined || value.globalFilter instanceof Filter) &&
-		(value.mode === undefined || (typeof value.mode === 'string' && isDiscordUserMode(value.mode))) &&
-		(value.channelAutoRingEnableds === undefined || value.channelAutoRingEnableds instanceof WatcherMap) &&
-		(value.globalAutoRingEnabled === undefined || typeof value.globalAutoRingEnabled === 'boolean') &&
-		(value.channelDefaultRingeeUserIds === undefined || value.channelDefaultRingeeUserIds instanceof WatcherMap) &&
-		(value.globalDefaultRingeeUserIds === undefined || value.globalDefaultRingeeUserIds instanceof WatcherMap) && 
-		(!DiscordUser.isDefault(channelFilters, value.globalFilter, value.mode, value.channelAutoRingEnableds, value.globalAutoRingEnabled, value.channelDefaultRingeeUserIds, value.globalDefaultRingeeUserIds))) {
-			return new DiscordUser(value.userId, channelFilters, value.globalFilter, value.mode, value.channelAutoRingEnableds, value.globalAutoRingEnabled, value.channelDefaultRingeeUserIds, value.globalDefaultRingeeUserIds);
+			},
+			new WatcherMap(onModify, null),
+		);
+	else if (dataType === "DiscordUser" && !Array.isArray(value)) {
+		const channelFilters = value.channelFilters ?? value.voiceChannels; // legacy support
+		if (
+			typeof value.userId === "string" &&
+			(channelFilters === undefined || channelFilters instanceof WatcherMap) &&
+			(value.globalFilter === undefined ||
+				value.globalFilter instanceof Filter) &&
+			(value.mode === undefined ||
+				(typeof value.mode === "string" && isDiscordUserMode(value.mode))) &&
+			(value.channelAutoRingEnableds === undefined ||
+				value.channelAutoRingEnableds instanceof WatcherMap) &&
+			(value.globalAutoRingEnabled === undefined ||
+				typeof value.globalAutoRingEnabled === "boolean") &&
+			(value.channelDefaultRingeeUserIds === undefined ||
+				value.channelDefaultRingeeUserIds instanceof WatcherMap) &&
+			(value.globalDefaultRingeeUserIds === undefined ||
+				value.globalDefaultRingeeUserIds instanceof WatcherMap) &&
+			!DiscordUser.isDefault(
+				channelFilters,
+				value.globalFilter,
+				value.mode,
+				value.channelAutoRingEnableds,
+				value.globalAutoRingEnabled,
+				value.channelDefaultRingeeUserIds,
+				value.globalDefaultRingeeUserIds,
+			)
+		) {
+			return new DiscordUser(
+				value.userId,
+				channelFilters,
+				value.globalFilter,
+				value.mode,
+				value.channelAutoRingEnableds,
+				value.globalAutoRingEnabled,
+				value.channelDefaultRingeeUserIds,
+				value.globalDefaultRingeeUserIds,
+			);
 		}
-	}
-	else if (
-		dataType === 'VoiceChat' && !Array.isArray(value) &&
-		typeof value.channelId === 'string' &&
+	} else if (
+		dataType === "VoiceChat" &&
+		!Array.isArray(value) &&
+		typeof value.channelId === "string" &&
 		(value.userIds === undefined || value.userIds instanceof WatcherMap) &&
 		(value.roleIds === undefined || value.roleIds instanceof WatcherMap)
 	) {
 		if (!VoiceChat.isDefault(value.userIds, value.roleIds))
 			return new VoiceChat(value.channelId, value.userIds, value.roleIds);
-	}
-	else if (
-		dataType === 'VoiceChannelFilter' && !Array.isArray(value) &&
-		(value.isWhitelist === undefined || typeof value.isWhitelist === 'boolean') &&
+	} else if (
+		dataType === "VoiceChannelFilter" &&
+		!Array.isArray(value) &&
+		(value.isWhitelist === undefined ||
+			typeof value.isWhitelist === "boolean") &&
 		(value.list === undefined || value.list instanceof WatcherMap)
 	) {
 		return new Filter(value.isWhitelist, value.list);
 	}
-	
+
 	return rawValue;
 };
 
@@ -125,7 +165,7 @@ const saveData = (): Promise<void> => {
 				reject(err);
 				return;
 			}
-			
+
 			fs.rename(tempDataPath, dataPath, (err) => {
 				if (err) {
 					console.log("error renaming temp file");
@@ -142,10 +182,18 @@ const onModify = () => {
 	// if it is already updated, then we don't need to do anything
 	if (!updated) {
 		updated = true;
-		if (new Date().getTime() - lastSave.getTime() >= SAVE_COOLDOWN * 1000) // SAVE_COOLDOWN is in seconds
-			timeout = setTimeout(() => {saved = saveData()}, 10); // save after a short delay (sometimes multiple things are changed at once)
+		if (new Date().getTime() - lastSave.getTime() >= SAVE_COOLDOWN * 1000)
+			// SAVE_COOLDOWN is in seconds
+			timeout = setTimeout(() => {
+				saved = saveData();
+			}, 10); // save after a short delay (sometimes multiple things are changed at once)
 		else
-			timeout = setTimeout(() => {saved = saveData()}, (SAVE_COOLDOWN * 1000) - (new Date().getTime() - lastSave.getTime()));
+			timeout = setTimeout(
+				() => {
+					saved = saveData();
+				},
+				SAVE_COOLDOWN * 1000 - (new Date().getTime() - lastSave.getTime()),
+			);
 	}
 };
 const cancelSave = () => {
@@ -160,13 +208,13 @@ filterOnModifyFunctions.push(onModify);
 export type DataType = {
 	voiceChats: WatcherMap<string, VoiceChat>;
 	users: WatcherMap<string, DiscordUser>;
-}
+};
 export const data: DataType = {
 	voiceChats: VoiceChat.voiceChats,
 	users: DiscordUser.users,
 };
 // read data.txt
-if (fs.existsSync(dataPath)) { 
+if (fs.existsSync(dataPath)) {
 	const storedText = fs.readFileSync(dataPath).toString();
 	if (storedText != "") {
 		JSON.parse(storedText, reviver); // parse text with reviver
@@ -174,8 +222,7 @@ if (fs.existsSync(dataPath)) {
 		cancelSave();
 
 		console.log("data successfully restored from data.txt");
-	}
-	else {
+	} else {
 		saved = saveData();
 		console.log("data.txt was empty, so data was reset to default");
 	}
@@ -192,9 +239,8 @@ else {
 // save data when exiting
 [`exit`, `SIGINT`, `SIGUSR1`, `SIGUSR2`, `SIGTERM`].forEach((eventType) => {
 	process.on(eventType, async (err) => {
-		if (err)
-			console.error(err);
- 
+		if (err) console.error(err);
+
 		// wait for data to be saved
 		await saved;
 

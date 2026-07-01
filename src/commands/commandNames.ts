@@ -15,9 +15,11 @@ export const commandNamesList = [
 	"filter",
 	"default_ring_recipients",
 ] as const;
-export type CommandName = typeof commandNamesList[number];
+export type CommandName = (typeof commandNamesList)[number];
 
 const commandNames = new Set<CommandName>(commandNamesList);
-export const isCommandName = (commandName: string): commandName is CommandName => {
+export const isCommandName = (
+	commandName: string,
+): commandName is CommandName => {
 	return commandNames.has(commandName as CommandName);
 };

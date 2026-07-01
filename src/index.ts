@@ -1,8 +1,18 @@
 // data is updated basically in every file
 import { data } from "./main/data";
-import { ChatInputCommandInteraction, Client, Collection, GatewayIntentBits, MessageFlags, Partials } from 'discord.js';
+import {
+	ChatInputCommandInteraction,
+	Client,
+	Collection,
+	GatewayIntentBits,
+	MessageFlags,
+	Partials,
+} from "discord.js";
 import { DISCORD_TOKEN } from "./config";
-import { CommandImplementation, commands as commandsArray } from "@commands/commands";
+import {
+	CommandImplementation,
+	commands as commandsArray,
+} from "@commands/commands";
 import { CommandName, isCommandName } from "@commands/commandNames";
 
 const client = new Client({
@@ -22,9 +32,12 @@ for (const command of commandsArray) {
 const commandIds = new Map<CommandName, string>();
 
 // When the client is ready, set status
-client.once('clientReady', async () => {
-	console.log('Ready');
-	client.user?.setPresence({ activities: [{ name: '/help', type: 3 }], status: 'online' });
+client.once("clientReady", async () => {
+	console.log("Ready");
+	client.user?.setPresence({
+		activities: [{ name: "/help", type: 3 }],
+		status: "online",
+	});
 
 	(await client.application?.commands.fetch())?.forEach((command, key) => {
 		if (isCommandName(command.name)) {
@@ -34,18 +47,21 @@ client.once('clientReady', async () => {
 		}
 	});
 });
-client.on('shardError', async () => {
+client.on("shardError", async () => {
 	// console.log('disconnected');
 });
-client.on('shardReconnecting', async () => {
+client.on("shardReconnecting", async () => {
 	// console.log('reconnecting');
 });
-client.on('shardResume', () => {
+client.on("shardResume", () => {
 	// console.log('reconnected');
-	client.user?.setPresence({ activities: [{ name: '/help', type: 3 }], status: 'online' });
+	client.user?.setPresence({
+		activities: [{ name: "/help", type: 3 }],
+		status: "online",
+	});
 });
 
-client.on('interactionCreate', async interaction => {
+client.on("interactionCreate", async (interaction) => {
 	if (!interaction.isCommand()) return;
 
 	const command = commands.get(interaction.commandName);
@@ -58,18 +74,28 @@ client.on('interactionCreate', async interaction => {
 		}
 	} catch (error) {
 		console.error(error);
-		await interaction.reply({ content: 'There was an error while executing this command!', flags: [MessageFlags.Ephemeral] });
+		await interaction.reply({
+			content: "There was an error while executing this command!",
+			flags: [MessageFlags.Ephemeral],
+		});
 	}
 });
 
-client.on('voiceStateUpdate', async (oldState, newState) => {
+client.on("voiceStateUpdate", async (oldState, newState) => {
 	// first condition is to check if user has joined a channel
 	// second condition is to check if user is joining a new channel
 	// third condition is to check if the channel has a voiceChat object
 	try {
-		if (newState?.channel && (!oldState || oldState.channelId !== newState.channelId) && data.voiceChats.has(newState.channelId ?? "") && newState.member?.user) {
+		if (
+			newState?.channel &&
+			(!oldState || oldState.channelId !== newState.channelId) &&
+			data.voiceChats.has(newState.channelId ?? "") &&
+			newState.member?.user
+		) {
 			await Promise.all([
-				data.voiceChats.get(newState.channelId ?? "")?.onJoin(newState.member.user),
+				data.voiceChats
+					.get(newState.channelId ?? "")
+					?.onJoin(newState.member.user),
 				data.users.get(newState.member.user.id)?.onJoin(newState.channel),
 			]);
 		}

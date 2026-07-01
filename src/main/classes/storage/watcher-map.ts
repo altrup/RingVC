@@ -4,11 +4,19 @@ class WatcherMap<K, V> extends Map<K, V> {
 	private onGet: () => void;
 
 	// onset and onget are functions
-	constructor(onModify: null | (() => void), onGet: null | (() => void), ...args: ConstructorParameters<typeof Map<K, V>>) {
+	constructor(
+		onModify: null | (() => void),
+		onGet: null | (() => void),
+		...args: ConstructorParameters<typeof Map<K, V>>
+	) {
 		super(...args);
 
-		this.onModify = (onModify === null || typeof onModify === "undefined")? () => {}: onModify;
-		this.onGet = (onGet === null || typeof onGet === "undefined")? () => {}: onGet;
+		this.onModify =
+			onModify === null || typeof onModify === "undefined"
+				? () => {}
+				: onModify;
+		this.onGet =
+			onGet === null || typeof onGet === "undefined" ? () => {} : onGet;
 	}
 
 	set(...args: Parameters<Map<K, V>["set"]>) {
@@ -36,6 +44,4 @@ class WatcherMap<K, V> extends Map<K, V> {
 	}
 }
 
-export {
-	WatcherMap
-}
+export { WatcherMap };

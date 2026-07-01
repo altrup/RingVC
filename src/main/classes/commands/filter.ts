@@ -3,7 +3,7 @@ import { WatcherMap } from "@main/classes/storage/watcher-map";
 
 export const filterOnModifyFunctions: (() => void)[] = [];
 const onModify = () => {
-	for (let i = 0; i < filterOnModifyFunctions.length; i ++)
+	for (let i = 0; i < filterOnModifyFunctions.length; i++)
 		filterOnModifyFunctions[i]?.();
 };
 
@@ -11,21 +11,31 @@ export type FilterType = "whitelist" | "blacklist";
 
 // class for whitelist or blacklist
 export class Filter {
-	static isDefault(isWhitelist: boolean = false, list: WatcherMap<string, null> = new WatcherMap(onModify, null)) {
+	static isDefault(
+		isWhitelist: boolean = false,
+		list: WatcherMap<string, null> = new WatcherMap(onModify, null),
+	) {
 		return isWhitelist === false && list.size === 0;
 	}
 
 	private isWhitelist: boolean;
 	private list: WatcherMap<string, null>; // value doesn't matter, just using map for easy lookup
 
-	public getIsWhitelist() { return this.isWhitelist; }
-	public getList() { return this.list; }
+	public getIsWhitelist() {
+		return this.isWhitelist;
+	}
+	public getList() {
+		return this.list;
+	}
 
 	/* 
 		isWhitelist is a boolean
 		list is the set of userIds
 	*/
-	constructor(isWhitelist: boolean = false, list: WatcherMap<string, null> = new WatcherMap(onModify, null)) {
+	constructor(
+		isWhitelist: boolean = false,
+		list: WatcherMap<string, null> = new WatcherMap(onModify, null),
+	) {
 		this.isWhitelist = isWhitelist;
 		this.list = list;
 	}
@@ -37,7 +47,7 @@ export class Filter {
 
 	// return whitelist or blacklist
 	getType(): FilterType {
-		return this.isWhitelist? "whitelist": "blacklist";
+		return this.isWhitelist ? "whitelist" : "blacklist";
 	}
 
 	// sets the mode for a filter
@@ -45,8 +55,8 @@ export class Filter {
 	// also clears filter
 	setType(type: string) {
 		if (type !== "whitelist" && type !== "blacklist") return;
-		
-		this.isWhitelist = (type === "whitelist")? true: false;
+
+		this.isWhitelist = type === "whitelist" ? true : false;
 
 		this.clearFilter();
 

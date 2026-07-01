@@ -21,7 +21,11 @@ import { defaultRingRecipients } from "@commands/defaultRingRecipient";
 
 export type CommandImplementation = {
 	data: SharedSlashCommand;
-	execute: (data: DataType, interaction: ChatInputCommandInteraction, commandIds: Map<CommandName, string>) => Promise<void>;
+	execute: (
+		data: DataType,
+		interaction: ChatInputCommandInteraction,
+		commandIds: Map<CommandName, string>,
+	) => Promise<void>;
 };
 
 export const commands: CommandImplementation[] = [

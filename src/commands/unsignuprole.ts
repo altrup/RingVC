@@ -11,7 +11,6 @@ import {
 } from "discord.js";
 
 import { DataType } from "@main/data";
-import { CommandName } from "@commands/commandNames";
 
 export const unsignuprole = {
 	data: new SlashCommandBuilder()
@@ -30,11 +29,7 @@ export const unsignuprole = {
 				.addChannelTypes(ChannelType.GuildVoice)
 				.setRequired(false),
 		),
-	async execute(
-		data: DataType,
-		interaction: ChatInputCommandInteraction,
-		commandIds: Map<CommandName, string>,
-	) {
+	async execute(data: DataType, interaction: ChatInputCommandInteraction) {
 		const channel =
 			interaction.options.getChannel("channel") ?? interaction.channel;
 		const role = interaction.options.getRole("role", true);

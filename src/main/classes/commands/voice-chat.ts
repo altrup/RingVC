@@ -1,4 +1,4 @@
-import { User } from "discord.js";
+import { User, VoiceBasedChannel } from "discord.js";
 import { WatcherMap } from "../storage/watcher-map";
 import { DiscordUser } from "./discord-user";
 
@@ -8,6 +8,17 @@ const onModify = () => {
 	for (let i = 0; i < voiceChatOnModifyFunctions.length; i++)
 		voiceChatOnModifyFunctions[i]?.();
 };
+
+export type UserRingResult =
+	| {
+			userId: string;
+			status: "fulfilled";
+	  }
+	| {
+			userId: string;
+			status: "rejected";
+			error: Error;
+	  };
 
 // class for a discord voice chat
 export class VoiceChat {
@@ -22,6 +33,69 @@ export class VoiceChat {
 		roleIds: WatcherMap<string, null> = new WatcherMap(onModify, null),
 	) {
 		return userIds.size === 0 && roleIds.size === 0;
+	}
+
+	// helper to convert role id to mention string
+	static roleToString(roleId: string) {
+		return `<@&${roleId}>`;
+	}
+
+	static joinWithAnd(list: string[]): string {
+		return list.length >= 2
+			? `${list
+					.slice(0, list.length - 1)
+					.join(", ")} and ${list[list.length - 1]}`
+			: (list[0] ?? "");
+	}
+
+	// sends a message to ping the user(s), for whom validateRing passes
+	// returns an array of error messages for users who didn't pass filter
+	// throws an error if message failed to send
+	static async ring(
+		channel: VoiceBasedChannel,
+		ringerUserId: string,
+		message: string,
+		ringeeUserIds: string[],
+	): Promise<UserRingResult[]> {
+		const failureReasons: UserRingResult[] = [];
+		const userIdsToRing: string[] = [];
+		ringeeUserIds.forEach((ringeeUserId) => {
+			try {
+				DiscordUser.validateRing(channel, ringerUserId, ringeeUserId);
+				failureReasons.push({
+					userId: ringeeUserId,
+					status: "fulfilled",
+				});
+				userIdsToRing.push(ringeeUserId);
+			} catch (err) {
+				failureReasons.push({
+					userId: ringeeUserId,
+					status: "rejected",
+					error: new Error(DiscordUser.getErrorMessage(err)),
+				});
+			}
+		});
+
+		// Build the mentions list (users first, then roles)
+		const mentions: string[] = userIdsToRing.map((userId) =>
+			DiscordUser.toString(userId),
+		);
+
+		try {
+			if (mentions.length > 0) {
+				await channel.send({
+					content: `\`@${channel.guild.members.resolve(ringerUserId)?.displayName}\` ${message} \`#${channel.name}\`, ${VoiceChat.joinWithAnd(
+						mentions,
+					)}`,
+					allowedMentions: { users: userIdsToRing },
+				});
+			}
+			return failureReasons;
+		} catch (err) {
+			throw new Error(
+				`the ring message ${userIdsToRing.length === 1 ? `to ${userIdsToRing[0]} ` : ``}failed to send: \`${DiscordUser.getErrorMessage(err)}\``,
+			);
+		}
 	}
 
 	private channelId: string;
@@ -119,19 +193,13 @@ export class VoiceChat {
 		return this.roleIds.has(roleId);
 	}
 
-	// helper to convert role id to mention string
-	static roleToString(roleId: string) {
-		return `<@&${roleId}>`;
-	}
-
 	// on someone joining a call
 	// user is the person who just joined the call
+	// doesn't use ring function; that's only for rings from commands
 	async onJoin(ringerUser: User) {
-		// if the channel cache does not contain the channel
-		if (!ringerUser.client.channels.resolve(this.channelId))
-			await ringerUser.client.channels.fetch(this.channelId);
-
-		const channel = ringerUser.client.channels.resolve(this.channelId);
+		const channel =
+			ringerUser.client.channels.resolve(this.channelId) ??
+			(await ringerUser.client.channels.fetch(this.channelId));
 		if (!channel?.isVoiceBased()) return;
 
 		const ringerDiscordUser = DiscordUser.users.get(ringerUser.id);
@@ -144,73 +212,76 @@ export class VoiceChat {
 
 		// Collect roles to ping - only ping a role if no one else in the channel has it
 		// (similar to how individual pings only happen when someone "starts" a call)
-		const roleMemberIds = new Set<string>();
 		const roleIdsToRing: string[] = [];
 		for (const roleId of this.roleIds.keys()) {
-			const role = channel.guild.roles.resolve(roleId);
-			if (role) {
-				// Check if any existing member in the channel (besides the one who just joined) has triggered a ping
-				let roleHasBeenPinged = false;
-				for (const [memberId] of channel.members) {
-					if (memberId === ringerUser.id) continue; // skip the person who just joined
+			const role =
+				channel.guild.roles.resolve(roleId) ??
+				(await channel.guild.roles.fetch(roleId));
+			if (!role) continue;
 
-					// Check if they're in stealth mode
-					const memberDiscordUser = DiscordUser.users.get(memberId);
-					if (
-						!memberDiscordUser ||
-						memberDiscordUser.getRealMode(channel) !== "stealth"
-					) {
-						roleHasBeenPinged = true;
-						break;
-					}
-				}
+			// Check if any existing member in the channel (besides the one who just joined) has triggered a ping
+			let roleHasBeenPinged = false;
+			for (const [memberId] of channel.members) {
+				if (memberId === ringerUser.id) continue; // skip the person who just joined
 
-				// Only ping this role if it has not already been pinged
-				if (!roleHasBeenPinged) {
-					roleIdsToRing.push(roleId);
+				// Check if they're in stealth mode
+				const memberDiscordUser = DiscordUser.users.get(memberId);
+				if (
+					!memberDiscordUser ||
+					memberDiscordUser.getRealMode(channel) !== "stealth"
+				) {
+					// role has already been pinged
+					roleHasBeenPinged = true;
+					break;
 				}
-				// Always collect role members for duplicate ping prevention
-				role.members.forEach((member) => roleMemberIds.add(member.id));
 			}
+			if (roleHasBeenPinged) continue;
+
+			roleIdsToRing.push(roleId);
 		}
 
-		const userIdsToRing: string[] = Array.from(this.userIds.keys()).filter(
-			(ringeeUserId) => {
-				try {
-					// if ring is valid
-					DiscordUser.validateRing(channel, ringerUser.id, ringeeUserId);
+		const userIdsToRing: string[] = [];
+		for (const ringeeUserId of this.userIds.keys()) {
+			try {
+				// if ring is valid
+				DiscordUser.validateRing(channel, ringerUser.id, ringeeUserId);
 
-					// Skip this user if they will be pinged via a role (prevent duplicate pings)
-					if (roleMemberIds.has(ringeeUserId)) {
-						return false;
-					}
+				let userHasBeenPinged = false;
+				for (const userId of channel.members.keys()) {
+					if (userId === ringerUser.id) continue;
 
-					let onlyOnePersonPassing = true;
-					// check if anyone else in the call passes the filter of the person joining
-					for (const userId of channel.members.keys()) {
-						if (userId === ringerUser.id) continue;
+					try {
+						DiscordUser.validateRing(channel, userId, ringeeUserId);
 
-						try {
-							DiscordUser.validateRing(channel, userId, ringeeUserId);
-
-							if (
-								DiscordUser.users.get(userId)?.getRealMode(channel) !==
-								"stealth"
-							) {
-								onlyOnePersonPassing = false;
-								break;
-							}
-						} catch {
-							/* do nothing */
+						if (
+							DiscordUser.users.get(userId)?.getRealMode(channel) !== "stealth"
+						) {
+							userHasBeenPinged = true;
+							break;
 						}
+					} catch {
+						/* do nothing */
 					}
-
-					return onlyOnePersonPassing;
-				} catch {
-					return false;
 				}
-			},
-		);
+				if (userHasBeenPinged) continue;
+
+				// Skip this user if they will be pinged via a role (prevent duplicate pings)
+				const ringeeUser =
+					channel.guild.members.resolve(ringeeUserId) ??
+					(await channel.guild.members.fetch(ringeeUserId));
+				if (
+					[...this.roleIds.keys()].some((roleId) =>
+						ringeeUser.roles.cache.has(roleId),
+					)
+				) {
+					continue;
+				}
+
+				userIdsToRing.push(ringeeUserId);
+			} catch {
+				continue;
+			}
+		}
 
 		// Build the mentions list (users first, then roles)
 		const mentions: string[] = [
@@ -219,13 +290,8 @@ export class VoiceChat {
 		];
 
 		if (mentions.length > 0) {
-			const mentionsText =
-				mentions.length >= 2
-					? `${mentions.slice(0, mentions.length - 1).join(", ")} and ${mentions[mentions.length - 1]}`
-					: mentions[0];
-
 			await channel.send({
-				content: `\`@${channel.guild.members.resolve(ringerUser.id)?.displayName}\` just joined \`#${channel.name}\`, ${mentionsText}`,
+				content: `\`@${channel.guild.members.resolve(ringerUser.id)?.displayName}\` just joined \`#${channel.name}\`, ${VoiceChat.joinWithAnd(mentions)}`,
 				allowedMentions: { users: userIdsToRing, roles: roleIdsToRing },
 			});
 		}

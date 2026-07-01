@@ -5,6 +5,7 @@ import {
 } from "discord.js";
 import { WatcherMap } from "@main/classes/storage/watcher-map";
 import { Filter } from "@main/classes/commands/filter";
+import { UserRingResult, VoiceChat } from "./voice-chat";
 
 // both used to notify data.js
 export const userOnModifyFunctions: (() => void)[] = [];
@@ -67,26 +68,6 @@ export class DiscordUser {
 			!ringeeDiscordUser.passesFilter(channel.id, ringerUserId)
 		)
 			throw new Error(`${DiscordUser.toString(ringeeUserId)} blocked you`);
-	}
-	// sends a message to ping the user, if validateRing passes
-	static async ring(
-		channel: VoiceBasedChannel,
-		ringerUserId: string,
-		message: string,
-		userId: string,
-	) {
-		DiscordUser.validateRing(channel, ringerUserId, userId);
-
-		try {
-			await channel.send({
-				content: `\`@${channel.guild.members.resolve(ringerUserId)?.displayName}\` ${message} \`#${channel.name}\`, ${DiscordUser.toString(userId)}`,
-				allowedMentions: { users: [userId] },
-			});
-		} catch (err) {
-			throw new Error(
-				`the ring message to ${DiscordUser.toString(userId)} failed to send: \`${DiscordUser.getErrorMessage(err)}\``,
-			);
-		}
 	}
 	// helper functions
 	static toString(userId: string) {
@@ -377,52 +358,16 @@ export class DiscordUser {
 		return true;
 	}
 
-	getDefaultUserIdsToRing(channel: VoiceBasedChannel) {
-		return this.getAllDefaultRingeeUserIds(channel.id)
-			.map((ringeeUserId) => {
-				try {
-					DiscordUser.validateRing(channel, this.userId, ringeeUserId);
-
-					return ringeeUserId;
-				} catch {
-					return null;
-				}
-			})
-			.filter((result) => result !== null);
-	}
-	async ringDefaultUsers(channel: VoiceBasedChannel, message: string) {
-		if (this.getAllDefaultRingeeUserIds(channel.id).length === 0) {
+	async ringDefaultUsers(
+		channel: VoiceBasedChannel,
+		message: string,
+	): Promise<UserRingResult[]> {
+		const ringeeUserIds = this.getAllDefaultRingeeUserIds(channel.id);
+		if (ringeeUserIds.length === 0) {
 			throw new Error(`no default users to ring`);
 		}
 
-		// ring each user that passes filters
-		const userIdsToRing: string[] = this.getDefaultUserIdsToRing(channel);
-
-		if (userIdsToRing.length > 0) {
-			try {
-				await channel.send({
-					content: `\`@${channel.guild.members.resolve(this.userId)?.displayName}\` ${message} \`#${channel.name}\`, ${
-						userIdsToRing.length >= 2
-							? `${userIdsToRing
-									.slice(0, userIdsToRing.length - 1)
-									.map((userId) => DiscordUser.toString(userId))
-									.join(
-										", ",
-									)} and ${DiscordUser.toString(userIdsToRing[userIdsToRing.length - 1] ?? "")}`
-							: `${DiscordUser.toString(userIdsToRing[0] ?? "")}`
-					}`,
-					allowedMentions: { users: userIdsToRing },
-				});
-			} catch (err) {
-				throw new Error(
-					`the ring message failed to send: \`${DiscordUser.getErrorMessage(err)}\``,
-				);
-			}
-		} else {
-			throw new Error(
-				`no default users for whom you passed each other's filters`,
-			);
-		}
+		return VoiceChat.ring(channel, this.userId, message, ringeeUserIds);
 	}
 
 	async onJoin(channel: VoiceBasedChannel) {

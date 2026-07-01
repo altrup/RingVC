@@ -1,13 +1,30 @@
 import {
+	ActionRowBuilder,
 	ChatInputCommandInteraction,
+	ComponentType,
 	GuildMember,
 	MessageFlags,
 	SlashCommandBuilder,
+	UserSelectMenuBuilder,
 } from "discord.js";
 
-import { DiscordUser } from "@main/classes/commands/discord-user";
 import { DataType } from "@main/data";
 import { CommandName } from "@commands/commandNames";
+import { VoiceChat } from "@main/classes/commands/voice-chat";
+import { DiscordUser } from "@main/classes/commands/discord-user";
+
+const ringUserSelectMenuBuilder = (disabled = false) => {
+	return new ActionRowBuilder<UserSelectMenuBuilder>()
+		.addComponents(
+			new UserSelectMenuBuilder()
+				.setPlaceholder("Select up to 25 users")
+				.setMinValues(1)
+				.setMaxValues(25)
+				.setDisabled(disabled)
+				.setCustomId("list-ring-users"),
+		)
+		.toJSON();
+};
 
 export const ring = {
 	data: new SlashCommandBuilder()
@@ -23,6 +40,11 @@ export const ring = {
 						.setDescription("Select a user")
 						.setRequired(true),
 				),
+		)
+		.addSubcommand((subcommand) =>
+			subcommand
+				.setName("users")
+				.setDescription("Ring multiple users (select after running command)"),
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
@@ -61,32 +83,98 @@ export const ring = {
 		if (interaction.options.getSubcommand() === "user") {
 			const user = interaction.options.getUser("user", true);
 			// send the user an invite link to the voice channel or text channel that the interaction creator is in
-			Promise.allSettled([
+			const results = await Promise.allSettled([
 				interaction.deferReply({ flags: [MessageFlags.Ephemeral] }),
-				DiscordUser.ring(
+				VoiceChat.ring(channel, interaction.user.id, "wants you to join", [
+					user.id,
+				]),
+			]);
+
+			// if deferReply failed, then there isn't a reply to edit
+			if (results[0].status === "rejected") return;
+			// otherwise, edit the reply to update about the ring
+			if (results[1].status === "fulfilled") {
+				const result = results[1].value[0];
+				interaction
+					.editReply({
+						content:
+							result?.status === "fulfilled"
+								? `Notified ${user}`
+								: `Can't ring ${DiscordUser.toString(user.id)}${result ? ` because ${result.error.message}` : ``}`,
+					})
+					.catch(console.error);
+			} else {
+				interaction
+					.editReply({
+						content: `Can't ring ${user} because ${results[1].reason.message}`,
+					})
+					.catch(console.error);
+			}
+		} else if (interaction.options.getSubcommand() === "users") {
+			const response = await interaction.reply({
+				content: `Select the users you want to ring`,
+				components: [],
+				flags: [MessageFlags.Ephemeral],
+			});
+
+			const selection = await response
+				.awaitMessageComponent({
+					componentType: ComponentType.UserSelect,
+					filter: (i) => i.user.id === interaction.user.id,
+					time: 60_000,
+				})
+				.catch(() => null);
+
+			if (!selection) {
+				await interaction
+					.editReply({
+						content: `Timed out, no users were ringed`,
+						components: [ringUserSelectMenuBuilder(true)],
+					})
+					.catch(console.error);
+				return;
+			}
+
+			const results = await Promise.allSettled([
+				selection.update({
+					content: `Ringing users`,
+				}),
+				VoiceChat.ring(
 					channel,
 					interaction.user.id,
 					"wants you to join",
-					user.id,
+					selection.values,
 				),
-			]).then((results) => {
-				// if deferReply failed, then there isn't a reply to edit
-				if (results[0].status === "rejected") return;
-				// otherwise, edit the reply to update about the ring
-				if (results[1].status === "fulfilled") {
-					interaction
-						.editReply({
-							content: `Notified ${user}`,
-						})
-						.catch(console.error);
-				} else {
-					interaction
-						.editReply({
-							content: `Can't notify ${user} because ${results[1].reason.message}`,
-						})
-						.catch(console.error);
-				}
-			});
+			]);
+
+			if (results[1].status === "fulfilled") {
+				const ringedList = VoiceChat.joinWithAnd(
+					results[1].value
+						.filter((r) => r.status === "fulfilled")
+						.map((r) => DiscordUser.toString(r.userId)),
+				);
+				selection
+					.editReply({
+						content: [
+							...(ringedList.length > 0 ? [`Ringed ${ringedList}`] : []),
+							...results[1].value
+								.filter((r) => r.status === "rejected")
+								.map(
+									(r) =>
+										`Can't ring ${DiscordUser.toString(r.userId)} because ${r.error.message}`,
+								),
+						].join("\n"),
+						components: [ringUserSelectMenuBuilder(true)],
+					})
+					.catch(console.error);
+			} else {
+				selection
+					.editReply({
+						content: `Can't ring ${VoiceChat.joinWithAnd(selection.values.map((v) => DiscordUser.toString(v)))} because ${results[1].reason.message}`,
+						components: [ringUserSelectMenuBuilder(true)],
+					})
+					.catch(console.error);
+			}
 		} else if (interaction.options.getSubcommand() === "default") {
 			const discordUser = data.users.get(interaction.user.id);
 			if (!discordUser) {
@@ -108,16 +196,29 @@ export const ring = {
 				if (results[0].status === "rejected") return;
 				// otherwise, edit the reply to update about the ring
 				if (results[1].status === "fulfilled") {
+					const ringedList = VoiceChat.joinWithAnd(
+						results[1].value
+							.filter((r) => r.status === "fulfilled")
+							.map((r) => DiscordUser.toString(r.userId)),
+					);
 					interaction
 						.editReply({
-							content: `Notified all default users`,
+							content: [
+								...(ringedList.length > 0 ? [`Ringed ${ringedList}`] : []),
+								...results[1].value
+									.filter((r) => r.status === "rejected")
+									.map(
+										(r) =>
+											`Can't ring ${DiscordUser.toString(r.userId)} because ${r.error.message}`,
+									),
+							].join("\n"),
 						})
 						.catch(console.error);
 				} else {
 					interaction
 						.editReply({
 							content:
-								`Can't notify default users because ${results[1].reason.message}` +
+								`Can't ring default users because ${results[1].reason.message}` +
 								([
 									"no default users to ring",
 									"no default users for whom you passed each other's filters",

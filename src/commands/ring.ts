@@ -113,7 +113,7 @@ export const ring = {
 		} else if (interaction.options.getSubcommand() === "users") {
 			const response = await interaction.reply({
 				content: `Select the users you want to ring`,
-				components: [],
+				components: [ringUserSelectMenuBuilder(false)],
 				flags: [MessageFlags.Ephemeral],
 			});
 

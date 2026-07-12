@@ -262,12 +262,17 @@ export const onVoiceChannelJoin = async (
 	channel: VoiceBasedChannel,
 	ringerUser: User,
 ) => {
-	await Promise.all([
-		ringSignups(channel, ringerUser),
-		isAutoRingEnabled(ringerUser.id, channel.id).then((enabled) =>
-			enabled
-				? ringDefaultUsers(channel, ringerUser.id, "wants you to join")
-				: undefined,
-		),
-	]);
+	// unlike ringDefaultUsers, having no default ringees is not an error here:
+	// joining with auto ring on and nothing configured is a normal state
+	const autoRing = async () => {
+		if (!(await isAutoRingEnabled(ringerUser.id, channel.id))) return;
+		const ringeeUserIds = await getAllDefaultRingees(
+			ringerUser.id,
+			channel.id,
+		);
+		if (ringeeUserIds.length === 0) return;
+		await ring(channel, ringerUser.id, "wants you to join", ringeeUserIds);
+	};
+
+	await Promise.all([ringSignups(channel, ringerUser), autoRing()]);
 };

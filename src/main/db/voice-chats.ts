@@ -1,5 +1,4 @@
 import { db, rowsOf } from "./client";
-import { resetFilter } from "./filters";
 
 // the users and roles signed up to be pinged for a channel
 export type VoiceChatSignups = {
@@ -45,8 +44,9 @@ export const addVoiceChatUser = async (
 	return inserted.length > 0;
 };
 
-// returns whether the user was signed up. Also deletes the user's filter for
-// the channel, since it is meaningless without the signup
+// returns whether the user was signed up. Their filter for the channel is
+// kept: filters also apply to rings from commands and default ringees, so
+// they are meaningful without a signup
 export const removeVoiceChatUser = async (
 	channelId: string,
 	userId: string,
@@ -59,7 +59,6 @@ export const removeVoiceChatUser = async (
 			.eq("user_id", userId)
 			.select("user_id"),
 	);
-	await resetFilter(userId, channelId);
 	return deleted.length > 0;
 };
 

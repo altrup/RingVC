@@ -451,6 +451,5 @@ export const signupsHandlers = {
 	members: { post: membersPost } satisfies Handlers,
 	roles: { get: rolesGet } satisfies Handlers,
 	rolesRemove: { post: rolesRemovePost } satisfies Handlers,
-	rolePick: { get: rolePickGet } satisfies Handlers,
-	roleCommit: { post: roleCommitPost } satisfies Handlers,
+	rolePage: { get: rolePickGet, post: roleCommitPost } satisfies Handlers,
 };

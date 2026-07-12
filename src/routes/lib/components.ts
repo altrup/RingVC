@@ -3,6 +3,7 @@ import {
 	ActionRowBuilder,
 	APIActionRowComponent,
 	APIComponentInMessageActionRow,
+	ButtonBuilder,
 	ButtonStyle,
 } from "discord.js";
 
@@ -10,11 +11,9 @@ import { Page } from "@routes/lib/paging";
 import { RingButton, RingRouter } from "@routes/types";
 
 export const row = (
-	...components: RouteButtonBuilder[]
+	...components: ButtonBuilder[]
 ): APIActionRowComponent<APIComponentInMessageActionRow> =>
-	new ActionRowBuilder<RouteButtonBuilder>()
-		.addComponents(...components)
-		.toJSON();
+	new ActionRowBuilder<ButtonBuilder>().addComponents(...components).toJSON();
 
 export const homeButton = (router: RingRouter): RingButton =>
 	new RouteButtonBuilder(router)

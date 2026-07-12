@@ -23,7 +23,7 @@ const makeInteraction = (admin: boolean) =>
 		guild: { channels: { cache: new Map([[voiceChannel.id, voiceChannel]]) } },
 	}) as unknown as Interaction;
 
-type RoleCommitPost = NonNullable<typeof signupsHandlers.roleCommit.post>;
+type RoleCommitPost = NonNullable<typeof signupsHandlers.rolePage.post>;
 const commitState = (query: string) =>
 	({
 		params: { roleId: "role1" },
@@ -39,7 +39,7 @@ beforeEach(() => {
 test("committing a role signup that already exists rejects with a flash", async () => {
 	vi.mocked(addVoiceChatRole).mockResolvedValue(false);
 
-	const result = await signupsHandlers.roleCommit.post!(
+	const result = await signupsHandlers.rolePage.post!(
 		undefined as never,
 		makeInteraction(true),
 		commitState("channel=vc1"),
@@ -56,7 +56,7 @@ test("committing a role signup that already exists rejects with a flash", async 
 test("committing a role signup succeeds and reports the mapping", async () => {
 	vi.mocked(addVoiceChatRole).mockResolvedValue(true);
 
-	const result = await signupsHandlers.roleCommit.post!(
+	const result = await signupsHandlers.rolePage.post!(
 		undefined as never,
 		makeInteraction(true),
 		commitState("channel=vc1"),
@@ -71,7 +71,7 @@ test("committing a role signup succeeds and reports the mapping", async () => {
 });
 
 test("a role signup commit without Manage Roles mutates nothing", async () => {
-	const result = await signupsHandlers.roleCommit.post!(
+	const result = await signupsHandlers.rolePage.post!(
 		undefined as never,
 		makeInteraction(false),
 		commitState("channel=vc1"),

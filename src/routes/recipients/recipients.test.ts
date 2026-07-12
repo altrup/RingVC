@@ -2,11 +2,11 @@ import { Interaction } from "discord.js";
 import { beforeEach, expect, test, vi } from "vitest";
 
 import { setAutoRing, unsetAutoRing } from "@db/auto-ring";
-import { clearDefaultRingees } from "@db/default-ringees";
+import { resetDefaultRingees } from "@db/default-ringees";
 
 import { recipientsAutoRingPost } from "./[scope]/auto-ring/post";
 import { recipientsAutoRingUnsetPost } from "./[scope]/auto-ring/unset/post";
-import { recipientsClearPost } from "./[scope]/clear/post";
+import { recipientsResetPost } from "./[scope]/reset/post";
 
 vi.mock("@db/auto-ring", () => ({
 	getAutoRingSetting: vi.fn(),
@@ -17,7 +17,7 @@ vi.mock("@db/default-ringees", () => ({
 	getDefaultRingees: vi.fn(),
 	addDefaultRingee: vi.fn(),
 	removeDefaultRingee: vi.fn(),
-	clearDefaultRingees: vi.fn(),
+	resetDefaultRingees: vi.fn(),
 }));
 
 const interaction = { user: { id: "caller" } } as unknown as Interaction;
@@ -30,25 +30,25 @@ const autoRingState = (scope: string, query: string) =>
 		timestamp: 0,
 	}) as unknown as Parameters<typeof recipientsAutoRingPost>[2];
 
-const clearPost = (confirmation: string) =>
-	recipientsClearPost(undefined as never, interaction, {
+const resetPost = (confirmation: string) =>
+	recipientsResetPost(undefined as never, interaction, {
 		params: { scope: "global" },
-		path: "/recipients/global/clear",
+		path: "/recipients/global/reset",
 		queryParams: new URLSearchParams(),
 		timestamp: 0,
 		fields: { getTextInputValue: () => confirmation },
-	} as unknown as Parameters<typeof recipientsClearPost>[2]);
+	} as unknown as Parameters<typeof recipientsResetPost>[2]);
 
 beforeEach(() => {
 	vi.clearAllMocks();
 });
 
 test("a recipients reset with matching confirmation text clears the list", async () => {
-	vi.mocked(clearDefaultRingees).mockResolvedValue(true);
+	vi.mocked(resetDefaultRingees).mockResolvedValue(true);
 
-	const result = await clearPost("RESET");
+	const result = await resetPost("RESET");
 
-	expect(clearDefaultRingees).toHaveBeenCalledExactlyOnceWith("caller", null);
+	expect(resetDefaultRingees).toHaveBeenCalledExactlyOnceWith("caller", null);
 	const flashParams = new URLSearchParams(
 		result.queryParams as Record<string, string>,
 	);
@@ -56,9 +56,9 @@ test("a recipients reset with matching confirmation text clears the list", async
 });
 
 test("a recipients reset without matching confirmation text mutates nothing", async () => {
-	const result = await clearPost("nope");
+	const result = await resetPost("nope");
 
-	expect(clearDefaultRingees).not.toHaveBeenCalled();
+	expect(resetDefaultRingees).not.toHaveBeenCalled();
 	const flashParams = new URLSearchParams(
 		result.queryParams as Record<string, string>,
 	);

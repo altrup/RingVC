@@ -1,8 +1,8 @@
 import { RingRouter } from "@routes/types";
 
 import { commandsGet } from "./commands/get";
-import { deleteDataConfirmModal } from "./delete-data/confirm/modal";
 import { deleteDataGet } from "./delete-data/get";
+import { deleteDataModal } from "./delete-data/modal";
 import { deleteDataPost } from "./delete-data/post";
 import { filterGet } from "./filter/[scope]/get";
 import { filterMembersPost } from "./filter/[scope]/members/post";
@@ -14,10 +14,10 @@ import { modeGet } from "./mode/get";
 import { modePost } from "./mode/post";
 import { recipientsAutoRingPost } from "./recipients/[scope]/auto-ring/post";
 import { recipientsAutoRingUnsetPost } from "./recipients/[scope]/auto-ring/unset/post";
-import { recipientsClearModal } from "./recipients/[scope]/clear/modal";
-import { recipientsClearPost } from "./recipients/[scope]/clear/post";
 import { recipientsGet } from "./recipients/[scope]/get";
 import { recipientsMembersPost } from "./recipients/[scope]/members/post";
+import { recipientsResetModal } from "./recipients/[scope]/reset/modal";
+import { recipientsResetPost } from "./recipients/[scope]/reset/post";
 import { ringDefaultPost } from "./ring/default/post";
 import { ringGet } from "./ring/get";
 import { ringUserPost } from "./ring/user/post";
@@ -48,9 +48,9 @@ export const registerRoutes = (router: RingRouter) => {
 
 	router.route(["/recipients", "/recipients/:scope"], { get: recipientsGet });
 	router.route("/recipients/:scope/members", { post: recipientsMembersPost });
-	router.route("/recipients/:scope/clear", {
-		modal: recipientsClearModal,
-		post: recipientsClearPost,
+	router.route("/recipients/:scope/reset", {
+		modal: recipientsResetModal,
+		post: recipientsResetPost,
 	});
 	router.route("/recipients/:scope/auto-ring", {
 		post: recipientsAutoRingPost,
@@ -76,6 +76,9 @@ export const registerRoutes = (router: RingRouter) => {
 	router.route("/ring/user", { post: ringUserPost });
 	router.route("/ring/default", { post: ringDefaultPost });
 
-	router.route("/delete-data", { get: deleteDataGet, post: deleteDataPost });
-	router.route("/delete-data/confirm", { modal: deleteDataConfirmModal });
+	router.route("/delete-data", {
+		get: deleteDataGet,
+		post: deleteDataPost,
+		modal: deleteDataModal,
+	});
 };

@@ -3,11 +3,11 @@ import { flashRedirect } from "@routes/lib/flash";
 import { channelIdOf, scopeOf } from "@routes/lib/scope";
 import { Handler } from "@routes/types";
 
-import { clearDefaultRingees } from "@db/default-ringees";
+import { resetDefaultRingees } from "@db/default-ringees";
 
 import { panelPath, scopeSuffix } from "../../_shared";
 
-export const recipientsClearPost: Handler<"POST"> = async (
+export const recipientsResetPost: Handler<"POST"> = async (
 	router,
 	interaction,
 	state,
@@ -19,11 +19,11 @@ export const recipientsClearPost: Handler<"POST"> = async (
 			"Confirmation text did not match, your recipients were not cleared",
 			"warn",
 		);
-	const cleared = await clearDefaultRingees(
+	const hadRingees = await resetDefaultRingees(
 		interaction.user.id,
 		channelIdOf(scope),
 	);
-	return cleared
+	return hadRingees
 		? flashRedirect(
 				panelPath(scope),
 				`Cleared your default ring recipients ${scopeSuffix(scope)}`,

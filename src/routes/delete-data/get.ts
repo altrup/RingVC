@@ -31,7 +31,7 @@ export const deleteDataGet: Handler<"GET"> = (router, interaction, state) => {
 					.setLabel("Delete")
 					.setStyle(ButtonStyle.Danger)
 					.setDisabled(done)
-					.setTo(`${PANEL}/confirm`, { method: "MODAL" }),
+					.setTo(PANEL, { method: "MODAL" }),
 				new RouteButtonBuilder(router)
 					.setLabel("Cancel")
 					.setStyle(ButtonStyle.Secondary)

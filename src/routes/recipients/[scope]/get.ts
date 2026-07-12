@@ -119,7 +119,7 @@ export const recipientsGet: Handler<"GET"> = async (
 				new RouteButtonBuilder(router)
 					.setLabel("Reset")
 					.setStyle(ButtonStyle.Danger)
-					.setTo(`${panelPath(scope)}/clear`, { method: "MODAL" }),
+					.setTo(`${panelPath(scope)}/reset`, { method: "MODAL" }),
 				new RouteButtonBuilder(router)
 					.setLabel(
 						autoRing.effective ? "Disable auto-ring" : "Enable auto-ring",

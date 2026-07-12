@@ -78,7 +78,7 @@ export const removeDefaultRingee = async (
 };
 
 // returns whether the list had any ringees
-export const clearDefaultRingees = async (
+export const resetDefaultRingees = async (
 	userId: string,
 	channelId: string | null,
 ): Promise<boolean> => {

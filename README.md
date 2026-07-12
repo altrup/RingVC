@@ -34,11 +34,35 @@ Guide on hosting the bot yourself
 ### Prerequisites
 
 - Docker Compose ([installation guide](https://docs.docker.com/compose/install/))
+- Node.js and npm, to run the Supabase CLI (it is a devDependency; run `npm install` first, then use it as `npx supabase ...`)
 - Have a Discord bot created ([guide](https://discordjs.guide/legacy/preparations/app-setup))
 - Enable required permissions (for [auto mode](#mode))
   - Under settings, on the left side, select Bot
   - Scroll down to Privileged Gateway Intents
   - Enable Presence Intent
+
+### Self-hosting Supabase
+
+The bot stores its data in a [Supabase](https://supabase.com) Postgres database, which you can self-host with Supabase's official Docker setup ([guide](https://supabase.com/docs/guides/self-hosting/docker)). A convenient place for it is a `supabase-docker/` folder in this repository (it is gitignored)
+
+- Apply this repository's database migrations to your instance
+
+  ```bash
+  npx supabase db push --db-url <your_postgres_connection_string>
+  ```
+
+- Use the instance's API URL and service role key (from your Supabase Docker `.env`) as `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` below
+  - Note: the bot runs in its own container, so `SUPABASE_URL` must be reachable from inside it (use the host's address or a shared Docker network, not `127.0.0.1`)
+
+### Migrating from data.txt
+
+Older versions of the bot stored data in `data/data.txt`. To import it into your Supabase database, run
+
+```bash
+npx tsx scripts/import-data-txt.ts
+```
+
+with `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` set (in the environment or `.env`). The script is idempotent, so it is safe to re-run
 
 ### Installation & Usage
 
@@ -81,6 +105,26 @@ Guide on hosting the bot yourself
 ### Development
 
 - For development, it may be easier to use `npm` directly instead of docker
+- Start a local Supabase stack (uses Docker; applies migrations and [`supabase/seed.sql`](supabase/seed.sql) automatically)
+
+  ```bash
+  npx supabase start
+  ```
+
+  and point `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` in `.env` at the values it prints
+
+- To re-apply migrations and seed data from scratch, run
+
+  ```bash
+  npx supabase db reset
+  ```
+
+- After changing the schema (adding a migration), regenerate the database types
+
+  ```bash
+  npx supabase gen types typescript --local > src/main/db/database.types.ts
+  ```
+
 - To deploy commands, run
 
   ```bash

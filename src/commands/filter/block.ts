@@ -4,9 +4,8 @@ import {
 	SlashCommandBuilder,
 } from "discord.js";
 
-import { DiscordUser } from "@main/classes/commands/discord-user";
-import { DataType } from "@main/data";
 import { CommandName } from "@commands/commandNames";
+import { addFilterEntry, getFilter } from "@db/filters";
 
 export const block = {
 	data: new SlashCommandBuilder()
@@ -19,17 +18,15 @@ export const block = {
 				.setRequired(true),
 		),
 	async execute(
-		data: DataType,
 		interaction: ChatInputCommandInteraction,
 		commandIds: Map<CommandName, string>,
 	) {
 		const user = interaction.user;
 		const blockedUser = interaction.options.getUser("user", true);
 
-		const discordUser = data.users.get(user.id) ?? new DiscordUser(user.id);
-		const globalFilter = discordUser.getFilter();
+		const globalFilter = await getFilter(user.id, null);
 
-		if (globalFilter.getIsWhitelist()) {
+		if (globalFilter?.isWhitelist) {
 			interaction
 				.reply({
 					content: `Your global filter is a whitelist. Either change it to a blacklist (</filter edit type:${commandIds.get("filter")}>) or use </whitelist:${commandIds.get("whitelist")}> instead`,
@@ -39,7 +36,7 @@ export const block = {
 			return;
 		}
 
-		if (globalFilter.hasUser(blockedUser.id)) {
+		if (globalFilter?.entries.has(blockedUser.id)) {
 			interaction
 				.reply({
 					content: `${blockedUser} is already blocked`,
@@ -50,7 +47,7 @@ export const block = {
 		}
 
 		// otherwise, add the user to the global filter
-		globalFilter.addUser(blockedUser.id);
+		await addFilterEntry(user.id, null, blockedUser.id);
 		interaction
 			.reply({
 				content: `${blockedUser} has been blocked`,

@@ -8,7 +8,7 @@ import {
 	SlashCommandBuilder,
 } from "discord.js";
 
-import { DataType } from "@main/data";
+import { removeVoiceChatUser } from "@db/voice-chats";
 
 export const unsignup = {
 	data: new SlashCommandBuilder()
@@ -21,7 +21,7 @@ export const unsignup = {
 				.addChannelTypes(ChannelType.GuildVoice)
 				.setRequired(false),
 		),
-	async execute(data: DataType, interaction: ChatInputCommandInteraction) {
+	async execute(interaction: ChatInputCommandInteraction) {
 		const channel =
 			interaction.options.getChannel("channel") ?? interaction.channel;
 		const user = interaction.user;
@@ -42,18 +42,15 @@ export const unsignup = {
 			return; // stop the rest of function
 		}
 
-		if (data.voiceChats.has(channel.id)) {
-			const voiceChat = data.voiceChats.get(channel.id);
-			if (voiceChat?.hasUser(user.id)) {
-				voiceChat.removeUser(user.id);
-				interaction
-					.reply({
-						content: `You will no longer be "rung" for <#${channel.id}>`,
-						flags: [MessageFlags.Ephemeral],
-					})
-					.catch(console.error);
-				return;
-			}
+		const removed = await removeVoiceChatUser(channel.id, user.id);
+		if (removed) {
+			interaction
+				.reply({
+					content: `You will no longer be "rung" for <#${channel.id}>`,
+					flags: [MessageFlags.Ephemeral],
+				})
+				.catch(console.error);
+			return;
 		}
 		interaction
 			.reply({

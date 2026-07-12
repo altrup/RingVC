@@ -1,6 +1,7 @@
 import {
 	EmbedRouter,
 	Method,
+	RouteButtonBuilder,
 	RouteHandler,
 	RouteHandlers,
 } from "discord-embed-router";
@@ -27,3 +28,7 @@ export type Handler<M extends Method> = RouteHandler<
 	Locals
 >;
 export type Handlers = RouteHandlers<Globals, Session, Locals>;
+
+// nameable alias for helper return types (declaration emit can't name the
+// library's internal Unused symbol that Session/Locals infer to)
+export type RingButton = RouteButtonBuilder<Globals, Session, Locals>;

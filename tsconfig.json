@@ -1,8 +1,10 @@
 {
 	// Visit https://aka.ms/tsconfig to read more about this file
+	// bundling is done by tsup; tsc is only used for typechecking (no emit),
+	// so there is no rootDir and scripts/ is typechecked alongside src/
+	"include": ["src", "scripts"],
 	"compilerOptions": {
 		// File Layout
-		"rootDir": "./src",
 		"outDir": "./dist",
 		"paths": {
 			"@config": ["./src/config"],

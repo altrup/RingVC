@@ -27,6 +27,34 @@ export const getVoiceChatSignups = async (
 	};
 };
 
+// every channel the user is signed up for, across all guilds; callers
+// scope the result to a guild by intersecting with its channels
+export const getUserVoiceChatSignups = async (
+	userId: string,
+): Promise<string[]> => {
+	const rows = rowsOf(
+		await db.from("voice_chat_users").select("channel_id").eq("user_id", userId),
+	);
+	return rows.map((row) => row.channel_id);
+};
+
+// role signups for a set of channels (typically one guild's voice channels)
+export const getVoiceChatRoleSignups = async (
+	channelIds: string[],
+): Promise<{ channelId: string; roleId: string }[]> => {
+	if (channelIds.length === 0) return [];
+	const rows = rowsOf(
+		await db
+			.from("voice_chat_roles")
+			.select("channel_id, role_id")
+			.in("channel_id", channelIds),
+	);
+	return rows.map((row) => ({
+		channelId: row.channel_id,
+		roleId: row.role_id,
+	}));
+};
+
 // returns whether the user was newly signed up (false if already signed up)
 export const addVoiceChatUser = async (
 	channelId: string,

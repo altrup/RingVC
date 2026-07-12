@@ -40,29 +40,29 @@ const panelGet: Handler<"GET"> = (router, interaction, state) => {
 		components: [
 			row(
 				new RouteButtonBuilder(router)
-					.setLabel("Signups")
-					.setStyle(ButtonStyle.Secondary)
+					.setLabel("🔔 Signups")
+					.setStyle(ButtonStyle.Primary)
 					.setTo("/signups"),
 				new RouteButtonBuilder(router)
-					.setLabel("Filter")
+					.setLabel("🛡️ Filter")
 					.setStyle(ButtonStyle.Secondary)
 					.setTo("/filter/global"),
 				new RouteButtonBuilder(router)
-					.setLabel("Ring recipients")
+					.setLabel("📣 Ring recipients")
 					.setStyle(ButtonStyle.Secondary)
 					.setTo("/recipients/global"),
 				new RouteButtonBuilder(router)
-					.setLabel("Mode")
+					.setLabel("💤 Mode")
 					.setStyle(ButtonStyle.Secondary)
 					.setTo("/mode"),
 				new RouteButtonBuilder(router)
-					.setLabel("Delete data")
-					.setStyle(ButtonStyle.Secondary)
+					.setLabel("🗑️ Delete data")
+					.setStyle(ButtonStyle.Danger)
 					.setTo("/delete-data"),
 			),
 			row(
 				new RouteButtonBuilder(router)
-					.setLabel("Commands")
+					.setLabel("📖 Commands")
 					.setStyle(ButtonStyle.Secondary)
 					.setTo("/commands"),
 				new ButtonBuilder()

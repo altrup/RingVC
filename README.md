@@ -34,7 +34,7 @@ Guide on hosting the bot yourself
 ### Prerequisites
 
 - Docker Compose ([installation guide](https://docs.docker.com/compose/install/))
-- Supabase CLI ([installation guide](https://supabase.com/docs/guides/local-development/cli/getting-started))
+- Node.js and npm, to run the Supabase CLI (it is a devDependency; run `npm install` first, then use it as `npx supabase ...`)
 - Have a Discord bot created ([guide](https://discordjs.guide/legacy/preparations/app-setup))
 - Enable required permissions (for [auto mode](#mode))
   - Under settings, on the left side, select Bot
@@ -48,7 +48,7 @@ The bot stores its data in a [Supabase](https://supabase.com) Postgres database,
 - Apply this repository's database migrations to your instance
 
   ```bash
-  supabase db push --db-url <your_postgres_connection_string>
+  npx supabase db push --db-url <your_postgres_connection_string>
   ```
 
 - Use the instance's API URL and service role key (from your Supabase Docker `.env`) as `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` below
@@ -108,7 +108,7 @@ with `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` set (in the environment or `
 - Start a local Supabase stack (uses Docker; applies migrations and [`supabase/seed.sql`](supabase/seed.sql) automatically)
 
   ```bash
-  supabase start
+  npx supabase start
   ```
 
   and point `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` in `.env` at the values it prints
@@ -116,13 +116,13 @@ with `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` set (in the environment or `
 - To re-apply migrations and seed data from scratch, run
 
   ```bash
-  supabase db reset
+  npx supabase db reset
   ```
 
 - After changing the schema (adding a migration), regenerate the database types
 
   ```bash
-  supabase gen types typescript --local > src/main/db/database.types.ts
+  npx supabase gen types typescript --local > src/main/db/database.types.ts
   ```
 
 - To deploy commands, run

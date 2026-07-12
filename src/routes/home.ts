@@ -1,4 +1,4 @@
-import { backButton, homeButton, row } from "@routes/lib/components";
+import { homeButton, row } from "@routes/lib/components";
 import { withFlash } from "@routes/lib/flash";
 import { commandMention } from "@routes/lib/mentions";
 import { Handler, Handlers } from "@routes/types";
@@ -117,7 +117,7 @@ const commandsGet: Handler<"GET"> = (router, interaction, state) => {
 					{ name: "Panel openers", value: list(panels) },
 				),
 		],
-		components: [row(backButton(router, "/"), homeButton(router))],
+		components: [row(homeButton(router))],
 	};
 };
 

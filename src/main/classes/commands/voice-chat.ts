@@ -1,4 +1,5 @@
 import { User, VoiceBasedChannel } from "discord.js";
+
 import { WatcherMap } from "../storage/watcher-map";
 import { DiscordUser } from "./discord-user";
 

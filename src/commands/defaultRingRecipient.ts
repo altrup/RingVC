@@ -6,9 +6,9 @@ import {
 	SlashCommandBuilder,
 } from "discord.js";
 
-import { DataType } from "@main/data";
-import { DiscordUser } from "@main/classes/commands/discord-user";
 import { CommandName } from "@commands/commandNames";
+import { DiscordUser } from "@main/classes/commands/discord-user";
+import { DataType } from "@main/data";
 
 export const defaultRingRecipients = {
 	data: new SlashCommandBuilder()

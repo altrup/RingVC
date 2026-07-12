@@ -1,10 +1,12 @@
 import {
-	VoiceBasedChannel,
-	PermissionsBitField,
 	DiscordAPIError,
+	PermissionsBitField,
+	VoiceBasedChannel,
 } from "discord.js";
-import { WatcherMap } from "@main/classes/storage/watcher-map";
+
 import { Filter } from "@main/classes/commands/filter";
+import { WatcherMap } from "@main/classes/storage/watcher-map";
+
 import { UserRingResult, VoiceChat } from "./voice-chat";
 
 // both used to notify data.js

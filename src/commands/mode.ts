@@ -1,13 +1,13 @@
 import {
-	SlashCommandBuilder,
-	EmbedBuilder,
 	ChatInputCommandInteraction,
+	EmbedBuilder,
 	MessageFlags,
+	SlashCommandBuilder,
 } from "discord.js";
 
-import { DataType } from "@main/data";
-import { DiscordUser } from "@main/classes/commands/discord-user";
 import { CommandName } from "@commands/commandNames";
+import { DiscordUser } from "@main/classes/commands/discord-user";
+import { DataType } from "@main/data";
 
 export const mode = {
 	data: new SlashCommandBuilder()

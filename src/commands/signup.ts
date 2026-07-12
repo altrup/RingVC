@@ -8,9 +8,9 @@ import {
 	SlashCommandBuilder,
 } from "discord.js";
 
-import { DataType } from "@main/data";
-import { VoiceChat } from "@main/classes/commands/voice-chat";
 import { CommandName } from "@commands/commandNames";
+import { VoiceChat } from "@main/classes/commands/voice-chat";
+import { DataType } from "@main/data";
 
 export const signup = {
 	data: new SlashCommandBuilder()

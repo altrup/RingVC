@@ -3,19 +3,18 @@ import * as path from "path";
 
 // get setting
 import { SAVE_COOLDOWN } from "@config";
-
-// get classes
-import { WatcherMap } from "@main/classes/storage/watcher-map";
 import {
 	DiscordUser,
 	isDiscordUserMode,
 	userOnModifyFunctions,
 } from "@main/classes/commands/discord-user";
+import { Filter, filterOnModifyFunctions } from "@main/classes/commands/filter";
 import {
 	VoiceChat,
 	voiceChatOnModifyFunctions,
 } from "@main/classes/commands/voice-chat";
-import { Filter, filterOnModifyFunctions } from "@main/classes/commands/filter";
+// get classes
+import { WatcherMap } from "@main/classes/storage/watcher-map";
 
 const tempDataPath = path.join(process.cwd(), "data", "data.tmp.txt");
 const dataPath = path.join(process.cwd(), "data", "data.txt");

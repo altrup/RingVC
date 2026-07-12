@@ -8,10 +8,10 @@ import {
 	UserSelectMenuBuilder,
 } from "discord.js";
 
-import { DataType } from "@main/data";
 import { CommandName } from "@commands/commandNames";
-import { VoiceChat } from "@main/classes/commands/voice-chat";
 import { DiscordUser } from "@main/classes/commands/discord-user";
+import { VoiceChat } from "@main/classes/commands/voice-chat";
+import { DataType } from "@main/data";
 
 const ringUserSelectMenuBuilder = (disabled = false) => {
 	return new ActionRowBuilder<UserSelectMenuBuilder>()

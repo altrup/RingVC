@@ -1,23 +1,22 @@
 import { ChatInputCommandInteraction, SharedSlashCommand } from "discord.js";
 
-import { DataType } from "@main/data";
 import { CommandName } from "@commands/commandNames";
-
-import { help } from "@commands/help";
+import { defaultRingRecipients } from "@commands/defaultRingRecipient";
 import { deleteData } from "@commands/deleteData";
+import { block } from "@commands/filter/block";
+import { filter } from "@commands/filter/filter";
+import { unblock } from "@commands/filter/unblock";
+import { unwhitelist } from "@commands/filter/unwhitelist";
+import { whitelist } from "@commands/filter/whitelist";
+import { help } from "@commands/help";
+import { mode } from "@commands/mode";
+import { quit } from "@commands/quit";
 import { ring } from "@commands/ring";
 import { signup } from "@commands/signup";
-import { unsignup } from "@commands/unsignup";
 import { signuprole } from "@commands/signuprole";
+import { unsignup } from "@commands/unsignup";
 import { unsignuprole } from "@commands/unsignuprole";
-import { quit } from "@commands/quit";
-import { mode } from "@commands/mode";
-import { block } from "@commands/filter/block";
-import { unblock } from "@commands/filter/unblock";
-import { whitelist } from "@commands/filter/whitelist";
-import { unwhitelist } from "@commands/filter/unwhitelist";
-import { filter } from "@commands/filter/filter";
-import { defaultRingRecipients } from "@commands/defaultRingRecipient";
+import { DataType } from "@main/data";
 
 export type CommandImplementation = {
 	data: SharedSlashCommand;

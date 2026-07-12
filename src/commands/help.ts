@@ -1,15 +1,15 @@
 import {
-	SlashCommandBuilder,
-	EmbedBuilder,
 	ActionRowBuilder,
 	ButtonBuilder,
 	ButtonStyle,
 	ChatInputCommandInteraction,
+	EmbedBuilder,
 	MessageFlags,
+	SlashCommandBuilder,
 } from "discord.js";
 
-import { DataType } from "@main/data";
 import { CommandName } from "@commands/commandNames";
+import { DataType } from "@main/data";
 
 export const help = {
 	data: new SlashCommandBuilder()

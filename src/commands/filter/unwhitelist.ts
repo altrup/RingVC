@@ -4,9 +4,9 @@ import {
 	SlashCommandBuilder,
 } from "discord.js";
 
+import { CommandName } from "@commands/commandNames";
 import { DiscordUser } from "@main/classes/commands/discord-user";
 import { DataType } from "@main/data";
-import { CommandName } from "@commands/commandNames";
 
 export const unwhitelist = {
 	data: new SlashCommandBuilder()

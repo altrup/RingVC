@@ -1,5 +1,4 @@
 // data is updated basically in every file
-import { data } from "./main/data";
 import {
 	ChatInputCommandInteraction,
 	Client,
@@ -8,12 +7,15 @@ import {
 	MessageFlags,
 	Partials,
 } from "discord.js";
-import { DISCORD_TOKEN } from "./config";
+
+import { CommandName, isCommandName } from "@commands/commandNames";
 import {
 	CommandImplementation,
 	commands as commandsArray,
 } from "@commands/commands";
-import { CommandName, isCommandName } from "@commands/commandNames";
+
+import { DISCORD_TOKEN } from "./config";
+import { data } from "./main/data";
 
 const client = new Client({
 	intents: [

@@ -7,8 +7,8 @@ import {
 } from "discord.js";
 
 import { DiscordUser } from "@main/classes/commands/discord-user";
-import { DataType } from "@main/data";
 import { Filter } from "@main/classes/commands/filter";
+import { DataType } from "@main/data";
 
 export const filter = {
 	data: new SlashCommandBuilder()

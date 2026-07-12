@@ -5,8 +5,8 @@ import {
 	SlashCommandBuilder,
 } from "discord.js";
 
-import { DataType } from "@main/data";
 import { unsignup } from "@commands/unsignup";
+import { DataType } from "@main/data";
 
 export const quit = {
 	data: new SlashCommandBuilder()

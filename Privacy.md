@@ -2,7 +2,7 @@
 
 - Only data necessary for the functioning of the bot is collected and/or stored
 - Data is never shared and only used for the functioning and development of the bot
-- See [`data.ts`](/src/main/data.ts) for exactly what is stored
+- See the database schema in [`supabase/migrations`](/supabase/migrations) for exactly what is stored
 
 ## Stored Data
 

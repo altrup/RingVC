@@ -1,13 +1,12 @@
 import {
-	SlashCommandBuilder,
-	EmbedBuilder,
 	ChatInputCommandInteraction,
+	EmbedBuilder,
 	MessageFlags,
+	SlashCommandBuilder,
 } from "discord.js";
 
-import { DataType } from "@main/data";
-import { DiscordUser } from "@main/classes/commands/discord-user";
 import { CommandName } from "@commands/commandNames";
+import { getUserMode, setUserMode } from "@db/users";
 
 export const mode = {
 	data: new SlashCommandBuilder()
@@ -38,7 +37,6 @@ export const mode = {
 			subcommand.setName("get").setDescription("Displays your current mode"),
 		),
 	async execute(
-		data: DataType,
 		interaction: ChatInputCommandInteraction,
 		commandIds: Map<CommandName, string>,
 	) {
@@ -76,11 +74,11 @@ export const mode = {
 		}
 		// set mode
 		else if (interaction.options.getSubcommand() === "set") {
-			const user = interaction.user;
-			const discordUser = data.users.get(user.id) ?? new DiscordUser(user.id);
+			const mode = interaction.options.getString("mode", true);
+			// the option choices only allow valid modes
+			if (mode !== "normal" && mode !== "stealth" && mode !== "auto") return;
 
-			const mode = interaction.options.getString("mode");
-			discordUser.setMode(mode);
+			await setUserMode(interaction.user.id, mode);
 			interaction
 				.reply({
 					content: `Mode set to \`${mode}\`. ${
@@ -96,10 +94,7 @@ export const mode = {
 		}
 		// get mode
 		else if (interaction.options.getSubcommand() === "get") {
-			const user = interaction.user;
-			const discordUser = data.users.get(user.id);
-
-			const mode = discordUser ? discordUser.getMode() : "normal";
+			const mode = await getUserMode(interaction.user.id);
 			interaction
 				.reply({
 					content: `Your current mode is \`${mode}\`. ${

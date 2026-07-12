@@ -5,7 +5,6 @@ import {
 	SlashCommandBuilder,
 } from "discord.js";
 
-import { DataType } from "@main/data";
 import { unsignup } from "@commands/unsignup";
 
 export const quit = {
@@ -21,7 +20,7 @@ export const quit = {
 				.addChannelTypes(ChannelType.GuildVoice)
 				.setRequired(false),
 		),
-	async execute(data: DataType, interaction: ChatInputCommandInteraction) {
-		unsignup.execute(data, interaction);
+	async execute(interaction: ChatInputCommandInteraction) {
+		await unsignup.execute(interaction);
 	},
 };

@@ -10,9 +10,8 @@ import {
 	SlashCommandBuilder,
 } from "discord.js";
 
-import { DataType } from "@main/data";
-import { VoiceChat } from "@main/classes/commands/voice-chat";
 import { CommandName } from "@commands/commandNames";
+import { addVoiceChatRole } from "@db/voice-chats";
 
 export const signuprole = {
 	data: new SlashCommandBuilder()
@@ -32,7 +31,6 @@ export const signuprole = {
 				.setRequired(false),
 		),
 	async execute(
-		data: DataType,
 		interaction: ChatInputCommandInteraction,
 		commandIds: Map<CommandName, string>,
 	) {
@@ -72,23 +70,15 @@ export const signuprole = {
 			return;
 		}
 
-		// update or create voice chat object
-		if (data.voiceChats.has(channel.id)) {
-			const voiceChat = data.voiceChats.get(channel.id);
-			// if voice chat already has this role
-			if (voiceChat?.hasRole(role.id)) {
-				interaction
-					.reply({
-						content: `<@&${role.id}> is already signed up for <#${channel.id}>. Use </unsignuprole:${commandIds.get("unsignuprole")}> to remove it`,
-						flags: [MessageFlags.Ephemeral],
-					})
-					.catch(console.error);
-				return;
-			}
-			voiceChat?.addRole(role.id);
-		} else {
-			const voiceChat = new VoiceChat(channel.id);
-			voiceChat.addRole(role.id);
+		const added = await addVoiceChatRole(channel.id, role.id);
+		if (!added) {
+			interaction
+				.reply({
+					content: `<@&${role.id}> is already signed up for <#${channel.id}>. Use </unsignuprole:${commandIds.get("unsignuprole")}> to remove it`,
+					flags: [MessageFlags.Ephemeral],
+				})
+				.catch(console.error);
+			return;
 		}
 
 		interaction

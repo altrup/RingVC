@@ -1,14 +1,13 @@
 import {
-	SlashCommandBuilder,
-	EmbedBuilder,
 	ActionRowBuilder,
 	ButtonBuilder,
 	ButtonStyle,
 	ChatInputCommandInteraction,
+	EmbedBuilder,
 	MessageFlags,
+	SlashCommandBuilder,
 } from "discord.js";
 
-import { DataType } from "@main/data";
 import { CommandName } from "@commands/commandNames";
 
 export const help = {
@@ -16,7 +15,6 @@ export const help = {
 		.setName("help")
 		.setDescription("Getting started"),
 	async execute(
-		data: DataType,
 		interaction: ChatInputCommandInteraction,
 		commandIds: Map<CommandName, string>,
 	) {

@@ -1,5 +1,3 @@
-// data is updated basically in every file
-import { data } from "./main/data";
 import {
 	ChatInputCommandInteraction,
 	Client,
@@ -8,12 +6,14 @@ import {
 	MessageFlags,
 	Partials,
 } from "discord.js";
-import { DISCORD_TOKEN } from "./config";
+
+import { CommandName, isCommandName } from "@commands/commandNames";
 import {
 	CommandImplementation,
 	commands as commandsArray,
 } from "@commands/commands";
-import { CommandName, isCommandName } from "@commands/commandNames";
+import { DISCORD_TOKEN } from "@config";
+import { onVoiceChannelJoin } from "@main/ring";
 
 const client = new Client({
 	intents: [
@@ -70,37 +70,33 @@ client.on("interactionCreate", async (interaction) => {
 
 	try {
 		if (interaction instanceof ChatInputCommandInteraction) {
-			await command.execute(data, interaction, commandIds);
+			await command.execute(interaction, commandIds);
 		}
 	} catch (error) {
 		console.error(error);
-		await interaction.reply({
-			content: "There was an error while executing this command!",
-			flags: [MessageFlags.Ephemeral],
-		});
+		await interaction
+			.reply({
+				content: "There was an error while executing this command!",
+				flags: [MessageFlags.Ephemeral],
+			})
+			.catch(console.error);
 	}
 });
 
 client.on("voiceStateUpdate", async (oldState, newState) => {
 	// first condition is to check if user has joined a channel
 	// second condition is to check if user is joining a new channel
-	// third condition is to check if the channel has a voiceChat object
 	try {
 		if (
 			newState?.channel &&
 			(!oldState || oldState.channelId !== newState.channelId) &&
-			data.voiceChats.has(newState.channelId ?? "") &&
 			newState.member?.user
 		) {
-			await Promise.all([
-				data.voiceChats
-					.get(newState.channelId ?? "")
-					?.onJoin(newState.member.user),
-				data.users.get(newState.member.user.id)?.onJoin(newState.channel),
-			]);
+			await onVoiceChannelJoin(newState.channel, newState.member.user);
 		}
-	} catch {
-		// do nothing (these are all permission errors)
+	} catch (error) {
+		// permission errors are expected here; log the rest
+		console.error(error);
 	}
 });
 

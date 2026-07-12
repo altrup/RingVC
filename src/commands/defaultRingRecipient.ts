@@ -6,9 +6,15 @@ import {
 	SlashCommandBuilder,
 } from "discord.js";
 
-import { DataType } from "@main/data";
-import { DiscordUser } from "@main/classes/commands/discord-user";
 import { CommandName } from "@commands/commandNames";
+import { getAutoRingSetting, setAutoRing, unsetAutoRing } from "@db/auto-ring";
+import {
+	addDefaultRingee,
+	clearDefaultRingees,
+	getDefaultRingees,
+	removeDefaultRingee,
+} from "@db/default-ringees";
+import { mentionUser } from "@main/ring";
 
 export const defaultRingRecipients = {
 	data: new SlashCommandBuilder()
@@ -132,7 +138,6 @@ export const defaultRingRecipients = {
 				),
 		),
 	async execute(
-		data: DataType,
 		interaction: ChatInputCommandInteraction,
 		commandIds: Map<CommandName, string>,
 	) {
@@ -189,60 +194,45 @@ export const defaultRingRecipients = {
 			const action = interaction.options.getInteger("action", true);
 
 			if (action === 1) {
-				const discordUser =
-					data.users.get(interaction.user.id) ??
-					new DiscordUser(interaction.user.id);
-				if (
-					discordUser.addDefaultRingeeUserId(channel?.id, userToAddOrRemove.id)
-				) {
-					interaction
-						.reply({
-							content: `${userToAddOrRemove} is now a${!channel ? " global" : ""} default ring recipient${channel ? ` for ${channel}` : ""}`,
-							flags: [MessageFlags.Ephemeral],
-						})
-						.catch(console.error);
-				} else {
-					interaction
-						.reply({
-							content: `${userToAddOrRemove} is a${!channel ? " global" : ""} default ring recipient${channel ? ` for ${channel}` : ""}`,
-							flags: [MessageFlags.Ephemeral],
-						})
-						.catch(console.error);
-				}
+				const added = await addDefaultRingee(
+					interaction.user.id,
+					channel?.id ?? null,
+					userToAddOrRemove.id,
+				);
+				interaction
+					.reply({
+						content: added
+							? `${userToAddOrRemove} is now a${!channel ? " global" : ""} default ring recipient${channel ? ` for ${channel}` : ""}`
+							: `${userToAddOrRemove} is a${!channel ? " global" : ""} default ring recipient${channel ? ` for ${channel}` : ""}`,
+						flags: [MessageFlags.Ephemeral],
+					})
+					.catch(console.error);
 			} else {
-				const discordUser = data.users.get(interaction.user.id);
-				if (
-					discordUser?.removeDefaultRingeeUserId(
-						channel?.id,
-						userToAddOrRemove.id,
-					)
-				) {
-					interaction
-						.reply({
-							content: `${userToAddOrRemove} is no longer a${!channel ? " global" : ""} default ring recipient${channel ? ` for ${channel}` : ""}`,
-							flags: [MessageFlags.Ephemeral],
-						})
-						.catch(console.error);
-				} else {
-					interaction
-						.reply({
-							content: `${userToAddOrRemove} is not a${!channel ? " global" : ""} default ring recipient${channel ? ` for ${channel}` : ""}`,
-							flags: [MessageFlags.Ephemeral],
-						})
-						.catch(console.error);
-				}
+				const removed = await removeDefaultRingee(
+					interaction.user.id,
+					channel?.id ?? null,
+					userToAddOrRemove.id,
+				);
+				interaction
+					.reply({
+						content: removed
+							? `${userToAddOrRemove} is no longer a${!channel ? " global" : ""} default ring recipient${channel ? ` for ${channel}` : ""}`
+							: `${userToAddOrRemove} is not a${!channel ? " global" : ""} default ring recipient${channel ? ` for ${channel}` : ""}`,
+						flags: [MessageFlags.Ephemeral],
+					})
+					.catch(console.error);
 			}
 		} else if (subcommand === "list") {
 			// List default ring recipients
 			const channel = interaction.options.getChannel("channel");
 
-			const discordUser = data.users.get(interaction.user.id);
-			const defaultRingees = discordUser?.getDefaultRingeeUserIds(channel?.id);
+			const defaultRingees = await getDefaultRingees(
+				interaction.user.id,
+				channel?.id ?? null,
+			);
 			const defaultRingeesString =
-				defaultRingees && defaultRingees.size > 0
-					? Array.from(defaultRingees.keys())
-							.map((userId) => DiscordUser.toString(userId))
-							.join("\n")
+				defaultRingees.length > 0
+					? defaultRingees.map(mentionUser).join("\n")
 					: "None";
 			interaction
 				.reply({
@@ -254,31 +244,29 @@ export const defaultRingRecipients = {
 			// Reset default ring recipients
 			const channel = interaction.options.getChannel("channel");
 
-			const discordUser = data.users.get(interaction.user.id);
-			if (discordUser?.clearDefaultRingeeUserIds(channel?.id)) {
-				interaction
-					.reply({
-						content: `Your${!channel ? " global" : ""} default ring recipients${channel ? ` for ${channel}` : ""} have been cleared.`,
-						flags: [MessageFlags.Ephemeral],
-					})
-					.catch(console.error);
-			} else {
-				interaction
-					.reply({
-						content: `You already have no${!channel ? " global" : ""} default ring recipients${channel ? ` for ${channel}` : ""}.`,
-						flags: [MessageFlags.Ephemeral],
-					})
-					.catch(console.error);
-			}
+			const cleared = await clearDefaultRingees(
+				interaction.user.id,
+				channel?.id ?? null,
+			);
+			interaction
+				.reply({
+					content: cleared
+						? `Your${!channel ? " global" : ""} default ring recipients${channel ? ` for ${channel}` : ""} have been cleared.`
+						: `You already have no${!channel ? " global" : ""} default ring recipients${channel ? ` for ${channel}` : ""}.`,
+					flags: [MessageFlags.Ephemeral],
+				})
+				.catch(console.error);
 		} else if (subcommand === "set") {
 			// Enable/disable auto ringing
 			const enabled = interaction.options.getBoolean("enabled", true);
 			const channel = interaction.options.getChannel("channel");
 
-			const discordUser =
-				data.users.get(interaction.user.id) ??
-				new DiscordUser(interaction.user.id);
-			if (discordUser.setAutoRingEnabled(channel?.id, enabled)) {
+			const changed = await setAutoRing(
+				interaction.user.id,
+				channel?.id ?? null,
+				enabled,
+			);
+			if (changed) {
 				interaction
 					.reply({
 						content:
@@ -301,31 +289,26 @@ export const defaultRingRecipients = {
 			// Unset auto ringing override for a channel
 			const channel = interaction.options.getChannel("channel", true);
 
-			const discordUser = data.users.get(interaction.user.id);
-			if (discordUser?.unsetAutoRingEnabled(channel.id)) {
-				interaction
-					.reply({
-						content: `Automatic ringing override for ${channel} has been unset. Your global automatic ringing setting will now be used.`,
-						flags: [MessageFlags.Ephemeral],
-					})
-					.catch(console.error);
-			} else {
-				interaction
-					.reply({
-						content: `You do not have an automatic ringing override set for ${channel}.`,
-						flags: [MessageFlags.Ephemeral],
-					})
-					.catch(console.error);
-			}
+			const unset = await unsetAutoRing(interaction.user.id, channel.id);
+			interaction
+				.reply({
+					content: unset
+						? `Automatic ringing override for ${channel} has been unset. Your global automatic ringing setting will now be used.`
+						: `You do not have an automatic ringing override set for ${channel}.`,
+					flags: [MessageFlags.Ephemeral],
+				})
+				.catch(console.error);
 		} else if (subcommand === "get") {
 			// Get auto ringing status
 			const channel = interaction.options.getChannel("channel");
 
-			const discordUser = data.users.get(interaction.user.id);
-			const autoRingOverride = channel
-				? discordUser?.getChannelAutoRingEnableds().get(channel.id)
-				: undefined;
-			const autoRingEnabled = discordUser?.isAutoRingEnabled(channel?.id);
+			const [autoRingOverride, globalAutoRing] = await Promise.all([
+				channel
+					? getAutoRingSetting(interaction.user.id, channel.id)
+					: Promise.resolve(undefined),
+				getAutoRingSetting(interaction.user.id, null),
+			]);
+			const autoRingEnabled = autoRingOverride ?? globalAutoRing ?? false;
 			interaction
 				.reply({
 					content:

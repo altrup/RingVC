@@ -10,7 +10,7 @@ import {
 	SlashCommandBuilder,
 } from "discord.js";
 
-import { DataType } from "@main/data";
+import { removeVoiceChatRole } from "@db/voice-chats";
 
 export const unsignuprole = {
 	data: new SlashCommandBuilder()
@@ -29,7 +29,7 @@ export const unsignuprole = {
 				.addChannelTypes(ChannelType.GuildVoice)
 				.setRequired(false),
 		),
-	async execute(data: DataType, interaction: ChatInputCommandInteraction) {
+	async execute(interaction: ChatInputCommandInteraction) {
 		const channel =
 			interaction.options.getChannel("channel") ?? interaction.channel;
 		const role = interaction.options.getRole("role", true);
@@ -66,18 +66,15 @@ export const unsignuprole = {
 			return;
 		}
 
-		if (data.voiceChats.has(channel.id)) {
-			const voiceChat = data.voiceChats.get(channel.id);
-			if (voiceChat?.hasRole(role.id)) {
-				voiceChat.removeRole(role.id);
-				interaction
-					.reply({
-						content: `<@&${role.id}> will no longer be pinged for <#${channel.id}>`,
-						flags: [MessageFlags.Ephemeral],
-					})
-					.catch(console.error);
-				return;
-			}
+		const removed = await removeVoiceChatRole(channel.id, role.id);
+		if (removed) {
+			interaction
+				.reply({
+					content: `<@&${role.id}> will no longer be pinged for <#${channel.id}>`,
+					flags: [MessageFlags.Ephemeral],
+				})
+				.catch(console.error);
+			return;
 		}
 		interaction
 			.reply({

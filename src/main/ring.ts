@@ -266,10 +266,7 @@ export const onVoiceChannelJoin = async (
 	// joining with auto ring on and nothing configured is a normal state
 	const autoRing = async () => {
 		if (!(await isAutoRingEnabled(ringerUser.id, channel.id))) return;
-		const ringeeUserIds = await getAllDefaultRingees(
-			ringerUser.id,
-			channel.id,
-		);
+		const ringeeUserIds = await getAllDefaultRingees(ringerUser.id, channel.id);
 		if (ringeeUserIds.length === 0) return;
 		await ring(channel, ringerUser.id, "wants you to join", ringeeUserIds);
 	};

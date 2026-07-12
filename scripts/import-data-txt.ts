@@ -12,7 +12,7 @@ import * as path from "path";
 import { createClient } from "@supabase/supabase-js";
 import * as dotenv from "dotenv";
 
-import { Database } from "../src/main/db/database.types";
+import { Database } from "@db/database.types";
 
 dotenv.config({ quiet: true });
 

@@ -9,7 +9,7 @@ import {
 } from "discord.js";
 
 import { CommandName } from "@commands/commandNames";
-import { addVoiceChatUser } from "@main/db/voice-chats";
+import { addVoiceChatUser } from "@db/voice-chats";
 
 export const signup = {
 	data: new SlashCommandBuilder()

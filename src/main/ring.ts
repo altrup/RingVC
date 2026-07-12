@@ -5,15 +5,15 @@ import {
 	VoiceBasedChannel,
 } from "discord.js";
 
-import { isAutoRingEnabled } from "@main/db/auto-ring";
-import { getAllDefaultRingees } from "@main/db/default-ringees";
+import { isAutoRingEnabled } from "@db/auto-ring";
+import { getAllDefaultRingees } from "@db/default-ringees";
 import {
 	getFiltersForUsers,
 	passesUserFilters,
 	UserFilters,
-} from "@main/db/filters";
-import { DiscordUserMode, getUserModes } from "@main/db/users";
-import { getVoiceChatSignups } from "@main/db/voice-chats";
+} from "@db/filters";
+import { DiscordUserMode, getUserModes } from "@db/users";
+import { getVoiceChatSignups } from "@db/voice-chats";
 
 export const mentionUser = (userId: string) => `<@${userId}>`;
 export const mentionRole = (roleId: string) => `<@&${roleId}>`;

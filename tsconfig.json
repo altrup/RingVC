@@ -9,6 +9,7 @@
 		"paths": {
 			"@config": ["./src/config"],
 			"@commands/*": ["./src/commands/*"],
+			"@db/*": ["./src/main/db/*"],
 			"@main/*": ["./src/main/*"]
 		},
 

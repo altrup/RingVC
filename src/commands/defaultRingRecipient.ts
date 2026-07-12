@@ -7,17 +7,13 @@ import {
 } from "discord.js";
 
 import { CommandName } from "@commands/commandNames";
-import {
-	getAutoRingSetting,
-	setAutoRing,
-	unsetAutoRing,
-} from "@main/db/auto-ring";
+import { getAutoRingSetting, setAutoRing, unsetAutoRing } from "@db/auto-ring";
 import {
 	addDefaultRingee,
 	clearDefaultRingees,
 	getDefaultRingees,
 	removeDefaultRingee,
-} from "@main/db/default-ringees";
+} from "@db/default-ringees";
 import { mentionUser } from "@main/ring";
 
 export const defaultRingRecipients = {

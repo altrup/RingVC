@@ -5,7 +5,7 @@ import {
 } from "discord.js";
 
 import { CommandName } from "@commands/commandNames";
-import { addFilterEntry, getFilter } from "@main/db/filters";
+import { addFilterEntry, getFilter } from "@db/filters";
 
 export const block = {
 	data: new SlashCommandBuilder()

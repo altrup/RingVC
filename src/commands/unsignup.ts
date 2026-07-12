@@ -8,7 +8,7 @@ import {
 	SlashCommandBuilder,
 } from "discord.js";
 
-import { removeVoiceChatUser } from "@main/db/voice-chats";
+import { removeVoiceChatUser } from "@db/voice-chats";
 
 export const unsignup = {
 	data: new SlashCommandBuilder()

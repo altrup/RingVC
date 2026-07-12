@@ -11,7 +11,7 @@ import {
 } from "discord.js";
 
 import { CommandName } from "@commands/commandNames";
-import { addVoiceChatRole } from "@main/db/voice-chats";
+import { addVoiceChatRole } from "@db/voice-chats";
 
 export const signuprole = {
 	data: new SlashCommandBuilder()

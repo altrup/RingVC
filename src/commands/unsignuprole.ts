@@ -10,7 +10,7 @@ import {
 	SlashCommandBuilder,
 } from "discord.js";
 
-import { removeVoiceChatRole } from "@main/db/voice-chats";
+import { removeVoiceChatRole } from "@db/voice-chats";
 
 export const unsignuprole = {
 	data: new SlashCommandBuilder()

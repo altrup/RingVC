@@ -8,7 +8,7 @@ import {
 	SlashCommandBuilder,
 } from "discord.js";
 
-import { deleteAllUserData } from "@main/db/users";
+import { deleteAllUserData } from "@db/users";
 
 export const deleteData = {
 	data: new SlashCommandBuilder()

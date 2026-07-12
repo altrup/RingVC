@@ -6,7 +6,7 @@ import {
 } from "discord.js";
 
 import { CommandName } from "@commands/commandNames";
-import { getUserMode, setUserMode } from "@main/db/users";
+import { getUserMode, setUserMode } from "@db/users";
 
 export const mode = {
 	data: new SlashCommandBuilder()

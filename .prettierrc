@@ -6,7 +6,7 @@
 		"",
 		"<THIRD_PARTY_MODULES>",
 		"",
-		"^@(config$|commands/|main/)",
+		"^@(config$|commands/|db/|main/)",
 		"",
 		"^[./]"
 	]

@@ -5,7 +5,7 @@ import {
 } from "discord.js";
 
 import { CommandName } from "@commands/commandNames";
-import { getFilter, removeFilterEntry } from "@main/db/filters";
+import { getFilter, removeFilterEntry } from "@db/filters";
 
 export const unwhitelist = {
 	data: new SlashCommandBuilder()

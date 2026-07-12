@@ -13,7 +13,7 @@ import {
 	removeFilterEntry,
 	resetFilter,
 	setFilterType,
-} from "@main/db/filters";
+} from "@db/filters";
 import { mentionUser } from "@main/ring";
 
 export const filter = {

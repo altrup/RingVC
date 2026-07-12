@@ -1,13 +1,15 @@
 {
 	"scripts": {
 		"lint": "npx eslint --config src/eslint.config.mts src",
+		"typecheck": "tsc --noEmit",
 		"dev": "tsx watch src/index.ts",
 		"deploy-commands": "tsx src/deploy-commands.ts",
 		"build": "tsup src/index.ts --minify && tsup src/deploy-commands.ts --minify",
 		"start": "node dist/index.js",
 		"deploy-commands:production": "node dist/deploy-commands.js",
 		"deploy-and-start": "npm run deploy-commands && npm run start",
-		"format": "prettier . --write"
+		"format": "prettier . --write",
+		"format:check": "prettier . --check"
 	},
 	"dependencies": {
 		"discord.js": "^14.22.1",

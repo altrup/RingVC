@@ -58,6 +58,13 @@ create table default_ringees (
 	unique nulls not distinct (user_id, channel_id, ringee_user_id)
 );
 
+-- The bot connects with the service role; grant it data access explicitly
+-- instead of relying on the stack's default privileges. anon/authenticated
+-- get nothing.
+grant select, insert, update, delete
+	on all tables in schema public
+	to service_role;
+
 -- The bot connects with the service role, which bypasses RLS. Enabling RLS
 -- with no policies locks out anon/authenticated access through PostgREST.
 alter table users enable row level security;

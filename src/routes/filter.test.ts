@@ -2,7 +2,12 @@ import { filterHandlers } from "@routes/filter";
 import { Interaction } from "discord.js";
 import { beforeEach, expect, test, vi } from "vitest";
 
-import { addFilterEntry, getFilter, removeFilterEntry } from "@db/filters";
+import {
+	addFilterEntry,
+	getFilter,
+	removeFilterEntry,
+	resetFilter,
+} from "@db/filters";
 
 vi.mock("@db/filters", async (importOriginal) => ({
 	...(await importOriginal<typeof import("@db/filters")>()),
@@ -76,6 +81,39 @@ test("a select submission applies adds and removes from the visible page togethe
 		result.queryParams as Record<string, string>,
 	);
 	expect(flashParams.get("level")).toBe("success");
+});
+
+type ResetPost = NonNullable<typeof filterHandlers.reset.post>;
+const resetPost = (confirmation: string) =>
+	filterHandlers.reset.post!(undefined as never, interaction, {
+		params: { scope: "global" },
+		path: "/filter/global/reset",
+		queryParams: new URLSearchParams(),
+		timestamp: 0,
+		fields: { getTextInputValue: () => confirmation },
+	} as unknown as Parameters<ResetPost>[2]);
+
+test("a filter reset with matching confirmation text resets the filter", async () => {
+	vi.mocked(resetFilter).mockResolvedValue(true);
+
+	const result = await resetPost("RESET");
+
+	expect(resetFilter).toHaveBeenCalledExactlyOnceWith("caller", null);
+	const flashParams = new URLSearchParams(
+		result.queryParams as Record<string, string>,
+	);
+	expect(flashParams.get("level")).toBe("success");
+});
+
+test("a filter reset without matching confirmation text mutates nothing", async () => {
+	const result = await resetPost("nope");
+
+	expect(resetFilter).not.toHaveBeenCalled();
+	const flashParams = new URLSearchParams(
+		result.queryParams as Record<string, string>,
+	);
+	expect(flashParams.get("level")).toBe("warn");
+	expect(flashParams.get("flash")).toContain("did not match");
 });
 
 test("blocking an already blocked user reports it without a duplicate write", async () => {

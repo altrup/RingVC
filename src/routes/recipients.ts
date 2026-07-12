@@ -1,4 +1,5 @@
 import { homeButton, paginationRows, row } from "@routes/lib/components";
+import { confirmed, confirmModal } from "@routes/lib/confirm";
 import { flashRedirect, withFlash } from "@routes/lib/flash";
 import { diffSelection, PAGE_SIZE, paginate } from "@routes/lib/paging";
 import { channelIdOf, scopeOf } from "@routes/lib/scope";
@@ -122,9 +123,9 @@ const panelGet: Handler<"GET"> = async (router, interaction, state) => {
 				.toJSON(),
 			row(
 				new RouteButtonBuilder(router)
-					.setLabel("Clear all")
+					.setLabel("Reset")
 					.setStyle(ButtonStyle.Danger)
-					.setTo(`${panelPath(scope)}/clear`, { method: "POST" }),
+					.setTo(`${panelPath(scope)}/clear`, { method: "MODAL" }),
 				new RouteButtonBuilder(router)
 					.setLabel(
 						autoRing.effective ? "Disable auto-ring" : "Enable auto-ring",
@@ -191,8 +192,21 @@ const membersPost: Handler<"POST"> = async (router, interaction, state) => {
 	);
 };
 
+const clearConfirm: Handler<"MODAL"> = (router, interaction, state) =>
+	confirmModal(router, {
+		to: `${panelPath(scopeOf(state.params))}/clear`,
+		title: "Reset ring recipients",
+		word: "RESET",
+	});
+
 const clearPost: Handler<"POST"> = async (router, interaction, state) => {
 	const scope = scopeOf(state.params);
+	if (!confirmed(state.fields, "RESET"))
+		return flashRedirect(
+			panelPath(scope),
+			"Confirmation text did not match, your recipients were not cleared",
+			"warn",
+		);
 	const cleared = await clearDefaultRingees(
 		interaction.user.id,
 		channelIdOf(scope),
@@ -268,7 +282,7 @@ const autoRingUnsetPost: Handler<"POST"> = async (
 export const recipientsHandlers = {
 	panel: { get: panelGet } satisfies Handlers,
 	members: { post: membersPost } satisfies Handlers,
-	clear: { post: clearPost } satisfies Handlers,
+	clear: { modal: clearConfirm, post: clearPost } satisfies Handlers,
 	autoRing: { post: autoRingPost } satisfies Handlers,
 	autoRingUnset: { post: autoRingUnsetPost } satisfies Handlers,
 };

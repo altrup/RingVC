@@ -4,6 +4,7 @@ import {
 	RouteButtonBuilder,
 	RouteHandler,
 	RouteHandlers,
+	RouteModalBuilder,
 } from "discord-embed-router";
 
 import { CommandName } from "@commands/commandNames";
@@ -30,4 +31,8 @@ export type Handlers =
 export type RingButton =
 	RingRouter extends EmbedRouter<Globals, infer S, infer L>
 		? RouteButtonBuilder<Globals, S, L>
+		: never;
+export type RingModal =
+	RingRouter extends EmbedRouter<Globals, infer S, infer L>
+		? RouteModalBuilder<Globals, S, L>
 		: never;

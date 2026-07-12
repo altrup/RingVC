@@ -1,4 +1,5 @@
 import { homeButton, paginationRows, row } from "@routes/lib/components";
+import { confirmed, confirmModal } from "@routes/lib/confirm";
 import { flashRedirect, withFlash } from "@routes/lib/flash";
 import { diffSelection, PAGE_SIZE, paginate } from "@routes/lib/paging";
 import { channelIdOf, scopeName, scopeOf } from "@routes/lib/scope";
@@ -104,7 +105,7 @@ const panelGet: Handler<"GET"> = async (router, interaction, state) => {
 				new RouteButtonBuilder(router)
 					.setLabel("Reset")
 					.setStyle(ButtonStyle.Danger)
-					.setTo(`${panelPath(scope)}/reset`, { method: "POST" }),
+					.setTo(`${panelPath(scope)}/reset`, { method: "MODAL" }),
 				homeButton(router),
 			),
 			...paginationRows(router, panelPath(scope), { page, pageCount }),
@@ -227,9 +228,22 @@ const typePost: Handler<"POST"> = async (router, interaction, state) => {
 	);
 };
 
+const resetConfirm: Handler<"MODAL"> = (router, interaction, state) =>
+	confirmModal(router, {
+		to: `${panelPath(scopeOf(state.params))}/reset`,
+		title: "Reset filter",
+		word: "RESET",
+	});
+
 const resetPost: Handler<"POST"> = async (router, interaction, state) => {
 	const scope = scopeOf(state.params);
 	const panel = panelPath(scope);
+	if (!confirmed(state.fields, "RESET"))
+		return flashRedirect(
+			panel,
+			"Confirmation text did not match, the filter was not reset",
+			"warn",
+		);
 	const wasNotDefault = await resetFilter(
 		interaction.user.id,
 		channelIdOf(scope),
@@ -251,5 +265,5 @@ export const filterHandlers = {
 	panel: { get: panelGet } satisfies Handlers,
 	members: { post: membersPost } satisfies Handlers,
 	type: { post: typePost } satisfies Handlers,
-	reset: { post: resetPost } satisfies Handlers,
+	reset: { modal: resetConfirm, post: resetPost } satisfies Handlers,
 };

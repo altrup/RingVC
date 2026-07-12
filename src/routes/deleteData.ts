@@ -1,14 +1,9 @@
 import { row } from "@routes/lib/components";
+import { confirmed, confirmModal } from "@routes/lib/confirm";
 import { flashRedirect, withFlash } from "@routes/lib/flash";
 import { Handler, Handlers } from "@routes/types";
-import { RouteButtonBuilder, RouteModalBuilder } from "discord-embed-router";
-import {
-	ButtonStyle,
-	EmbedBuilder,
-	LabelBuilder,
-	TextInputBuilder,
-	TextInputStyle,
-} from "discord.js";
+import { RouteButtonBuilder } from "discord-embed-router";
+import { ButtonStyle, EmbedBuilder } from "discord.js";
 
 import { deleteAllUserData } from "@db/users";
 
@@ -50,25 +45,15 @@ const panelGet: Handler<"GET"> = (router, interaction, state) => {
 	};
 };
 
-const confirmModal: Handler<"MODAL"> = (router) =>
-	new RouteModalBuilder(router)
-		.setTo(PANEL, { method: "POST" })
-		.setTitle("Delete all data")
-		.addLabelComponents(
-			new LabelBuilder()
-				.setLabel(`Type ${CONFIRMATION} to confirm`)
-				.setTextInputComponent(
-					new TextInputBuilder()
-						.setCustomId("confirm")
-						.setStyle(TextInputStyle.Short)
-						.setRequired(true)
-						.setPlaceholder(CONFIRMATION),
-				),
-		);
+const deleteConfirm: Handler<"MODAL"> = (router) =>
+	confirmModal(router, {
+		to: PANEL,
+		title: "Delete all data",
+		word: CONFIRMATION,
+	});
 
 const panelPost: Handler<"POST"> = async (router, interaction, state) => {
-	const confirmation = state.fields?.getTextInputValue("confirm") ?? "";
-	if (confirmation !== CONFIRMATION)
+	if (!confirmed(state.fields, CONFIRMATION))
 		return flashRedirect(
 			PANEL,
 			"Confirmation text did not match, nothing was deleted",
@@ -88,5 +73,5 @@ const panelPost: Handler<"POST"> = async (router, interaction, state) => {
 
 export const deleteDataHandlers = {
 	panel: { get: panelGet, post: panelPost } satisfies Handlers,
-	confirm: { modal: confirmModal } satisfies Handlers,
+	confirm: { modal: deleteConfirm } satisfies Handlers,
 };

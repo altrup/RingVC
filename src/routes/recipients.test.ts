@@ -3,6 +3,7 @@ import { Interaction } from "discord.js";
 import { beforeEach, expect, test, vi } from "vitest";
 
 import { setAutoRing, unsetAutoRing } from "@db/auto-ring";
+import { clearDefaultRingees } from "@db/default-ringees";
 
 vi.mock("@db/auto-ring", () => ({
 	getAutoRingSetting: vi.fn(),
@@ -29,6 +30,39 @@ const autoRingState = (scope: string, query: string) =>
 
 beforeEach(() => {
 	vi.clearAllMocks();
+});
+
+type ClearPost = NonNullable<typeof recipientsHandlers.clear.post>;
+const clearPost = (confirmation: string) =>
+	recipientsHandlers.clear.post!(undefined as never, interaction, {
+		params: { scope: "global" },
+		path: "/recipients/global/clear",
+		queryParams: new URLSearchParams(),
+		timestamp: 0,
+		fields: { getTextInputValue: () => confirmation },
+	} as unknown as Parameters<ClearPost>[2]);
+
+test("a recipients reset with matching confirmation text clears the list", async () => {
+	vi.mocked(clearDefaultRingees).mockResolvedValue(true);
+
+	const result = await clearPost("RESET");
+
+	expect(clearDefaultRingees).toHaveBeenCalledExactlyOnceWith("caller", null);
+	const flashParams = new URLSearchParams(
+		result.queryParams as Record<string, string>,
+	);
+	expect(flashParams.get("level")).toBe("success");
+});
+
+test("a recipients reset without matching confirmation text mutates nothing", async () => {
+	const result = await clearPost("nope");
+
+	expect(clearDefaultRingees).not.toHaveBeenCalled();
+	const flashParams = new URLSearchParams(
+		result.queryParams as Record<string, string>,
+	);
+	expect(flashParams.get("level")).toBe("warn");
+	expect(flashParams.get("flash")).toContain("did not match");
 });
 
 test("enabling auto-ring warns that joins ring default recipients even in stealth", async () => {

@@ -1,3 +1,5 @@
+import { Page } from "@routes/lib/paging";
+import { RingButton, RingRouter } from "@routes/types";
 import { RouteButtonBuilder } from "discord-embed-router";
 import {
 	ActionRowBuilder,
@@ -6,9 +8,6 @@ import {
 	ButtonBuilder,
 	ButtonStyle,
 } from "discord.js";
-
-import { Page } from "@routes/lib/paging";
-import { RingButton, RingRouter } from "@routes/types";
 
 export const row = (
 	...components: ButtonBuilder[]

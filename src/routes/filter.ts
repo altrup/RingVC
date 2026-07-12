@@ -1,3 +1,8 @@
+import { homeButton, paginationRows, row } from "@routes/lib/components";
+import { flashRedirect, withFlash } from "@routes/lib/flash";
+import { diffSelection, PAGE_SIZE, paginate } from "@routes/lib/paging";
+import { channelIdOf, scopeName, scopeOf } from "@routes/lib/scope";
+import { Handler, Handlers } from "@routes/types";
 import {
 	RouteButtonBuilder,
 	RouteChannelSelectMenuBuilder,
@@ -19,11 +24,6 @@ import {
 	setFilterType,
 } from "@db/filters";
 import { joinWithAnd, mentionUser } from "@main/ring";
-import { homeButton, paginationRows, row } from "@routes/lib/components";
-import { flashRedirect, withFlash } from "@routes/lib/flash";
-import { diffSelection, PAGE_SIZE, paginate } from "@routes/lib/paging";
-import { channelIdOf, scopeName, scopeOf } from "@routes/lib/scope";
-import { Handler, Handlers } from "@routes/types";
 
 const COLOR = "#94ab62";
 
@@ -90,7 +90,9 @@ const panelGet: Handler<"GET"> = async (router, interaction, state) => {
 			row(
 				new RouteButtonBuilder(router)
 					.setLabel(
-						type === "blacklist" ? "Switch to Whitelist" : "Switch to Blacklist",
+						type === "blacklist"
+							? "Switch to Whitelist"
+							: "Switch to Blacklist",
 					)
 					.setStyle(ButtonStyle.Primary)
 					.setTo(`${panelPath(scope)}/type`, {
@@ -206,9 +208,8 @@ const typePost: Handler<"POST"> = async (router, interaction, state) => {
 	const scope = scopeOf(state.params);
 	const channelId = channelIdOf(scope);
 	const panel = panelPath(scope);
-	const to = state.queryParams.get("to") === "whitelist"
-		? "whitelist"
-		: "blacklist";
+	const to =
+		state.queryParams.get("to") === "whitelist" ? "whitelist" : "blacklist";
 
 	const filter = await getFilter(interaction.user.id, channelId);
 	if (filterType(filter) === to)

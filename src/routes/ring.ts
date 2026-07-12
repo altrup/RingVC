@@ -1,3 +1,8 @@
+import { homeButton, row } from "@routes/lib/components";
+import { flashRedirect, withFlash } from "@routes/lib/flash";
+import { commandMention } from "@routes/lib/mentions";
+import { PAGE_SIZE } from "@routes/lib/paging";
+import { Handler, Handlers } from "@routes/types";
 import {
 	RouteButtonBuilder,
 	RouteUserSelectMenuBuilder,
@@ -19,11 +24,6 @@ import {
 	ringDefaultUsers,
 	UserRingResult,
 } from "@main/ring";
-import { homeButton, row } from "@routes/lib/components";
-import { flashRedirect, withFlash } from "@routes/lib/flash";
-import { commandMention } from "@routes/lib/mentions";
-import { PAGE_SIZE } from "@routes/lib/paging";
-import { Handler, Handlers } from "@routes/types";
 
 const COLOR = "#c58a74";
 const PANEL = "/ring";
@@ -61,7 +61,10 @@ const panelGet: Handler<"GET"> = async (router, interaction, state) => {
 
 	return {
 		embeds: [
-			new EmbedBuilder().setColor(COLOR).setTitle("Ring").setDescription(description),
+			new EmbedBuilder()
+				.setColor(COLOR)
+				.setTitle("Ring")
+				.setDescription(description),
 		],
 		components: [
 			new ActionRowBuilder<RouteUserSelectMenuBuilder>()
@@ -103,10 +106,7 @@ const ringResultsFlash = (results: UserRingResult[]) => {
 	};
 };
 
-const ringUserIds = async (
-	interaction: Interaction,
-	userIds: string[],
-) => {
+const ringUserIds = async (interaction: Interaction, userIds: string[]) => {
 	const channel = voiceChannelOf(interaction);
 	if (!channel) return flashRedirect(PANEL, NOT_IN_VC, "warn");
 	if (userIds.length === 0)

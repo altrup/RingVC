@@ -1,8 +1,8 @@
+import { deleteDataHandlers } from "@routes/deleteData";
 import { Interaction } from "discord.js";
 import { beforeEach, expect, test, vi } from "vitest";
 
 import { deleteAllUserData } from "@db/users";
-import { deleteDataHandlers } from "@routes/deleteData";
 
 vi.mock("@db/users", () => ({
 	deleteAllUserData: vi.fn(),

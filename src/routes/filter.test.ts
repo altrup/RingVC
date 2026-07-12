@@ -1,12 +1,8 @@
+import { filterHandlers } from "@routes/filter";
 import { Interaction } from "discord.js";
 import { beforeEach, expect, test, vi } from "vitest";
 
-import {
-	addFilterEntry,
-	getFilter,
-	removeFilterEntry,
-} from "@db/filters";
-import { filterHandlers } from "@routes/filter";
+import { addFilterEntry, getFilter, removeFilterEntry } from "@db/filters";
 
 vi.mock("@db/filters", async (importOriginal) => ({
 	...(await importOriginal<typeof import("@db/filters")>()),

@@ -1,10 +1,10 @@
+import { homeButton, row } from "@routes/lib/components";
+import { flashRedirect, withFlash } from "@routes/lib/flash";
+import { Handler, Handlers } from "@routes/types";
 import { RouteButtonBuilder } from "discord-embed-router";
 import { ButtonStyle, EmbedBuilder } from "discord.js";
 
 import { DiscordUserMode, getUserMode, setUserMode } from "@db/users";
-import { homeButton, row } from "@routes/lib/components";
-import { flashRedirect, withFlash } from "@routes/lib/flash";
-import { Handler, Handlers } from "@routes/types";
 
 const COLOR = "#F5853F";
 const PATH = "/mode";

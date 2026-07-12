@@ -1,4 +1,5 @@
 // the same behavior as unsignup, under the name people reach for
+import { RingRouter } from "@routes/types";
 import {
 	ChannelType,
 	ChatInputCommandInteraction,
@@ -6,7 +7,6 @@ import {
 } from "discord.js";
 
 import { unsignup } from "@commands/unsignup";
-import { RingRouter } from "@routes/types";
 
 export const quit = {
 	data: new SlashCommandBuilder()

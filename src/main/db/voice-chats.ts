@@ -33,7 +33,10 @@ export const getUserVoiceChatSignups = async (
 	userId: string,
 ): Promise<string[]> => {
 	const rows = rowsOf(
-		await db.from("voice_chat_users").select("channel_id").eq("user_id", userId),
+		await db
+			.from("voice_chat_users")
+			.select("channel_id")
+			.eq("user_id", userId),
 	);
 	return rows.map((row) => row.channel_id);
 };

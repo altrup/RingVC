@@ -1,11 +1,11 @@
-import { RouteButtonBuilder } from "discord-embed-router";
-import { ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
-
-import { CommandName } from "@commands/commandNames";
 import { backButton, homeButton, row } from "@routes/lib/components";
 import { withFlash } from "@routes/lib/flash";
 import { commandMention } from "@routes/lib/mentions";
 import { Handler, Handlers } from "@routes/types";
+import { RouteButtonBuilder } from "discord-embed-router";
+import { ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
+
+import { CommandName } from "@commands/commandNames";
 
 const COLOR = "#b574c5";
 const GITHUB_URL = "https://github.com/altrup/RingVC";
@@ -109,7 +109,9 @@ const commandsGet: Handler<"GET"> = (router, interaction, state) => {
 			new EmbedBuilder()
 				.setColor(COLOR)
 				.setTitle("Commands")
-				.setDescription(withFlash(state.queryParams, "Every command is clickable."))
+				.setDescription(
+					withFlash(state.queryParams, "Every command is clickable."),
+				)
 				.addFields(
 					{ name: "Quick actions", value: list(quickActions) },
 					{ name: "Panel openers", value: list(panels) },

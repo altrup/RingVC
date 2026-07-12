@@ -1,7 +1,7 @@
-import {
-	RouteButtonBuilder,
-	RouteModalBuilder,
-} from "discord-embed-router";
+import { row } from "@routes/lib/components";
+import { flashRedirect, withFlash } from "@routes/lib/flash";
+import { Handler, Handlers } from "@routes/types";
+import { RouteButtonBuilder, RouteModalBuilder } from "discord-embed-router";
 import {
 	ButtonStyle,
 	EmbedBuilder,
@@ -11,9 +11,6 @@ import {
 } from "discord.js";
 
 import { deleteAllUserData } from "@db/users";
-import { row } from "@routes/lib/components";
-import { flashRedirect, withFlash } from "@routes/lib/flash";
-import { Handler, Handlers } from "@routes/types";
 
 const COLOR = "#ca2b2b";
 const PANEL = "/delete-data";
@@ -81,7 +78,9 @@ const panelPost: Handler<"POST"> = async (router, interaction, state) => {
 	const hadData = await deleteAllUserData(interaction.user.id);
 	return flashRedirect(
 		PANEL,
-		hadData ? "All your data has been deleted" : "You had no stored data to delete",
+		hadData
+			? "All your data has been deleted"
+			: "You had no stored data to delete",
 		hadData ? "success" : "warn",
 		{ done: "1" },
 	);

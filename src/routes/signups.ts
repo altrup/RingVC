@@ -1,4 +1,13 @@
 import {
+	backButton,
+	homeButton,
+	paginationRows,
+	row,
+} from "@routes/lib/components";
+import { flashRedirect, withFlash } from "@routes/lib/flash";
+import { diffSelection, PAGE_SIZE, paginate } from "@routes/lib/paging";
+import { Handler, Handlers } from "@routes/types";
+import {
 	RouteButtonBuilder,
 	RouteChannelSelectMenuBuilder,
 	RouteRoleSelectMenuBuilder,
@@ -24,15 +33,6 @@ import {
 	removeVoiceChatUser,
 } from "@db/voice-chats";
 import { joinWithAnd, mentionRole } from "@main/ring";
-import {
-	backButton,
-	homeButton,
-	paginationRows,
-	row,
-} from "@routes/lib/components";
-import { flashRedirect, withFlash } from "@routes/lib/flash";
-import { diffSelection, PAGE_SIZE, paginate } from "@routes/lib/paging";
-import { Handler, Handlers } from "@routes/types";
 
 const COLOR = "#62a8ab";
 const PANEL = "/signups";
@@ -41,9 +41,8 @@ const ROLES = "/signups/roles";
 const mentionChannel = (channelId: string) => `<#${channelId}>`;
 
 const canManageRoleSignups = (interaction: Interaction): boolean =>
-	interaction.memberPermissions?.has(
-		PermissionsBitField.Flags.ManageRoles,
-	) === true ||
+	interaction.memberPermissions?.has(PermissionsBitField.Flags.ManageRoles) ===
+		true ||
 	interaction.memberPermissions?.has(
 		PermissionsBitField.Flags.Administrator,
 	) === true;
@@ -67,7 +66,10 @@ const guildOnlyRender = {
 
 // the user's signups, restricted to this guild's voice channels and sorted
 // by channel name for stable paging
-const guildSignups = async (userId: string, guild: Guild): Promise<string[]> => {
+const guildSignups = async (
+	userId: string,
+	guild: Guild,
+): Promise<string[]> => {
 	const channelIds = new Set(guildVoiceChannelIds(guild));
 	return (await getUserVoiceChatSignups(userId))
 		.filter((channelId) => channelIds.has(channelId))
@@ -80,7 +82,8 @@ const guildSignups = async (userId: string, guild: Guild): Promise<string[]> => 
 
 const panelGet: Handler<"GET"> = async (router, interaction, state) => {
 	const guild = interaction.guild;
-	if (!guild) return { ...guildOnlyRender, components: [row(homeButton(router))] };
+	if (!guild)
+		return { ...guildOnlyRender, components: [row(homeButton(router))] };
 
 	const signups = await guildSignups(interaction.user.id, guild);
 	const { pageItems, page, pageCount } = paginate(
@@ -186,7 +189,9 @@ const membersPost: Handler<"POST"> = async (router, interaction, state) => {
 				]
 			: []),
 		...(notSignedUp.length > 0
-			? [`You aren't signed up for ${joinWithAnd(notSignedUp.map(mentionChannel))}`]
+			? [
+					`You aren't signed up for ${joinWithAnd(notSignedUp.map(mentionChannel))}`,
+				]
 			: []),
 	];
 	const changed = added.length > 0 || removed.length > 0;
@@ -216,13 +221,16 @@ const sortedRoleSignups = async (guild: Guild) => {
 		`${guild.roles.cache.get(roleId)?.name ?? roleId} ${guild.channels.cache.get(channelId)?.name ?? channelId}`;
 	return (await getVoiceChatRoleSignups(guildVoiceChannelIds(guild))).sort(
 		(a, b) =>
-			nameOf(a.roleId, a.channelId).localeCompare(nameOf(b.roleId, b.channelId)),
+			nameOf(a.roleId, a.channelId).localeCompare(
+				nameOf(b.roleId, b.channelId),
+			),
 	);
 };
 
 const rolesGet: Handler<"GET"> = async (router, interaction, state) => {
 	const guild = interaction.guild;
-	if (!guild) return { ...guildOnlyRender, components: [row(homeButton(router))] };
+	if (!guild)
+		return { ...guildOnlyRender, components: [row(homeButton(router))] };
 	if (!canManageRoleSignups(interaction)) return noPermissionRender(router);
 
 	const mappings = await sortedRoleSignups(guild);
@@ -299,7 +307,9 @@ const rolesGet: Handler<"GET"> = async (router, interaction, state) => {
 };
 
 // a remove-select value decodes to "<path>?pair=<roleId>:<channelId>"
-const pairOf = (value: string): { roleId: string; channelId: string } | null => {
+const pairOf = (
+	value: string,
+): { roleId: string; channelId: string } | null => {
 	const [, query = ""] = value.split("?");
 	const [roleId, channelId] =
 		new URLSearchParams(query).get("pair")?.split(":") ?? [];
@@ -362,9 +372,7 @@ const rolesRemovePost: Handler<"POST"> = async (router, interaction, state) => {
 		);
 	const parts = [
 		...(removed.length > 0 ? [`Removed ${describe(removed)}`] : []),
-		...(missing.length > 0
-			? [`Already removed: ${describe(missing)}`]
-			: []),
+		...(missing.length > 0 ? [`Already removed: ${describe(missing)}`] : []),
 	];
 	return flashRedirect(
 		ROLES,
@@ -376,10 +384,12 @@ const rolesRemovePost: Handler<"POST"> = async (router, interaction, state) => {
 
 const rolePickGet: Handler<"GET"> = async (router, interaction, state) => {
 	const guild = interaction.guild;
-	if (!guild) return { ...guildOnlyRender, components: [row(homeButton(router))] };
+	if (!guild)
+		return { ...guildOnlyRender, components: [row(homeButton(router))] };
 	if (!canManageRoleSignups(interaction)) return noPermissionRender(router);
 
-	const roleId = typeof state.params.roleId === "string" ? state.params.roleId : "";
+	const roleId =
+		typeof state.params.roleId === "string" ? state.params.roleId : "";
 
 	return {
 		embeds: [
@@ -420,7 +430,8 @@ const roleCommitPost: Handler<"POST"> = async (router, interaction, state) => {
 			"warn",
 		);
 
-	const roleId = typeof state.params.roleId === "string" ? state.params.roleId : "";
+	const roleId =
+		typeof state.params.roleId === "string" ? state.params.roleId : "";
 	const channelId = state.queryParams.get("channel") ?? "";
 	const channel = interaction.guild?.channels.cache.get(channelId);
 	if (!channel?.isVoiceBased())

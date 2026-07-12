@@ -1,11 +1,10 @@
+import { RingRouter } from "@routes/types";
 import {
 	ChannelType,
 	ChatInputCommandInteraction,
 	MessageFlags,
 	SlashCommandBuilder,
 } from "discord.js";
-
-import { RingRouter } from "@routes/types";
 
 export const defaultRingRecipients = {
 	data: new SlashCommandBuilder()
@@ -14,7 +13,9 @@ export const defaultRingRecipients = {
 		.addChannelOption((option) =>
 			option
 				.setName("channel")
-				.setDescription("The channel whose recipients to open (global if omitted)")
+				.setDescription(
+					"The channel whose recipients to open (global if omitted)",
+				)
 				.addChannelTypes(ChannelType.GuildVoice)
 				.setRequired(false),
 		),

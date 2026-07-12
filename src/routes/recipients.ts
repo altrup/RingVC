@@ -1,3 +1,8 @@
+import { homeButton, paginationRows, row } from "@routes/lib/components";
+import { flashRedirect, withFlash } from "@routes/lib/flash";
+import { diffSelection, PAGE_SIZE, paginate } from "@routes/lib/paging";
+import { channelIdOf, scopeOf } from "@routes/lib/scope";
+import { Handler, Handlers } from "@routes/types";
 import {
 	RouteButtonBuilder,
 	RouteChannelSelectMenuBuilder,
@@ -18,11 +23,6 @@ import {
 	removeDefaultRingee,
 } from "@db/default-ringees";
 import { joinWithAnd, mentionUser } from "@main/ring";
-import { homeButton, paginationRows, row } from "@routes/lib/components";
-import { flashRedirect, withFlash } from "@routes/lib/flash";
-import { diffSelection, PAGE_SIZE, paginate } from "@routes/lib/paging";
-import { channelIdOf, scopeOf } from "@routes/lib/scope";
-import { Handler, Handlers } from "@routes/types";
 
 const COLOR = "#747ac5";
 
@@ -41,7 +41,11 @@ const autoRingStatus = async (userId: string, channelId: string | null) => {
 			: getAutoRingSetting(userId, channelId),
 		getAutoRingSetting(userId, null),
 	]);
-	return { override, global: global ?? false, effective: override ?? global ?? false };
+	return {
+		override,
+		global: global ?? false,
+		effective: override ?? global ?? false,
+	};
 };
 
 const panelGet: Handler<"GET"> = async (router, interaction, state) => {

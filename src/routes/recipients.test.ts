@@ -1,8 +1,8 @@
+import { recipientsHandlers } from "@routes/recipients";
 import { Interaction } from "discord.js";
 import { beforeEach, expect, test, vi } from "vitest";
 
 import { setAutoRing, unsetAutoRing } from "@db/auto-ring";
-import { recipientsHandlers } from "@routes/recipients";
 
 vi.mock("@db/auto-ring", () => ({
 	getAutoRingSetting: vi.fn(),

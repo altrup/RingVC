@@ -1,11 +1,10 @@
+import { RingRouter } from "@routes/types";
 import {
 	ChannelType,
 	ChatInputCommandInteraction,
 	MessageFlags,
 	SlashCommandBuilder,
 } from "discord.js";
-
-import { RingRouter } from "@routes/types";
 
 export const unsignuprole = {
 	data: new SlashCommandBuilder()

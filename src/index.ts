@@ -1,3 +1,5 @@
+import { registerRoutes } from "@routes/index";
+import { Globals } from "@routes/types";
 import { EmbedRouter } from "discord-embed-router";
 import {
 	ChatInputCommandInteraction,
@@ -15,8 +17,6 @@ import {
 } from "@commands/commands";
 import { DISCORD_TOKEN } from "@config";
 import { onVoiceChannelJoin } from "@main/ring";
-import { registerRoutes } from "@routes/index";
-import { Globals } from "@routes/types";
 
 const client = new Client({
 	intents: [

@@ -1,9 +1,10 @@
+import { flashLine, flashRedirect } from "@routes/lib/flash";
 import { expect, test } from "vitest";
 
-import { flashLine, flashRedirect } from "@routes/lib/flash";
-
 test("flashRedirect carries the flash text and level as redirect query params", () => {
-	expect(flashRedirect("/filter/global", "Blocked <@1>", "success")).toStrictEqual({
+	expect(
+		flashRedirect("/filter/global", "Blocked <@1>", "success"),
+	).toStrictEqual({
 		redirect: "/filter/global",
 		queryParams: { flash: "Blocked <@1>", level: "success" },
 	});
@@ -19,12 +20,12 @@ test("flashRedirect merges extra params like the page to stay on", () => {
 });
 
 test("flashLine renders the flash verbatim with an icon from the level alone", () => {
-	expect(flashLine(new URLSearchParams({ flash: "Done", level: "success" }))).toBe(
-		"✅ Done",
-	);
-	expect(flashLine(new URLSearchParams({ flash: "Careful", level: "warn" }))).toBe(
-		"⚠️ Careful",
-	);
+	expect(
+		flashLine(new URLSearchParams({ flash: "Done", level: "success" })),
+	).toBe("✅ Done");
+	expect(
+		flashLine(new URLSearchParams({ flash: "Careful", level: "warn" })),
+	).toBe("⚠️ Careful");
 });
 
 test("flashLine returns null when no flash is present", () => {

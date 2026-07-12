@@ -1,10 +1,9 @@
+import { RingRouter } from "@routes/types";
 import {
 	ChatInputCommandInteraction,
 	MessageFlags,
 	SlashCommandBuilder,
 } from "discord.js";
-
-import { RingRouter } from "@routes/types";
 
 export const block = {
 	data: new SlashCommandBuilder()

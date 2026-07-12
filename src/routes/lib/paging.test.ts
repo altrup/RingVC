@@ -1,6 +1,5 @@
-import { expect, test } from "vitest";
-
 import { diffSelection, paginate } from "@routes/lib/paging";
+import { expect, test } from "vitest";
 
 const ids = (count: number, offset = 0) =>
 	Array.from({ length: count }, (_, i) => `${i + offset + 1}`);
@@ -81,7 +80,8 @@ test("a submitted value that already lives on another page is not re-added", () 
 test("deselecting everything on a page removes the whole page only", () => {
 	const allItems = ids(30);
 	const { pageItems } = paginate(allItems, "0");
-	expect(
-		diffSelection({ allItems, pageItems, submitted: [] }),
-	).toStrictEqual({ added: [], removed: pageItems });
+	expect(diffSelection({ allItems, pageItems, submitted: [] })).toStrictEqual({
+		added: [],
+		removed: pageItems,
+	});
 });

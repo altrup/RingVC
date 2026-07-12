@@ -1,8 +1,8 @@
+import { modeHandlers } from "@routes/mode";
 import { Interaction } from "discord.js";
 import { beforeEach, expect, test, vi } from "vitest";
 
 import { getUserMode, setUserMode } from "@db/users";
-import { modeHandlers } from "@routes/mode";
 
 vi.mock("@db/users", () => ({
 	getUserMode: vi.fn(),

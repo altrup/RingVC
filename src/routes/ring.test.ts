@@ -1,8 +1,8 @@
+import { ringHandlers } from "@routes/ring";
 import { Interaction } from "discord.js";
 import { beforeEach, expect, test, vi } from "vitest";
 
 import { ring } from "@main/ring";
-import { ringHandlers } from "@routes/ring";
 
 vi.mock("@main/ring", async (importOriginal) => ({
 	...(await importOriginal<typeof import("@main/ring")>()),

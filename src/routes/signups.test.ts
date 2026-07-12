@@ -1,8 +1,8 @@
+import { signupsHandlers } from "@routes/signups";
 import { Interaction, PermissionsBitField } from "discord.js";
 import { beforeEach, expect, test, vi } from "vitest";
 
 import { addVoiceChatRole } from "@db/voice-chats";
-import { signupsHandlers } from "@routes/signups";
 
 vi.mock("@db/voice-chats", () => ({
 	getUserVoiceChatSignups: vi.fn(),

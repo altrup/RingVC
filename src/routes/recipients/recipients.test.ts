@@ -1,9 +1,12 @@
-import { recipientsHandlers } from "@routes/recipients";
 import { Interaction } from "discord.js";
 import { beforeEach, expect, test, vi } from "vitest";
 
 import { setAutoRing, unsetAutoRing } from "@db/auto-ring";
 import { clearDefaultRingees } from "@db/default-ringees";
+
+import { recipientsAutoRingPost } from "./[scope]/auto-ring/post";
+import { recipientsAutoRingUnsetPost } from "./[scope]/auto-ring/unset/post";
+import { recipientsClearPost } from "./[scope]/clear/post";
 
 vi.mock("@db/auto-ring", () => ({
 	getAutoRingSetting: vi.fn(),
@@ -19,28 +22,26 @@ vi.mock("@db/default-ringees", () => ({
 
 const interaction = { user: { id: "caller" } } as unknown as Interaction;
 
-type AutoRingPost = NonNullable<typeof recipientsHandlers.autoRing.post>;
 const autoRingState = (scope: string, query: string) =>
 	({
 		params: { scope },
 		path: `/recipients/${scope}/auto-ring`,
 		queryParams: new URLSearchParams(query),
 		timestamp: 0,
-	}) as unknown as Parameters<AutoRingPost>[2];
+	}) as unknown as Parameters<typeof recipientsAutoRingPost>[2];
 
-beforeEach(() => {
-	vi.clearAllMocks();
-});
-
-type ClearPost = NonNullable<typeof recipientsHandlers.clear.post>;
 const clearPost = (confirmation: string) =>
-	recipientsHandlers.clear.post!(undefined as never, interaction, {
+	recipientsClearPost(undefined as never, interaction, {
 		params: { scope: "global" },
 		path: "/recipients/global/clear",
 		queryParams: new URLSearchParams(),
 		timestamp: 0,
 		fields: { getTextInputValue: () => confirmation },
-	} as unknown as Parameters<ClearPost>[2]);
+	} as unknown as Parameters<typeof recipientsClearPost>[2]);
+
+beforeEach(() => {
+	vi.clearAllMocks();
+});
 
 test("a recipients reset with matching confirmation text clears the list", async () => {
 	vi.mocked(clearDefaultRingees).mockResolvedValue(true);
@@ -68,7 +69,7 @@ test("a recipients reset without matching confirmation text mutates nothing", as
 test("enabling auto-ring warns that joins ring default recipients even in stealth", async () => {
 	vi.mocked(setAutoRing).mockResolvedValue(true);
 
-	const result = await recipientsHandlers.autoRing.post!(
+	const result = await recipientsAutoRingPost(
 		undefined as never,
 		interaction,
 		autoRingState("123", "enable=1"),
@@ -85,7 +86,7 @@ test("enabling auto-ring warns that joins ring default recipients even in stealt
 test("toggling auto-ring to its current value reports no change", async () => {
 	vi.mocked(setAutoRing).mockResolvedValue(false);
 
-	const result = await recipientsHandlers.autoRing.post!(
+	const result = await recipientsAutoRingPost(
 		undefined as never,
 		interaction,
 		autoRingState("global", "enable=0"),
@@ -100,7 +101,7 @@ test("toggling auto-ring to its current value reports no change", async () => {
 test("removing a missing auto-ring override reports there was none", async () => {
 	vi.mocked(unsetAutoRing).mockResolvedValue(false);
 
-	const result = await recipientsHandlers.autoRingUnset.post!(
+	const result = await recipientsAutoRingUnsetPost(
 		undefined as never,
 		interaction,
 		autoRingState("123", ""),

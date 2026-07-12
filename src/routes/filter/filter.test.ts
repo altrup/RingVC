@@ -1,4 +1,3 @@
-import { filterHandlers } from "@routes/filter";
 import { Interaction } from "discord.js";
 import { beforeEach, expect, test, vi } from "vitest";
 
@@ -8,6 +7,9 @@ import {
 	removeFilterEntry,
 	resetFilter,
 } from "@db/filters";
+
+import { filterMembersPost } from "./[scope]/members/post";
+import { filterResetPost } from "./[scope]/reset/post";
 
 vi.mock("@db/filters", async (importOriginal) => ({
 	...(await importOriginal<typeof import("@db/filters")>()),
@@ -20,11 +22,7 @@ vi.mock("@db/filters", async (importOriginal) => ({
 
 const interaction = { user: { id: "caller" } } as unknown as Interaction;
 
-type MembersPost = NonNullable<typeof filterHandlers.members.post>;
-const membersState = (
-	query: string,
-	values?: string[],
-): Parameters<MembersPost>[2] =>
+const membersState = (query: string, values?: string[]) =>
 	({
 		params: { scope: "global" },
 		path: "/filter/global/members",
@@ -32,14 +30,23 @@ const membersState = (
 		timestamp: 0,
 		globals: { commandIds: new Map() },
 		values,
-	}) as unknown as Parameters<MembersPost>[2];
+	}) as unknown as Parameters<typeof filterMembersPost>[2];
 
 const membersPost = (query: string, values?: string[]) =>
-	filterHandlers.members.post!(
+	filterMembersPost(
 		undefined as never,
 		interaction,
 		membersState(query, values),
 	);
+
+const resetPost = (confirmation: string) =>
+	filterResetPost(undefined as never, interaction, {
+		params: { scope: "global" },
+		path: "/filter/global/reset",
+		queryParams: new URLSearchParams(),
+		timestamp: 0,
+		fields: { getTextInputValue: () => confirmation },
+	} as unknown as Parameters<typeof filterResetPost>[2]);
 
 beforeEach(() => {
 	vi.clearAllMocks();
@@ -82,16 +89,6 @@ test("a select submission applies adds and removes from the visible page togethe
 	);
 	expect(flashParams.get("level")).toBe("success");
 });
-
-type ResetPost = NonNullable<typeof filterHandlers.reset.post>;
-const resetPost = (confirmation: string) =>
-	filterHandlers.reset.post!(undefined as never, interaction, {
-		params: { scope: "global" },
-		path: "/filter/global/reset",
-		queryParams: new URLSearchParams(),
-		timestamp: 0,
-		fields: { getTextInputValue: () => confirmation },
-	} as unknown as Parameters<ResetPost>[2]);
 
 test("a filter reset with matching confirmation text resets the filter", async () => {
 	vi.mocked(resetFilter).mockResolvedValue(true);

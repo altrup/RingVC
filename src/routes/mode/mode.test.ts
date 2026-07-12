@@ -1,8 +1,9 @@
-import { modeHandlers } from "@routes/mode";
 import { Interaction } from "discord.js";
 import { beforeEach, expect, test, vi } from "vitest";
 
 import { getUserMode, setUserMode } from "@db/users";
+
+import { modePost } from "./post";
 
 vi.mock("@db/users", () => ({
 	getUserMode: vi.fn(),
@@ -11,14 +12,13 @@ vi.mock("@db/users", () => ({
 
 const interaction = { user: { id: "caller" } } as unknown as Interaction;
 
-type ModePost = NonNullable<typeof modeHandlers.panel.post>;
 const state = (query: string) =>
 	({
 		params: {},
 		path: "/mode",
 		queryParams: new URLSearchParams(query),
 		timestamp: 0,
-	}) as unknown as Parameters<ModePost>[2];
+	}) as unknown as Parameters<typeof modePost>[2];
 
 beforeEach(() => {
 	vi.clearAllMocks();
@@ -27,7 +27,7 @@ beforeEach(() => {
 test("setting a mode persists it and confirms what it does", async () => {
 	vi.mocked(getUserMode).mockResolvedValue("normal");
 
-	const result = await modeHandlers.panel.post!(
+	const result = await modePost(
 		undefined as never,
 		interaction,
 		state("set=stealth"),
@@ -43,7 +43,7 @@ test("setting a mode persists it and confirms what it does", async () => {
 test("an unknown mode value writes nothing", async () => {
 	vi.mocked(getUserMode).mockResolvedValue("normal");
 
-	const result = await modeHandlers.panel.post!(
+	const result = await modePost(
 		undefined as never,
 		interaction,
 		state("set=loud"),

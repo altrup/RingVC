@@ -3,7 +3,6 @@ import {
 	Method,
 	RouteButtonBuilder,
 	RouteHandler,
-	RouteHandlers,
 	RouteModalBuilder,
 } from "discord-embed-router";
 
@@ -20,10 +19,6 @@ export type RingRouter = EmbedRouter<Globals>;
 export type Handler<M extends Method> =
 	RingRouter extends EmbedRouter<Globals, infer S, infer L>
 		? RouteHandler<M, Globals, S, L>
-		: never;
-export type Handlers =
-	RingRouter extends EmbedRouter<Globals, infer S, infer L>
-		? RouteHandlers<Globals, S, L>
 		: never;
 
 // nameable alias for helper return types (declaration emit can't name the

@@ -1,8 +1,9 @@
-import { ringHandlers } from "@routes/ring";
 import { Interaction } from "discord.js";
 import { beforeEach, expect, test, vi } from "vitest";
 
 import { ring } from "@main/ring";
+
+import { ringUsersPost } from "./users/post";
 
 vi.mock("@main/ring", async (importOriginal) => ({
 	...(await importOriginal<typeof import("@main/ring")>()),
@@ -20,7 +21,6 @@ const makeInteraction = (inVoice: boolean) =>
 		member: { voice: { channel: inVoice ? voiceChannel : null } },
 	}) as unknown as Interaction;
 
-type UsersPost = NonNullable<typeof ringHandlers.users.post>;
 const state = (query: string, values?: string[]) =>
 	({
 		params: {},
@@ -29,14 +29,14 @@ const state = (query: string, values?: string[]) =>
 		timestamp: 0,
 		globals: { commandIds: new Map() },
 		values,
-	}) as unknown as Parameters<UsersPost>[2];
+	}) as unknown as Parameters<typeof ringUsersPost>[2];
 
 beforeEach(() => {
 	vi.clearAllMocks();
 });
 
 test("ringing while not in a voice channel flashes the join hint and rings nobody", async () => {
-	const result = await ringHandlers.users.post!(
+	const result = await ringUsersPost(
 		undefined as never,
 		makeInteraction(false),
 		state("", ["9"]),
@@ -56,7 +56,7 @@ test("a selection rings the submitted users and reports per-user outcomes", asyn
 		{ userId: "8", status: "rejected", error: new Error("you blocked <@8>") },
 	]);
 
-	const result = await ringHandlers.users.post!(
+	const result = await ringUsersPost(
 		undefined as never,
 		makeInteraction(true),
 		state("", ["9", "8"]),

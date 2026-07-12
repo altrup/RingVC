@@ -1,8 +1,9 @@
-import { signupsHandlers } from "@routes/signups";
 import { Interaction, PermissionsBitField } from "discord.js";
 import { beforeEach, expect, test, vi } from "vitest";
 
 import { addVoiceChatRole } from "@db/voice-chats";
+
+import { signupsRolePost } from "./roles/[roleId]/post";
 
 vi.mock("@db/voice-chats", () => ({
 	getUserVoiceChatSignups: vi.fn(),
@@ -23,14 +24,13 @@ const makeInteraction = (admin: boolean) =>
 		guild: { channels: { cache: new Map([[voiceChannel.id, voiceChannel]]) } },
 	}) as unknown as Interaction;
 
-type RoleCommitPost = NonNullable<typeof signupsHandlers.rolePage.post>;
 const commitState = (query: string) =>
 	({
 		params: { roleId: "role1" },
 		path: "/signups/roles/role1",
 		queryParams: new URLSearchParams(query),
 		timestamp: 0,
-	}) as unknown as Parameters<RoleCommitPost>[2];
+	}) as unknown as Parameters<typeof signupsRolePost>[2];
 
 beforeEach(() => {
 	vi.clearAllMocks();
@@ -39,7 +39,7 @@ beforeEach(() => {
 test("committing a role signup that already exists rejects with a flash", async () => {
 	vi.mocked(addVoiceChatRole).mockResolvedValue(false);
 
-	const result = await signupsHandlers.rolePage.post!(
+	const result = await signupsRolePost(
 		undefined as never,
 		makeInteraction(true),
 		commitState("channel=vc1"),
@@ -56,7 +56,7 @@ test("committing a role signup that already exists rejects with a flash", async 
 test("committing a role signup succeeds and reports the mapping", async () => {
 	vi.mocked(addVoiceChatRole).mockResolvedValue(true);
 
-	const result = await signupsHandlers.rolePage.post!(
+	const result = await signupsRolePost(
 		undefined as never,
 		makeInteraction(true),
 		commitState("channel=vc1"),
@@ -71,7 +71,7 @@ test("committing a role signup succeeds and reports the mapping", async () => {
 });
 
 test("a role signup commit without Manage Roles mutates nothing", async () => {
-	const result = await signupsHandlers.rolePage.post!(
+	const result = await signupsRolePost(
 		undefined as never,
 		makeInteraction(false),
 		commitState("channel=vc1"),

@@ -1,8 +1,9 @@
-import { deleteDataHandlers } from "@routes/deleteData";
 import { Interaction } from "discord.js";
 import { beforeEach, expect, test, vi } from "vitest";
 
 import { deleteAllUserData } from "@db/users";
+
+import { deleteDataPost } from "./post";
 
 vi.mock("@db/users", () => ({
 	deleteAllUserData: vi.fn(),
@@ -10,7 +11,6 @@ vi.mock("@db/users", () => ({
 
 const interaction = { user: { id: "caller" } } as unknown as Interaction;
 
-type DeletePost = NonNullable<typeof deleteDataHandlers.panel.post>;
 const state = (confirmation: string) =>
 	({
 		params: {},
@@ -18,7 +18,7 @@ const state = (confirmation: string) =>
 		queryParams: new URLSearchParams(),
 		timestamp: 0,
 		fields: { getTextInputValue: () => confirmation },
-	}) as unknown as Parameters<DeletePost>[2];
+	}) as unknown as Parameters<typeof deleteDataPost>[2];
 
 beforeEach(() => {
 	vi.clearAllMocks();
@@ -27,7 +27,7 @@ beforeEach(() => {
 test("typing DELETE exactly deletes all user data", async () => {
 	vi.mocked(deleteAllUserData).mockResolvedValue(true);
 
-	const result = await deleteDataHandlers.panel.post!(
+	const result = await deleteDataPost(
 		undefined as never,
 		interaction,
 		state("DELETE"),
@@ -43,7 +43,7 @@ test("typing DELETE exactly deletes all user data", async () => {
 });
 
 test("a mismatched confirmation deletes nothing", async () => {
-	const result = await deleteDataHandlers.panel.post!(
+	const result = await deleteDataPost(
 		undefined as never,
 		interaction,
 		state("delete"),

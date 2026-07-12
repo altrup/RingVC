@@ -1,4 +1,4 @@
-// literally the same as signup.js but with a different name
+// the same behavior as unsignup, under the name people reach for
 import {
 	ChannelType,
 	ChatInputCommandInteraction,
@@ -6,6 +6,7 @@ import {
 } from "discord.js";
 
 import { unsignup } from "@commands/unsignup";
+import { RingRouter } from "@routes/types";
 
 export const quit = {
 	data: new SlashCommandBuilder()
@@ -20,7 +21,7 @@ export const quit = {
 				.addChannelTypes(ChannelType.GuildVoice)
 				.setRequired(false),
 		),
-	async execute(interaction: ChatInputCommandInteraction) {
-		await unsignup.execute(interaction);
+	async execute(router: RingRouter, interaction: ChatInputCommandInteraction) {
+		await unsignup.execute(router, interaction);
 	},
 };

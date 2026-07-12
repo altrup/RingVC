@@ -161,16 +161,14 @@ const membersPost: Handler<"POST"> = async (router, interaction, state) => {
 	const added: string[] = [];
 	const alreadySignedUp: string[] = [];
 	for (const channelId of addsRequested) {
-		(await addVoiceChatUser(channelId, userId))
-			? added.push(channelId)
-			: alreadySignedUp.push(channelId);
+		if (await addVoiceChatUser(channelId, userId)) added.push(channelId);
+		else alreadySignedUp.push(channelId);
 	}
 	const removed: string[] = [];
 	const notSignedUp: string[] = [];
 	for (const channelId of removesRequested) {
-		(await removeVoiceChatUser(channelId, userId))
-			? removed.push(channelId)
-			: notSignedUp.push(channelId);
+		if (await removeVoiceChatUser(channelId, userId)) removed.push(channelId);
+		else notSignedUp.push(channelId);
 	}
 
 	const parts = [
@@ -350,9 +348,9 @@ const rolesRemovePost: Handler<"POST"> = async (router, interaction, state) => {
 	const removed: typeof pairs = [];
 	const missing: typeof pairs = [];
 	for (const pair of pairs) {
-		(await removeVoiceChatRole(pair.channelId, pair.roleId))
-			? removed.push(pair)
-			: missing.push(pair);
+		if (await removeVoiceChatRole(pair.channelId, pair.roleId))
+			removed.push(pair);
+		else missing.push(pair);
 	}
 
 	const describe = (list: typeof pairs) =>

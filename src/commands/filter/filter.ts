@@ -6,9 +6,15 @@ import {
 	SlashCommandBuilder,
 } from "discord.js";
 
-import { DiscordUser } from "@main/classes/commands/discord-user";
-import { Filter } from "@main/classes/commands/filter";
-import { DataType } from "@main/data";
+import {
+	addFilterEntry,
+	filterType,
+	getFilter,
+	removeFilterEntry,
+	resetFilter,
+	setFilterType,
+} from "@main/db/filters";
+import { mentionUser } from "@main/ring";
 
 export const filter = {
 	data: new SlashCommandBuilder()
@@ -110,8 +116,17 @@ export const filter = {
 						),
 				),
 		),
-	async execute(data: DataType, interaction: ChatInputCommandInteraction) {
+	async execute(interaction: ChatInputCommandInteraction) {
 		const subcommand = interaction.options.getSubcommand();
+		const currentUser = interaction.user; // user who started the command
+		const channel = interaction.options.getChannel("channel");
+		// "your global <x>" or "your <x> for #channel"
+		const scopeName = (noun: string) =>
+			channel ? `your ${noun} for ${channel}` : `your global ${noun}`;
+		// for the start of a sentence
+		const scopeNameCapitalized = (noun: string) =>
+			channel ? `Your ${noun} for ${channel}` : `Your global ${noun}`;
+
 		if (subcommand === "help") {
 			// Show help information
 			interaction.reply({
@@ -147,238 +162,96 @@ export const filter = {
 				flags: [MessageFlags.Ephemeral],
 			});
 		} else if (subcommand === "get") {
-			const currentUser = interaction.user; // user who started the command
-			const channel = interaction.options.getChannel("channel");
-			if (channel) {
-				const discordUser = data.users.get(currentUser.id);
-				const filter = discordUser?.getFilter(channel.id);
-				if (!filter) {
-					interaction
-						.reply({
-							content: `__List of people in your blacklist for ${channel}__\nNone`,
-							flags: [MessageFlags.Ephemeral],
-						})
-						.catch(console.error);
-				} else {
-					let userList = "";
-					filter.getList().forEach((_, key) => {
-						userList += `<@${key}>\n`;
-					});
-
-					interaction
-						.reply({
-							content: `__List of people in your ${filter.getType()} for ${channel}__\n${userList ? userList : "None"}`,
-							flags: [MessageFlags.Ephemeral],
-						})
-						.catch(console.error);
-				}
-			} else {
-				const discordUser = data.users.get(currentUser.id);
-				if (!discordUser) {
-					interaction
-						.reply({
-							content: `__List of people in your global blacklist__\nNone`,
-							flags: [MessageFlags.Ephemeral],
-						})
-						.catch(console.error);
-				} else {
-					const filter = discordUser.getFilter();
-					let userList = "";
-					filter.getList().forEach((_, key) => {
-						userList += `<@${key}>\n`;
-					});
-
-					interaction
-						.reply({
-							content: `__List of people in your global ${filter.getType()}__\n${userList ? userList : "None"}`,
-							flags: [MessageFlags.Ephemeral],
-						})
-						.catch(console.error);
-				}
-			}
+			const filter = await getFilter(currentUser.id, channel?.id ?? null);
+			const userList = filter
+				? [...filter.entries]
+						.map((userId) => `${mentionUser(userId)}\n`)
+						.join("")
+				: "";
+			interaction
+				.reply({
+					content: `__List of people in ${scopeName(filterType(filter))}__\n${userList ? userList : "None"}`,
+					flags: [MessageFlags.Ephemeral],
+				})
+				.catch(console.error);
 		} else if (subcommand === "users") {
 			// modifying users list
-			const currentUser = interaction.user; // user who started the command
-			const channel = interaction.options.getChannel("channel");
 			const addOrRemove = interaction.options.getInteger("action", true); // 1 for add 0 for remove
 			const user = interaction.options.getUser("user", true);
-			if (channel) {
-				const discordUser =
-					data.users.get(currentUser.id) ?? new DiscordUser(currentUser.id);
-				const filter =
-					discordUser.getFilter(channel.id) ??
-					discordUser.addFilter(channel.id);
 
-				if (addOrRemove === 1) {
-					filter.addUser(user.id);
-					interaction
-						.reply({
-							content: `Added ${user} to your ${filter.getType()} for ${channel}`,
-							flags: [MessageFlags.Ephemeral],
-						})
-						.catch(console.error);
-				} else {
-					if (filter.hasUser(user.id)) {
-						filter.removeUser(user.id);
-						interaction
-							.reply({
-								content: `Removed ${user} from your ${filter.getType()} for ${channel}`,
-								flags: [MessageFlags.Ephemeral],
-							})
-							.catch(console.error);
-					} else {
-						interaction
-							.reply({
-								content: `${user} was not in your ${filter.getType()} for ${channel}`,
-								flags: [MessageFlags.Ephemeral],
-							})
-							.catch(console.error);
-					}
-				}
+			const filter = await getFilter(currentUser.id, channel?.id ?? null);
+			const type = filterType(filter);
+
+			if (addOrRemove === 1) {
+				await addFilterEntry(currentUser.id, channel?.id ?? null, user.id);
+				interaction
+					.reply({
+						content: `Added ${user} to ${scopeName(type)}`,
+						flags: [MessageFlags.Ephemeral],
+					})
+					.catch(console.error);
 			} else {
-				let discordUser = data.users.get(currentUser.id);
-				if (!discordUser) {
-					discordUser = new DiscordUser(currentUser.id);
-				} else {
-					const filter = discordUser.getFilter();
-					if (addOrRemove === 1) {
-						filter.addUser(user.id);
-						interaction
-							.reply({
-								content: `Added ${user} to your global ${filter.getType()}`,
-								flags: [MessageFlags.Ephemeral],
-							})
-							.catch(console.error);
-					} else {
-						if (filter.hasUser(user.id)) {
-							filter.removeUser(user.id);
-							interaction
-								.reply({
-									content: `Removed ${user} from your global ${filter.getType()}`,
-									flags: [MessageFlags.Ephemeral],
-								})
-								.catch(console.error);
-						} else {
-							interaction
-								.reply({
-									content: `${user} was not in your global ${filter.getType()}`,
-									flags: [MessageFlags.Ephemeral],
-								})
-								.catch(console.error);
-						}
-					}
-				}
+				const removed = await removeFilterEntry(
+					currentUser.id,
+					channel?.id ?? null,
+					user.id,
+				);
+				interaction
+					.reply({
+						content: removed
+							? `Removed ${user} from ${scopeName(type)}`
+							: `${user} was not in ${scopeName(type)}`,
+						flags: [MessageFlags.Ephemeral],
+					})
+					.catch(console.error);
 			}
 		} else if (subcommand === "type") {
-			const currentUser = interaction.user; // user who started the command
-			const channel = interaction.options.getChannel("channel");
 			const type = interaction.options.getString("filter_type", true); // string of either "whitelist" or "blacklist"
-			if (channel) {
-				if (channel.type !== ChannelType.GuildVoice) {
-					interaction
-						.reply({
-							content: `Filters are only available on voice channels`,
-							flags: [MessageFlags.Ephemeral],
-						})
-						.catch(console.error);
-					return; // stop the rest of function
-				}
+			if (type !== "whitelist" && type !== "blacklist") return;
+			if (channel && channel.type !== ChannelType.GuildVoice) {
+				interaction
+					.reply({
+						content: `Filters are only available on voice channels`,
+						flags: [MessageFlags.Ephemeral],
+					})
+					.catch(console.error);
+				return; // stop the rest of function
+			}
 
-				const discordUser =
-					data.users.get(currentUser.id) ?? new DiscordUser(currentUser.id);
-				const filter =
-					discordUser.getFilter(channel.id) ??
-					discordUser.addFilter(channel.id);
-
-				if (filter.getType() === type) {
-					interaction
-						.reply({
-							content: `Your filter for ${channel} is already a \`${type}\``,
-							flags: [MessageFlags.Ephemeral],
-						})
-						.catch(console.error);
-				} else {
-					filter.setType(type);
-					interaction
-						.reply({
-							content: `Your filter for ${channel} was reset and changed to a \`${type}\``,
-							flags: [MessageFlags.Ephemeral],
-						})
-						.catch(console.error);
-				}
+			const filter = await getFilter(currentUser.id, channel?.id ?? null);
+			if (filterType(filter) === type) {
+				interaction
+					.reply({
+						content: `${scopeNameCapitalized("filter")} is already a \`${type}\``,
+						flags: [MessageFlags.Ephemeral],
+					})
+					.catch(console.error);
 			} else {
-				let discordUser = data.users.get(currentUser.id);
-				if (!discordUser) {
-					discordUser = new DiscordUser(currentUser.id);
-				} else {
-					const filter = discordUser.getFilter();
-					if (filter.getType() === type) {
-						interaction
-							.reply({
-								content: `Your global filter is already a \`${type}\``,
-								flags: [MessageFlags.Ephemeral],
-							})
-							.catch(console.error);
-					} else {
-						filter.setType(type);
-						interaction
-							.reply({
-								content: `Your global filter was reset and changed to a \`${type}\``,
-								flags: [MessageFlags.Ephemeral],
-							})
-							.catch(console.error);
-					}
-				}
+				await setFilterType(
+					currentUser.id,
+					channel?.id ?? null,
+					type === "whitelist",
+				);
+				interaction
+					.reply({
+						content: `${scopeNameCapitalized("filter")} was reset and changed to a \`${type}\``,
+						flags: [MessageFlags.Ephemeral],
+					})
+					.catch(console.error);
 			}
 		} else if (subcommand === "reset") {
-			const currentUser = interaction.user; // user who started the command
-			const channel = interaction.options.getChannel("channel");
-			// if they inputted a channel
-			if (channel) {
-				const filter = data.users.get(currentUser.id)?.getFilter(channel.id);
-				if (
-					!filter ||
-					Filter.isDefault(filter.getIsWhitelist(), filter.getList())
-				)
-					interaction
-						.reply({
-							content: `Your filter for ${channel} is already the default (blacklist with no users)`,
-							flags: [MessageFlags.Ephemeral],
-						})
-						.catch(console.error);
-				else {
-					filter.setType("blacklist"); // also resets filter
-
-					interaction
-						.reply({
-							content: `Filter for ${channel} has been reset and is now a ${filter.getType()}`,
-							flags: [MessageFlags.Ephemeral],
-						})
-						.catch(console.error);
-				}
-			} else {
-				const filter = data.users.get(currentUser.id)?.getFilter();
-				if (
-					!filter ||
-					Filter.isDefault(filter.getIsWhitelist(), filter.getList())
-				) {
-					interaction
-						.reply({
-							content: `Your global filter is already the default (blacklist with no users)`,
-							flags: [MessageFlags.Ephemeral],
-						})
-						.catch(console.error);
-				} else {
-					filter.setType("blacklist"); // also resets filter
-
-					interaction
-						.reply({
-							content: `Your global filter has been reset and is now a ${filter.getType()}`,
-							flags: [MessageFlags.Ephemeral],
-						})
-						.catch(console.error);
-				}
-			}
+			const wasNotDefault = await resetFilter(
+				currentUser.id,
+				channel?.id ?? null,
+			);
+			interaction
+				.reply({
+					content: wasNotDefault
+						? `${scopeNameCapitalized("filter")} has been reset and is now a blacklist`
+						: `${scopeNameCapitalized("filter")} is already the default (blacklist with no users)`,
+					flags: [MessageFlags.Ephemeral],
+				})
+				.catch(console.error);
 		}
 	},
 };

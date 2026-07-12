@@ -5,8 +5,7 @@ import {
 } from "discord.js";
 
 import { CommandName } from "@commands/commandNames";
-import { DiscordUser } from "@main/classes/commands/discord-user";
-import { DataType } from "@main/data";
+import { getFilter, removeFilterEntry } from "@main/db/filters";
 
 export const unwhitelist = {
 	data: new SlashCommandBuilder()
@@ -19,17 +18,15 @@ export const unwhitelist = {
 				.setRequired(true),
 		),
 	async execute(
-		data: DataType,
 		interaction: ChatInputCommandInteraction,
 		commandIds: Map<CommandName, string>,
 	) {
 		const user = interaction.user;
 		const whitelistUser = interaction.options.getUser("user", true);
 
-		const discordUser = data.users.get(user.id) ?? new DiscordUser(user.id);
-		const globalFilter = discordUser.getFilter();
+		const globalFilter = await getFilter(user.id, null);
 
-		if (!globalFilter.getIsWhitelist()) {
+		if (!globalFilter?.isWhitelist) {
 			interaction
 				.reply({
 					content: `Your global filter is not a whitelist. Either change it to a whitelist (</filter edit type:${commandIds.get("filter")}>) or use </unblock:${commandIds.get("unblock")}> instead`,
@@ -39,7 +36,7 @@ export const unwhitelist = {
 			return;
 		}
 
-		if (!globalFilter.hasUser(whitelistUser.id)) {
+		if (!globalFilter.entries.has(whitelistUser.id)) {
 			interaction
 				.reply({
 					content: `${whitelistUser} isn't whitelisted`,
@@ -49,8 +46,8 @@ export const unwhitelist = {
 			return;
 		}
 
-		// otherwise, add the user to the global filter
-		globalFilter.removeUser(whitelistUser.id);
+		// otherwise, remove the user from the global filter
+		await removeFilterEntry(user.id, null, whitelistUser.id);
 		interaction
 			.reply({
 				content: `${whitelistUser} has been unwhitelisted`,

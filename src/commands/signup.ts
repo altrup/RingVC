@@ -9,8 +9,7 @@ import {
 } from "discord.js";
 
 import { CommandName } from "@commands/commandNames";
-import { VoiceChat } from "@main/classes/commands/voice-chat";
-import { DataType } from "@main/data";
+import { addVoiceChatUser } from "@main/db/voice-chats";
 
 export const signup = {
 	data: new SlashCommandBuilder()
@@ -24,7 +23,6 @@ export const signup = {
 				.setRequired(false),
 		),
 	async execute(
-		data: DataType,
 		interaction: ChatInputCommandInteraction,
 		commandIds: Map<CommandName, string>,
 	) {
@@ -48,22 +46,16 @@ export const signup = {
 			return; // stop the rest of function
 		}
 
-		// update or create voice chat object
-		let voiceChat = null;
-		if (data.voiceChats.has(channel.id)) {
-			voiceChat = data.voiceChats.get(channel.id);
-			// if voice chat already has them
-			if (voiceChat?.hasUser(user.id)) {
-				interaction
-					.reply({
-						content: `You are already signed up for <#${channel.id}>. Use </unsignup:${commandIds.get("unsignup")}> to unsignup`,
-						flags: [MessageFlags.Ephemeral],
-					})
-					.catch(console.error);
-				return; // stops the rest of the function
-			}
-			voiceChat?.addUser(user.id);
-		} else new VoiceChat(channel.id, [user.id]);
+		const added = await addVoiceChatUser(channel.id, user.id);
+		if (!added) {
+			interaction
+				.reply({
+					content: `You are already signed up for <#${channel.id}>. Use </unsignup:${commandIds.get("unsignup")}> to unsignup`,
+					flags: [MessageFlags.Ephemeral],
+				})
+				.catch(console.error);
+			return; // stops the rest of the function
+		}
 
 		interaction
 			.reply({

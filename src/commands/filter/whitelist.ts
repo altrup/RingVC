@@ -5,8 +5,7 @@ import {
 } from "discord.js";
 
 import { CommandName } from "@commands/commandNames";
-import { DiscordUser } from "@main/classes/commands/discord-user";
-import { DataType } from "@main/data";
+import { addFilterEntry, getFilter } from "@main/db/filters";
 
 export const whitelist = {
 	data: new SlashCommandBuilder()
@@ -19,17 +18,15 @@ export const whitelist = {
 				.setRequired(true),
 		),
 	async execute(
-		data: DataType,
 		interaction: ChatInputCommandInteraction,
 		commandIds: Map<CommandName, string>,
 	) {
 		const user = interaction.user;
 		const whitelistedUser = interaction.options.getUser("user", true);
 
-		const discordUser = data.users.get(user.id) ?? new DiscordUser(user.id);
-		const globalFilter = discordUser.getFilter();
+		const globalFilter = await getFilter(user.id, null);
 
-		if (!globalFilter.getIsWhitelist()) {
+		if (!globalFilter?.isWhitelist) {
 			interaction
 				.reply({
 					content: `Your global filter is not a whitelist. Either change it to a whitelist (</filter edit type:${commandIds.get("filter")}>) or use </block:${commandIds.get("block")}> instead`,
@@ -39,7 +36,7 @@ export const whitelist = {
 			return;
 		}
 
-		if (globalFilter.hasUser(whitelistedUser.id)) {
+		if (globalFilter.entries.has(whitelistedUser.id)) {
 			interaction
 				.reply({
 					content: `${whitelistedUser} is already whitelisted`,
@@ -50,7 +47,7 @@ export const whitelist = {
 		}
 
 		// otherwise, add the user to the global filter
-		globalFilter.addUser(whitelistedUser.id);
+		await addFilterEntry(user.id, null, whitelistedUser.id);
 		interaction
 			.reply({
 				content: `${whitelistedUser} has been whitelisted`,

@@ -9,9 +9,12 @@ import {
 } from "discord.js";
 
 import { CommandName } from "@commands/commandNames";
-import { DiscordUser } from "@main/classes/commands/discord-user";
-import { VoiceChat } from "@main/classes/commands/voice-chat";
-import { DataType } from "@main/data";
+import {
+	joinWithAnd,
+	mentionUser,
+	ringDefaultUsers,
+	ring as ringUsers,
+} from "@main/ring";
 
 const ringUserSelectMenuBuilder = (disabled = false) => {
 	return new ActionRowBuilder<UserSelectMenuBuilder>()
@@ -52,7 +55,6 @@ export const ring = {
 				.setDescription("Ring all of your default ring recipients"),
 		),
 	async execute(
-		data: DataType,
 		interaction: ChatInputCommandInteraction,
 		commandIds: Map<CommandName, string>,
 	) {
@@ -85,9 +87,7 @@ export const ring = {
 			// send the user an invite link to the voice channel or text channel that the interaction creator is in
 			const results = await Promise.allSettled([
 				interaction.deferReply({ flags: [MessageFlags.Ephemeral] }),
-				VoiceChat.ring(channel, interaction.user.id, "wants you to join", [
-					user.id,
-				]),
+				ringUsers(channel, interaction.user.id, "wants you to join", [user.id]),
 			]);
 
 			// if deferReply failed, then there isn't a reply to edit
@@ -100,7 +100,7 @@ export const ring = {
 						content:
 							result?.status === "fulfilled"
 								? `Notified ${user}`
-								: `Can't ring ${DiscordUser.toString(user.id)}${result ? ` because ${result.error.message}` : ``}`,
+								: `Can't ring ${mentionUser(user.id)}${result ? ` because ${result.error.message}` : ``}`,
 					})
 					.catch(console.error);
 			} else {
@@ -139,7 +139,7 @@ export const ring = {
 				selection.update({
 					content: `Ringing users`,
 				}),
-				VoiceChat.ring(
+				ringUsers(
 					channel,
 					interaction.user.id,
 					"wants you to join",
@@ -148,10 +148,10 @@ export const ring = {
 			]);
 
 			if (results[1].status === "fulfilled") {
-				const ringedList = VoiceChat.joinWithAnd(
+				const ringedList = joinWithAnd(
 					results[1].value
 						.filter((r) => r.status === "fulfilled")
-						.map((r) => DiscordUser.toString(r.userId)),
+						.map((r) => mentionUser(r.userId)),
 				);
 				selection
 					.editReply({
@@ -161,7 +161,7 @@ export const ring = {
 								.filter((r) => r.status === "rejected")
 								.map(
 									(r) =>
-										`Can't ring ${DiscordUser.toString(r.userId)} because ${r.error.message}`,
+										`Can't ring ${mentionUser(r.userId)} because ${r.error.message}`,
 								),
 						].join("\n"),
 						components: [ringUserSelectMenuBuilder(true)],
@@ -170,36 +170,25 @@ export const ring = {
 			} else {
 				selection
 					.editReply({
-						content: `Can't ring ${VoiceChat.joinWithAnd(selection.values.map((v) => DiscordUser.toString(v)))} because ${results[1].reason.message}`,
+						content: `Can't ring ${joinWithAnd(selection.values.map(mentionUser))} because ${results[1].reason.message}`,
 						components: [ringUserSelectMenuBuilder(true)],
 					})
 					.catch(console.error);
 			}
 		} else if (interaction.options.getSubcommand() === "default") {
-			const discordUser = data.users.get(interaction.user.id);
-			if (!discordUser) {
-				interaction
-					.reply({
-						content: `You have no default ring recipients. Use </default_ring_recipients edit:${commandIds.get("default_ring_recipients")}> to add some`,
-						flags: [MessageFlags.Ephemeral],
-					})
-					.catch(console.error);
-				return;
-			}
-
 			// ring all default users
 			Promise.allSettled([
 				interaction.deferReply({ flags: [MessageFlags.Ephemeral] }),
-				discordUser.ringDefaultUsers(channel, "wants you to join"),
+				ringDefaultUsers(channel, interaction.user.id, "wants you to join"),
 			]).then((results) => {
 				// if deferReply failed, then there isn't a reply to edit
 				if (results[0].status === "rejected") return;
 				// otherwise, edit the reply to update about the ring
 				if (results[1].status === "fulfilled") {
-					const ringedList = VoiceChat.joinWithAnd(
+					const ringedList = joinWithAnd(
 						results[1].value
 							.filter((r) => r.status === "fulfilled")
-							.map((r) => DiscordUser.toString(r.userId)),
+							.map((r) => mentionUser(r.userId)),
 					);
 					interaction
 						.editReply({
@@ -209,7 +198,7 @@ export const ring = {
 									.filter((r) => r.status === "rejected")
 									.map(
 										(r) =>
-											`Can't ring ${DiscordUser.toString(r.userId)} because ${r.error.message}`,
+											`Can't ring ${mentionUser(r.userId)} because ${r.error.message}`,
 									),
 							].join("\n"),
 						})

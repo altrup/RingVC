@@ -1,4 +1,3 @@
-// literally the same as signup.js but with a different name
 import {
 	ActionRowBuilder,
 	ButtonBuilder,
@@ -9,16 +8,13 @@ import {
 	SlashCommandBuilder,
 } from "discord.js";
 
-import { DataType } from "@main/data";
+import { deleteAllUserData } from "@main/db/users";
 
 export const deleteData = {
 	data: new SlashCommandBuilder()
 		.setName("delete_data")
 		.setDescription("Delete all your data stored for this bot"),
-	async execute(data: DataType, interaction: ChatInputCommandInteraction) {
-		// kind of an expensive operation, since the channels users are signed up for
-		// are stored only in voiceChat class, not discordUser. might be worth changing later
-
+	async execute(interaction: ChatInputCommandInteraction) {
 		const response = await interaction.reply({
 			embeds: [
 				new EmbedBuilder()
@@ -59,13 +55,7 @@ export const deleteData = {
 
 		let hadUserData = false; // check if there even was any user data to begin with
 		if (confirmation.customId === "confirm-delete-data") {
-			// delete user
-			if (data.users.delete(interaction.user.id)) hadUserData = true;
-
-			// find all voice channels that user has signed up for
-			data.voiceChats.forEach((voiceChat) => {
-				if (voiceChat.removeUser(interaction.user.id)) hadUserData = true;
-			});
+			hadUserData = await deleteAllUserData(interaction.user.id);
 		}
 
 		await confirmation.update({

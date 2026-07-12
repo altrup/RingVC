@@ -16,12 +16,10 @@ import { signup } from "@commands/signup";
 import { signuprole } from "@commands/signuprole";
 import { unsignup } from "@commands/unsignup";
 import { unsignuprole } from "@commands/unsignuprole";
-import { DataType } from "@main/data";
 
 export type CommandImplementation = {
 	data: SharedSlashCommand;
 	execute: (
-		data: DataType,
 		interaction: ChatInputCommandInteraction,
 		commandIds: Map<CommandName, string>,
 	) => Promise<void>;

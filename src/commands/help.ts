@@ -9,14 +9,12 @@ import {
 } from "discord.js";
 
 import { CommandName } from "@commands/commandNames";
-import { DataType } from "@main/data";
 
 export const help = {
 	data: new SlashCommandBuilder()
 		.setName("help")
 		.setDescription("Getting started"),
 	async execute(
-		data: DataType,
 		interaction: ChatInputCommandInteraction,
 		commandIds: Map<CommandName, string>,
 	) {

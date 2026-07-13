@@ -1,4 +1,4 @@
-import { homeButton, paginationRows, row } from "@routes/lib/components";
+import { navRow, paginationRows, row } from "@routes/lib/components";
 import { withFlash } from "@routes/lib/flash";
 import { PAGE_SIZE, paginate } from "@routes/lib/paging";
 import { channelIdOf, scopeName, scopeOf } from "@routes/lib/scope";
@@ -20,7 +20,7 @@ import { mentionUser } from "@main/ring";
 
 import { panelPath } from "../_shared";
 
-const COLOR = "#94ab62";
+const COLOR = "#63a471";
 
 export const filterGet: Handler<"GET"> = async (router, interaction, state) => {
 	const scope = scopeOf(state.params);
@@ -41,14 +41,16 @@ export const filterGet: Handler<"GET"> = async (router, interaction, state) => {
 			(type === "whitelist"
 				? "Only the people listed here can ring you, and you only ring them."
 				: "The people listed here can't ring you, and you won't ring them.") +
-			`\n\n**Members${pageCount > 1 ? ` (page ${page + 1} of ${pageCount})` : ""}:** ${memberList}`,
+			`\n\n**Members${pageCount > 1 ? ` (page ${page + 1} of ${pageCount})` : ""}** · ${memberList}`,
 	);
 
 	return {
 		embeds: [
 			new EmbedBuilder()
 				.setColor(COLOR)
-				.setTitle(scope === "global" ? "Your global filter" : "Channel filter")
+				.setTitle(
+					scope === "global" ? "🛡️ Your global filter" : "🛡️ Channel filter",
+				)
 				.setDescription(description),
 		],
 		components: [
@@ -98,8 +100,8 @@ export const filterGet: Handler<"GET"> = async (router, interaction, state) => {
 					.setLabel("Reset")
 					.setStyle(ButtonStyle.Danger)
 					.setTo(`${panelPath(scope)}/reset`, { method: "MODAL" }),
-				homeButton(router),
 			),
+			navRow(router),
 			...paginationRows(router, panelPath(scope), { page, pageCount }),
 		],
 	};

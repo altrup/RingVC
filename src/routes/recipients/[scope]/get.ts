@@ -1,4 +1,4 @@
-import { homeButton, paginationRows, row } from "@routes/lib/components";
+import { navRow, paginationRows, row } from "@routes/lib/components";
 import { withFlash } from "@routes/lib/flash";
 import { PAGE_SIZE, paginate } from "@routes/lib/paging";
 import { channelIdOf, scopeOf } from "@routes/lib/scope";
@@ -21,7 +21,7 @@ import { mentionUser } from "@main/ring";
 
 import { panelPath } from "../_shared";
 
-const COLOR = "#747ac5";
+const COLOR = "#8c89cd";
 
 // the channel override when in channel scope, the global setting, and the
 // value that actually applies for the scope
@@ -57,20 +57,22 @@ export const recipientsGet: Handler<"GET"> = async (
 		state.queryParams.get("page"),
 	);
 
-	const autoRingLine =
+	const autoRingValue =
 		channelId === null
-			? `Auto-ring: **${autoRing.effective ? "enabled" : "disabled"}**`
+			? autoRing.effective
+				? "On"
+				: "Off"
 			: autoRing.override !== undefined
-				? `Auto-ring: **${autoRing.override ? "enabled" : "disabled"}** for <#${channelId}> (overrides your global setting: ${autoRing.global ? "enabled" : "disabled"})`
-				: `Auto-ring: **${autoRing.effective ? "enabled" : "disabled"}** (from your global setting)`;
+				? `${autoRing.override ? "On" : "Off"} for <#${channelId}> (global: ${autoRing.global ? "on" : "off"})`
+				: `${autoRing.effective ? "On" : "Off"} (from your global setting)`;
 
 	const memberList =
 		pageItems.length > 0 ? pageItems.map(mentionUser).join(" ") : "None";
 	const description = withFlash(
 		state.queryParams,
-		`These people get rung when you use Ring defaults${channelId ? ` in <#${channelId}>` : ""}, or on every voice channel join if auto-ring is enabled.\n\n` +
-			`${autoRingLine}\n\n` +
-			`**Recipients${pageCount > 1 ? ` (page ${page + 1} of ${pageCount})` : ""}:** ${memberList}`,
+		`These people get rung when you use Ring defaults${channelId ? ` in <#${channelId}>` : ""}, or on every voice channel join if auto-ring is on.\n\n` +
+			`**Auto-ring** · ${autoRingValue}\n` +
+			`**Recipients${pageCount > 1 ? ` (page ${page + 1} of ${pageCount})` : ""}** · ${memberList}`,
 	);
 
 	return {
@@ -79,8 +81,8 @@ export const recipientsGet: Handler<"GET"> = async (
 				.setColor(COLOR)
 				.setTitle(
 					scope === "global"
-						? "Your default ring recipients"
-						: "Channel ring recipients",
+						? "📣 Default ring recipients"
+						: "📣 Channel ring recipients",
 				)
 				.setDescription(description),
 		],
@@ -117,10 +119,6 @@ export const recipientsGet: Handler<"GET"> = async (
 				.toJSON(),
 			row(
 				new RouteButtonBuilder(router)
-					.setLabel("Reset")
-					.setStyle(ButtonStyle.Danger)
-					.setTo(`${panelPath(scope)}/reset`, { method: "MODAL" }),
-				new RouteButtonBuilder(router)
 					.setLabel(
 						autoRing.effective ? "Disable auto-ring" : "Enable auto-ring",
 					)
@@ -131,6 +129,10 @@ export const recipientsGet: Handler<"GET"> = async (
 						method: "POST",
 						queryParams: { enable: autoRing.effective ? "0" : "1" },
 					}),
+				new RouteButtonBuilder(router)
+					.setLabel("Reset")
+					.setStyle(ButtonStyle.Danger)
+					.setTo(`${panelPath(scope)}/reset`, { method: "MODAL" }),
 				...(channelId !== null && autoRing.override !== undefined
 					? [
 							new RouteButtonBuilder(router)
@@ -141,8 +143,8 @@ export const recipientsGet: Handler<"GET"> = async (
 								}),
 						]
 					: []),
-				homeButton(router),
 			),
+			navRow(router),
 			...paginationRows(router, panelPath(scope), { page, pageCount }),
 		],
 	};

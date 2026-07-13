@@ -12,7 +12,7 @@ import {
 	getVoiceChatRoleSignups,
 } from "@db/voice-chats";
 
-export const COLOR = "#62a8ab";
+export const COLOR = "#31a5a5";
 export const PANEL = "/signups";
 export const ROLES = "/signups/roles";
 

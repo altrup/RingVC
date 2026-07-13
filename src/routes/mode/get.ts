@@ -1,4 +1,4 @@
-import { homeButton, row } from "@routes/lib/components";
+import { navRow, row } from "@routes/lib/components";
 import { withFlash } from "@routes/lib/flash";
 import { Handler } from "@routes/types";
 import { RouteButtonBuilder } from "discord-embed-router";
@@ -8,24 +8,28 @@ import { getUserMode } from "@db/users";
 
 import { MODES, PATH } from "./_shared";
 
-const COLOR = "#F5853F";
+const COLOR = "#b28b45";
+
+// compact one-line legend replacing a field per mode
+const LEGEND =
+	"-# **Normal**: rings everyone · **Stealth**: nobody · **Auto**: stealth while invisible";
 
 export const modeGet: Handler<"GET"> = async (router, interaction, state) => {
 	const current = await getUserMode(interaction.user.id);
+	const currentLabel =
+		MODES.find(({ mode }) => mode === current)?.label ?? current;
 
 	return {
 		embeds: [
 			new EmbedBuilder()
 				.setColor(COLOR)
-				.setTitle("Your mode")
+				.setTitle("💤 Your mode")
 				.setDescription(
 					withFlash(
 						state.queryParams,
-						`Modes decide what happens when you join a voice channel. Your current mode is **${current}**.`,
+						"Modes decide what happens when you join a voice channel.\n\n" +
+							`**Current mode** · ${currentLabel}\n${LEGEND}`,
 					),
-				)
-				.addFields(
-					MODES.map(({ label, effect }) => ({ name: label, value: effect })),
 				),
 		],
 		components: [
@@ -39,8 +43,8 @@ export const modeGet: Handler<"GET"> = async (router, interaction, state) => {
 						.setDisabled(mode === current)
 						.setTo(PATH, { method: "POST", queryParams: { set: mode } }),
 				),
-				homeButton(router),
 			),
+			navRow(router),
 		],
 	};
 };

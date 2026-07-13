@@ -6,7 +6,7 @@ import { ButtonStyle, EmbedBuilder } from "discord.js";
 
 import { PANEL } from "./_shared";
 
-const COLOR = "#ca2b2b";
+const COLOR = "#da373c";
 
 export const deleteDataGet: Handler<"GET"> = (router, interaction, state) => {
 	// set by the deletion redirect: the panel has done its job, so its
@@ -17,18 +17,18 @@ export const deleteDataGet: Handler<"GET"> = (router, interaction, state) => {
 		embeds: [
 			new EmbedBuilder()
 				.setColor(COLOR)
-				.setTitle("Delete all data")
+				.setTitle("🗑️ Delete all data")
 				.setDescription(
 					withFlash(
 						state.queryParams,
-						"Are you sure you want to delete all your data? This will remove all your filters, signups, and other account settings. This is irreversible.",
+						"Are you sure you want to delete all your data? This removes your filters, signups, and other account settings. **This can't be undone.**",
 					),
 				),
 		],
 		components: [
 			row(
 				new RouteButtonBuilder(router)
-					.setLabel("Delete")
+					.setLabel("Delete everything")
 					.setStyle(ButtonStyle.Danger)
 					.setDisabled(done)
 					.setTo(PANEL, { method: "MODAL" }),

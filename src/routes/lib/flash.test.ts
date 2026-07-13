@@ -19,13 +19,24 @@ test("flashRedirect merges extra params like the page to stay on", () => {
 	});
 });
 
-test("flashLine renders the flash verbatim with an icon from the level alone", () => {
+test("flashLine renders a blockquote with the level icon and a bold lead", () => {
 	expect(
 		flashLine(new URLSearchParams({ flash: "Done", level: "success" })),
-	).toBe("✅ Done");
+	).toBe("> ✅ **Done**");
 	expect(
 		flashLine(new URLSearchParams({ flash: "Careful", level: "warn" })),
-	).toBe("⚠️ Careful");
+	).toBe("> ⚠️ **Careful**");
+});
+
+test("flashLine bolds only the opening clause through the first period", () => {
+	expect(
+		flashLine(
+			new URLSearchParams({
+				flash: "Auto-ring enabled. You'll ring these people.",
+				level: "success",
+			}),
+		),
+	).toBe("> ✅ **Auto-ring enabled.** You'll ring these people.");
 });
 
 test("flashLine returns null when no flash is present", () => {

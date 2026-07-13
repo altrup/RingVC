@@ -1,4 +1,9 @@
-import { homeButton, paginationRows, row } from "@routes/lib/components";
+import {
+	homeButton,
+	navRow,
+	paginationRows,
+	row,
+} from "@routes/lib/components";
 import { withFlash } from "@routes/lib/flash";
 import { PAGE_SIZE, paginate } from "@routes/lib/paging";
 import { Handler } from "@routes/types";
@@ -42,14 +47,14 @@ export const signupsGet: Handler<"GET"> = async (
 	const description = withFlash(
 		state.queryParams,
 		"You get rung when someone starts a call in one of these channels.\n\n" +
-			`**Your signups in this server${pageCount > 1 ? ` (page ${page + 1} of ${pageCount})` : ""}:** ${channelList}`,
+			`**Signups${pageCount > 1 ? ` (page ${page + 1} of ${pageCount})` : ""}** · ${channelList}`,
 	);
 
 	return {
 		embeds: [
 			new EmbedBuilder()
 				.setColor(COLOR)
-				.setTitle("Your signups")
+				.setTitle("🔔 Your signups")
 				.setDescription(description),
 		],
 		components: [
@@ -72,8 +77,8 @@ export const signupsGet: Handler<"GET"> = async (
 					.setLabel("Role signups")
 					.setStyle(ButtonStyle.Secondary)
 					.setTo(ROLES),
-				homeButton(router),
 			),
+			navRow(router),
 			...paginationRows(router, PANEL, { page, pageCount }),
 		],
 	};

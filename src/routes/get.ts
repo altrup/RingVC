@@ -1,11 +1,14 @@
 import { row } from "@routes/lib/components";
+import {
+	buttonEmoji,
+	emojiIconURL,
+	RINGVC_EMOJI_ID,
+	VC_EMOJI_ID,
+} from "@routes/lib/emoji";
 import { withFlash } from "@routes/lib/flash";
-import { commandMention } from "@routes/lib/mentions";
 import { Handler } from "@routes/types";
 import { RouteButtonBuilder } from "discord-embed-router";
 import { ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
-
-import { CommandName } from "@commands/commandNames";
 
 import { COLOR } from "./_shared";
 
@@ -13,37 +16,34 @@ const GITHUB_URL = "https://github.com/altrup/RingVC";
 const SUPPORT_URL = "https://discord.gg/bxBePEnndq";
 
 export const homeGet: Handler<"GET"> = (router, interaction, state) => {
-	const mention = (name: CommandName) => commandMention(state.globals, name);
+	const vc = buttonEmoji(interaction, VC_EMOJI_ID);
+	const brandIcon = emojiIconURL(interaction, RINGVC_EMOJI_ID);
+
+	const embed = new EmbedBuilder()
+		.setColor(COLOR)
+		.setTitle("🔔 RingVC")
+		.setDescription(
+			withFlash(
+				state.queryParams,
+				"RingVC replicates group-chat voice calls in Discord servers: sign up for a voice channel and get pinged when someone starts a call there.\n\n" +
+					"-# Everything the commands do lives in the panels below.",
+			),
+		);
+	if (brandIcon) embed.setAuthor({ name: "RingVC", iconURL: brandIcon });
+
+	// the Signups button carries the branded voice-channel emoji when it
+	// resolves, falling back to a unicode bell otherwise
+	const signups = new RouteButtonBuilder(router)
+		.setStyle(ButtonStyle.Secondary)
+		.setTo("/signups");
+	if (vc) signups.setEmoji(vc).setLabel("Signups");
+	else signups.setLabel("🔔 Signups");
 
 	return {
-		embeds: [
-			new EmbedBuilder()
-				.setColor(COLOR)
-				.setTitle("RingVC")
-				.setDescription(
-					withFlash(
-						state.queryParams,
-						"RingVC replicates group-chat voice calls in Discord servers: sign up for a voice channel and get pinged when someone starts a call there.",
-					),
-				)
-				.addFields(
-					{
-						name: "Quick commands",
-						value: `${mention("signup")} to get rung for a voice channel, ${mention("ring")} to ring people into yours, and ${mention("block")} to stop someone from ringing you.`,
-					},
-					{
-						name: "Panels",
-						value:
-							"Everything the commands do can also be done from the panels below.",
-					},
-				),
-		],
+		embeds: [embed],
 		components: [
 			row(
-				new RouteButtonBuilder(router)
-					.setLabel("🔔 Signups")
-					.setStyle(ButtonStyle.Primary)
-					.setTo("/signups"),
+				signups,
 				new RouteButtonBuilder(router)
 					.setLabel("🛡️ Filter")
 					.setStyle(ButtonStyle.Secondary)
@@ -56,16 +56,16 @@ export const homeGet: Handler<"GET"> = (router, interaction, state) => {
 					.setLabel("💤 Mode")
 					.setStyle(ButtonStyle.Secondary)
 					.setTo("/mode"),
-				new RouteButtonBuilder(router)
-					.setLabel("🗑️ Delete data")
-					.setStyle(ButtonStyle.Danger)
-					.setTo("/delete-data"),
 			),
 			row(
 				new RouteButtonBuilder(router)
 					.setLabel("📖 Commands")
 					.setStyle(ButtonStyle.Secondary)
 					.setTo("/commands"),
+				new RouteButtonBuilder(router)
+					.setLabel("🗑️ Delete data")
+					.setStyle(ButtonStyle.Danger)
+					.setTo("/delete-data"),
 				new ButtonBuilder()
 					.setLabel("Github")
 					.setStyle(ButtonStyle.Link)

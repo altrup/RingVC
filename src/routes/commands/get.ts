@@ -1,4 +1,4 @@
-import { homeButton, row } from "@routes/lib/components";
+import { navRow } from "@routes/lib/components";
 import { withFlash } from "@routes/lib/flash";
 import { commandMention } from "@routes/lib/mentions";
 import { Handler } from "@routes/types";
@@ -6,7 +6,7 @@ import { EmbedBuilder } from "discord.js";
 
 import { CommandName } from "@commands/commandNames";
 
-import { COLOR } from "../_shared";
+const COLOR = "#6197cd";
 
 export const commandsGet: Handler<"GET"> = (router, interaction, state) => {
 	const mention = (name: CommandName) => commandMention(state.globals, name);
@@ -39,7 +39,7 @@ export const commandsGet: Handler<"GET"> = (router, interaction, state) => {
 		embeds: [
 			new EmbedBuilder()
 				.setColor(COLOR)
-				.setTitle("Commands")
+				.setTitle("📖 Commands")
 				.setDescription(
 					withFlash(state.queryParams, "Every command is clickable."),
 				)
@@ -48,6 +48,6 @@ export const commandsGet: Handler<"GET"> = (router, interaction, state) => {
 					{ name: "Panel openers", value: list(panels) },
 				),
 		],
-		components: [row(homeButton(router))],
+		components: [navRow(router)],
 	};
 };

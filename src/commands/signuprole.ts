@@ -30,17 +30,21 @@ export const signuprole = {
 			(interaction.channel?.type === ChannelType.GuildVoice
 				? interaction.channel
 				: null);
-		// without a channel, land on the role's channel-pick page
+		// without a channel, open the role's scoped panel to pick channels
 		if (!channel) {
-			await router.dispatch(interaction, `/signups/roles/${role.id}`, {
+			await router.dispatch(interaction, `/signups/roles/by-role/${role.id}`, {
 				flags: [MessageFlags.Ephemeral],
 			});
 			return;
 		}
-		await router.dispatch(interaction, `/signups/roles/${role.id}`, {
-			method: "POST",
-			queryParams: { channel: channel.id },
-			flags: [MessageFlags.Ephemeral],
-		});
+		await router.dispatch(
+			interaction,
+			`/signups/roles/by-channel/${channel.id}/roles`,
+			{
+				method: "POST",
+				queryParams: { add: role.id },
+				flags: [MessageFlags.Ephemeral],
+			},
+		);
 	},
 };

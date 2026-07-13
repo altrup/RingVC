@@ -30,6 +30,17 @@ export const backButton = (
 		.setStyle(ButtonStyle.Secondary)
 		.setTo(path);
 
+// the navigation row every panel ends on: Back (when the panel has a parent)
+// then Home, always last and on their own row, so navigation sits in the same
+// place regardless of a panel's action buttons
+export const navRow = (
+	router: RingRouter,
+	parentPath?: string,
+): APIActionRowComponent<APIComponentInMessageActionRow> =>
+	parentPath
+		? row(backButton(router, parentPath), homeButton(router))
+		: row(homeButton(router));
+
 // the conditional pagination row: absent for single-page lists, so the
 // result is spread into a components array
 export const paginationRows = (

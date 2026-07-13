@@ -24,10 +24,10 @@ import { ringUserPost } from "./ring/user/post";
 import { ringUsersPost } from "./ring/users/post";
 import { signupsGet } from "./signups/get";
 import { signupsMembersPost } from "./signups/members/post";
-import { signupsRoleGet } from "./signups/roles/[roleId]/get";
-import { signupsRolePost } from "./signups/roles/[roleId]/post";
-import { signupsRolesGet } from "./signups/roles/get";
-import { signupsRolesRemovePost } from "./signups/roles/remove/post";
+import { rolesByChannelGet } from "./signups/roles/by-channel/get";
+import { rolesByChannelEditPost } from "./signups/roles/by-channel/roles/post";
+import { rolesByRoleEditPost } from "./signups/roles/by-role/channels/post";
+import { rolesByRoleGet } from "./signups/roles/by-role/get";
 
 // handlers live in files mirroring their route: the folder is the path (with
 // [param] segments) and the file is the method
@@ -63,12 +63,26 @@ export const registerRoutes = (router: RingRouter) => {
 
 	router.route("/signups", { get: signupsGet });
 	router.route("/signups/members", { post: signupsMembersPost });
-	router.route("/signups/roles", { get: signupsRolesGet });
-	router.route("/signups/roles/remove", { post: signupsRolesRemovePost });
-	// registered after /signups/roles/remove so "remove" never binds :roleId
-	router.route("/signups/roles/:roleId", {
-		get: signupsRoleGet,
-		post: signupsRolePost,
+
+	// role signups are a scoped panel like filter: an orientation segment
+	// (by-channel / by-role) then the scope id. The bare path lands on the
+	// by-channel view with nothing picked yet
+	router.route(
+		[
+			"/signups/roles",
+			"/signups/roles/by-channel",
+			"/signups/roles/by-channel/:scope",
+		],
+		{ get: rolesByChannelGet },
+	);
+	router.route("/signups/roles/by-channel/:scope/roles", {
+		post: rolesByChannelEditPost,
+	});
+	router.route(["/signups/roles/by-role", "/signups/roles/by-role/:scope"], {
+		get: rolesByRoleGet,
+	});
+	router.route("/signups/roles/by-role/:scope/channels", {
+		post: rolesByRoleEditPost,
 	});
 
 	router.route("/ring", { get: ringGet });

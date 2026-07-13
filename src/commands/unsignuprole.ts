@@ -28,13 +28,15 @@ export const unsignuprole = {
 	async execute(router: RingRouter, interaction: ChatInputCommandInteraction) {
 		const role = interaction.options.getRole("role", true);
 		const channel = interaction.options.getChannel("channel");
-		await router.dispatch(interaction, "/signups/roles/remove", {
-			method: "POST",
-			queryParams: {
-				role: role.id,
-				...(channel ? { channel: channel.id } : {}),
+		// a channel removes just that link; no channel clears every channel
+		await router.dispatch(
+			interaction,
+			`/signups/roles/by-role/${role.id}/channels`,
+			{
+				method: "POST",
+				queryParams: channel ? { remove: channel.id } : { removeAll: "1" },
+				flags: [MessageFlags.Ephemeral],
 			},
-			flags: [MessageFlags.Ephemeral],
-		});
+		);
 	},
 };

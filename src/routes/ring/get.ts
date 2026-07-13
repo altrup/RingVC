@@ -1,4 +1,4 @@
-import { homeButton, row } from "@routes/lib/components";
+import { homeButton, navRow, row } from "@routes/lib/components";
 import { withFlash } from "@routes/lib/flash";
 import { PAGE_SIZE } from "@routes/lib/paging";
 import { Handler } from "@routes/types";
@@ -13,7 +13,7 @@ import { joinWithAnd, mentionUser } from "@main/ring";
 
 import { NOT_IN_VC, PANEL, voiceChannelOf } from "./_shared";
 
-const COLOR = "#c58a74";
+const COLOR = "#c87a6d";
 
 export const ringGet: Handler<"GET"> = async (router, interaction, state) => {
 	const channel = voiceChannelOf(interaction);
@@ -32,16 +32,14 @@ export const ringGet: Handler<"GET"> = async (router, interaction, state) => {
 	const description = withFlash(
 		state.queryParams,
 		`Ringing people into <#${channel.id}>.\n\n` +
-			(defaults.length > 0
-				? `Your default recipients here: ${joinWithAnd(defaults.map(mentionUser))}`
-				: "You have no default recipients here."),
+			`**Your defaults here** · ${defaults.length > 0 ? joinWithAnd(defaults.map(mentionUser)) : "None"}`,
 	);
 
 	return {
 		embeds: [
 			new EmbedBuilder()
 				.setColor(COLOR)
-				.setTitle("Ring")
+				.setTitle("📣 Ring")
 				.setDescription(description),
 		],
 		components: [
@@ -59,8 +57,8 @@ export const ringGet: Handler<"GET"> = async (router, interaction, state) => {
 					.setLabel("Ring defaults")
 					.setStyle(ButtonStyle.Success)
 					.setTo(`${PANEL}/default`, { method: "POST" }),
-				homeButton(router),
 			),
+			navRow(router),
 		],
 	};
 };

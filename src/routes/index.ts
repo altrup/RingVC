@@ -14,7 +14,6 @@ import { homeGet } from "./get";
 import { modeGet } from "./mode/get";
 import { modePost } from "./mode/post";
 import { recipientsAutoRingPost } from "./recipients/[scope]/auto-ring/post";
-import { recipientsAutoRingUnsetPost } from "./recipients/[scope]/auto-ring/unset/post";
 import { recipientsGet } from "./recipients/[scope]/get";
 import { recipientsMembersPost } from "./recipients/[scope]/members/post";
 import { recipientsResetModal } from "./recipients/[scope]/reset/modal";
@@ -55,10 +54,6 @@ export const registerRoutes = (router: RingRouter) => {
 		post: recipientsResetPost,
 	});
 	router.post("/recipients/:scope/auto-ring", recipientsAutoRingPost);
-	router.post(
-		"/recipients/:scope/auto-ring/unset",
-		recipientsAutoRingUnsetPost,
-	);
 
 	router.route("/mode", { get: modeGet, post: modePost });
 

@@ -1,5 +1,6 @@
-import { navBar, paginationRows, row } from "@routes/lib/components";
+import { navBar, row, subNav } from "@routes/lib/components";
 import { withFlash } from "@routes/lib/flash";
+import { commandMention } from "@routes/lib/mentions";
 import { PAGE_SIZE, paginate } from "@routes/lib/paging";
 import { channelIdOf, scopeOf } from "@routes/lib/scope";
 import { Handler } from "@routes/types";
@@ -70,9 +71,9 @@ export const recipientsGet: Handler<"GET"> = async (
 		pageItems.length > 0 ? pageItems.map(mentionUser).join(" ") : "None";
 	const description = withFlash(
 		state.queryParams,
-		`These people get rung when you use Ring defaults${channelId ? ` in <#${channelId}>` : ""}, or on every voice channel join if auto-ring is on.\n\n` +
+		`These people get rung when you use ${commandMention(state.globals, "ring_defaults")}${channelId ? ` in <#${channelId}>` : ""}, or on every voice channel join if auto-ring is on.\n\n` +
 			`**Auto-ring** · ${autoRingValue}\n` +
-			`**Recipients${pageCount > 1 ? ` (page ${page + 1} of ${pageCount})` : ""}** · ${memberList}`,
+			`**Ringees${pageCount > 1 ? ` (page ${page + 1} of ${pageCount})` : ""}** · ${memberList}`,
 	);
 
 	return {
@@ -80,9 +81,7 @@ export const recipientsGet: Handler<"GET"> = async (
 			new EmbedBuilder()
 				.setColor(COLOR)
 				.setTitle(
-					scope === "global"
-						? "📣 Default ring recipients"
-						: "📣 Channel ring recipients",
+					scope === "global" ? "📣 Default ringees" : "📣 Channel ringees",
 				)
 				.setDescription(description),
 		],
@@ -95,8 +94,8 @@ export const recipientsGet: Handler<"GET"> = async (
 						.setMaxValues(1)
 						.setPlaceholder(
 							channelId
-								? "Viewing channel recipients (clear for global)"
-								: "View a voice channel's recipients",
+								? "Viewing channel ringees (clear for global)"
+								: "View a voice channel's ringees",
 						)
 						.setDefaultChannels(...(channelId ? [channelId] : []))
 						.setPattern("/recipients{/:channelId}"),
@@ -107,9 +106,7 @@ export const recipientsGet: Handler<"GET"> = async (
 					new RouteUserSelectMenuBuilder(router)
 						.setMinValues(0)
 						.setMaxValues(PAGE_SIZE)
-						.setPlaceholder(
-							"Edit recipients: select to add, deselect to remove",
-						)
+						.setPlaceholder("Edit ringees: select to add, deselect to remove")
 						.setDefaultUsers(...pageItems)
 						.setPattern(`${panelPath(scope)}/members`, {
 							method: "POST",
@@ -118,6 +115,18 @@ export const recipientsGet: Handler<"GET"> = async (
 				)
 				.toJSON(),
 			row(
+				// prev/next page the recipient list inline, so this dense panel
+				// spends no separate row on pagination
+				...(page > 0
+					? [
+							new RouteButtonBuilder(router)
+								.setLabel("◀")
+								.setStyle(ButtonStyle.Secondary)
+								.setTo(panelPath(scope), {
+									queryParams: { page: String(page - 1) },
+								}),
+						]
+					: []),
 				new RouteButtonBuilder(router)
 					.setLabel(
 						autoRing.effective ? "Disable auto-ring" : "Enable auto-ring",
@@ -133,23 +142,26 @@ export const recipientsGet: Handler<"GET"> = async (
 					.setLabel("Reset")
 					.setStyle(ButtonStyle.Danger)
 					.setTo(`${panelPath(scope)}/reset`, { method: "MODAL" }),
-				...(channelId !== null && autoRing.override !== undefined
+				...(page < pageCount - 1
 					? [
 							new RouteButtonBuilder(router)
-								.setLabel("Remove override")
+								.setLabel("▶")
 								.setStyle(ButtonStyle.Secondary)
-								.setTo(`${panelPath(scope)}/auto-ring/unset`, {
-									method: "POST",
+								.setTo(panelPath(scope), {
+									queryParams: { page: String(page + 1) },
 								}),
 						]
 					: []),
 			),
+			subNav(router, [
+				{ label: "Quick ring", path: "/ring" },
+				{ label: "Default ringees", path: panelPath(scope), active: true },
+			]),
 			navBar(router, interaction, {
 				active: "ringees",
 				path: panelPath(scope),
 				queryParams: state.queryParams,
 			}),
-			...paginationRows(router, panelPath(scope), { page, pageCount }),
 		],
 	};
 };

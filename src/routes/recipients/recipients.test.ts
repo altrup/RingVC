@@ -1,17 +1,15 @@
 import { Interaction } from "discord.js";
 import { beforeEach, expect, test, vi } from "vitest";
 
-import { setAutoRing, unsetAutoRing } from "@db/auto-ring";
+import { setAutoRing } from "@db/auto-ring";
 import { resetDefaultRingees } from "@db/default-ringees";
 
 import { recipientsAutoRingPost } from "./[scope]/auto-ring/post";
-import { recipientsAutoRingUnsetPost } from "./[scope]/auto-ring/unset/post";
 import { recipientsResetPost } from "./[scope]/reset/post";
 
 vi.mock("@db/auto-ring", () => ({
 	getAutoRingSetting: vi.fn(),
 	setAutoRing: vi.fn(),
-	unsetAutoRing: vi.fn(),
 }));
 vi.mock("@db/default-ringees", () => ({
 	getDefaultRingees: vi.fn(),
@@ -96,20 +94,4 @@ test("toggling auto-ring to its current value reports no change", async () => {
 		result.queryParams as Record<string, string>,
 	);
 	expect(flashParams.get("flash")).toContain("already");
-});
-
-test("removing a missing auto-ring override reports there was none", async () => {
-	vi.mocked(unsetAutoRing).mockResolvedValue(false);
-
-	const result = await recipientsAutoRingUnsetPost(
-		undefined as never,
-		interaction,
-		autoRingState("123", ""),
-	);
-
-	expect(unsetAutoRing).toHaveBeenCalledExactlyOnceWith("caller", "123");
-	const flashParams = new URLSearchParams(
-		result.queryParams as Record<string, string>,
-	);
-	expect(flashParams.get("level")).toBe("warn");
 });

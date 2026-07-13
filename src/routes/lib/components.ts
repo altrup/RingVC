@@ -52,7 +52,7 @@ const PAGE_ONE: readonly Tab[] = [
 	{ section: "home", label: "🏠 Home", path: "/" },
 	{ section: "signups", label: "🔔 Signups", path: "/signups" },
 	{ section: "filters", label: "🛡️ Filters", path: "/filter/global" },
-	{ section: "ringees", label: "📣 Ringees", path: "/recipients/global" },
+	{ section: "ringees", label: "📣 Ring", path: "/recipients/global" },
 ];
 
 const PAGE_TWO: readonly Tab[] = [
@@ -83,8 +83,17 @@ export const navBar = (
 		override === "2" ||
 		(override !== "1" && PAGE_TWO.some((t) => t.section === active));
 	const vc = buttonEmoji(interaction, VC_EMOJI_ID);
+	// the Ring section lands on the immediate ring action when the user is in a
+	// voice channel, and on the default-recipients settings otherwise, so the
+	// tab never opens the "not in a voice channel" notice by default
+	const inVoice = !!(
+		interaction.member &&
+		"voice" in interaction.member &&
+		interaction.member.voice.channel
+	);
 
 	const tab = ({ section, label, path: to }: Tab): RingButton => {
+		const target = section === "ringees" && inVoice ? "/ring" : to;
 		const button = new RouteButtonBuilder(router)
 			// the active tab is Primary, except Delete data reads as its
 			// destructive Danger red when it is the one selected
@@ -95,8 +104,8 @@ export const navBar = (
 						? ButtonStyle.Danger
 						: ButtonStyle.Primary,
 			)
-			.setDisabled(section === active && to === path)
-			.setTo(to);
+			.setDisabled(section === active && target === path)
+			.setTo(target);
 		if (section === "signups" && vc) button.setLabel("Signups").setEmoji(vc);
 		else button.setLabel(label);
 		return button;
@@ -116,6 +125,26 @@ export const navBar = (
 			: [...tabs, pager("More ▶", "2")]),
 	);
 };
+
+// the sub-view switch a section shows just above the bar when it has sibling
+// views (e.g. My signups / Role signups, Ring now / Default ringees). The
+// current view is an inert Primary; the others are Secondary links
+export const subNav = (
+	router: RingRouter,
+	items: { label: string; path: string; active?: boolean }[],
+): APIActionRowComponent<APIComponentInMessageActionRow> =>
+	row(
+		...items.map((item) =>
+			new RouteButtonBuilder(router)
+				.setLabel(item.label)
+				.setStyle(item.active ? ButtonStyle.Primary : ButtonStyle.Secondary)
+				.setDisabled(item.active ?? false)
+				// a sub-nav item can point at the same path as the bar's active tab
+				// (e.g. Default ringees / the Ring tab); the key keeps their
+				// customIds distinct, which Discord requires within one message
+				.setTo(item.path, { key: "subnav" }),
+		),
+	);
 
 // the conditional pagination row: absent for single-page lists, so the
 // result is spread into a components array

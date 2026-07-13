@@ -1,12 +1,11 @@
-import { navBar, paginationRows, row } from "@routes/lib/components";
+import { navBar, paginationRows, subNav } from "@routes/lib/components";
 import { flashRedirect, withFlash } from "@routes/lib/flash";
 import { Page } from "@routes/lib/paging";
 import { RingRouter } from "@routes/types";
-import { RouteButtonBuilder, RouteRedirect } from "discord-embed-router";
+import { RouteRedirect } from "discord-embed-router";
 import {
 	APIActionRowComponent,
 	APIComponentInMessageActionRow,
-	ButtonStyle,
 	EmbedBuilder,
 	Guild,
 	Interaction,
@@ -24,27 +23,6 @@ export type Orientation = "channel" | "role";
 // the shared lead sentence; both orientations describe the same feature
 const LEAD =
 	"When someone joins a voice channel, its signed-up roles get pinged.";
-
-// the orientation toggle: the active view is an inert Primary, the other a
-// Secondary link that resets the scope (a channel id is not a role id)
-const switchRow = (
-	router: RingRouter,
-	active: Orientation,
-): APIActionRowComponent<APIComponentInMessageActionRow> =>
-	row(
-		new RouteButtonBuilder(router)
-			.setLabel("By channel")
-			.setStyle(
-				active === "channel" ? ButtonStyle.Primary : ButtonStyle.Secondary,
-			)
-			.setDisabled(active === "channel")
-			.setTo(BY_CHANNEL),
-		new RouteButtonBuilder(router)
-			.setLabel("By role")
-			.setStyle(active === "role" ? ButtonStyle.Primary : ButtonStyle.Secondary)
-			.setDisabled(active === "role")
-			.setTo(BY_ROLE),
-	);
 
 // the scope carried in the path, or null when nothing is picked yet (unlike
 // filter/recipients, role signups have no global scope to fall back to)
@@ -171,9 +149,13 @@ export const renderRoleScope = ({
 				.setDescription(withFlash(queryParams, body)),
 		],
 		components: [
-			switchRow(router, active),
 			scopeSelectRow,
 			...(scope && editSelectRow ? [editSelectRow] : []),
+			...paginationRows(router, basePath, { page, pageCount }),
+			subNav(router, [
+				{ label: "By channel", path: BY_CHANNEL, active: active === "channel" },
+				{ label: "By role", path: BY_ROLE, active: active === "role" },
+			]),
 			navBar(router, interaction, {
 				active: "signups",
 				path:
@@ -181,7 +163,6 @@ export const renderRoleScope = ({
 					(scope ? `/${scope}` : ""),
 				queryParams,
 			}),
-			...paginationRows(router, basePath, { page, pageCount }),
 		],
 	};
 };

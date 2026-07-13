@@ -42,12 +42,21 @@ export const setAutoRing = async (
 	enabled: boolean,
 ): Promise<boolean> => {
 	const current = await getAutoRingSetting(userId, channelId);
-	// for the global scope, an unset value behaves as false
-	if (
-		current === enabled ||
-		(channelId === null && current === undefined && !enabled)
-	)
+
+	if (channelId !== null) {
+		// a channel override only exists when it differs from the global
+		// setting, so setting it back to the global value drops it entirely
+		const globalEnabled = (await getAutoRingSetting(userId, null)) ?? false;
+		const effective = current ?? globalEnabled;
+		if (enabled === effective) return false;
+		if (enabled === globalEnabled) {
+			await unsetAutoRing(userId, channelId);
+			return true;
+		}
+	} else if (current === enabled || (current === undefined && !enabled)) {
+		// global scope: an unset value behaves as false
 		return false;
+	}
 
 	await ensureUser(userId);
 	throwOnError(

@@ -11,7 +11,7 @@ import {
 
 export const PANEL = "/ring";
 export const NOT_IN_VC =
-	"RingVC needs to know which voice channel to ring people into. Join one, then run /ring again.";
+	"RingVC needs to know which voice channel to ring people in. Join one, then run /ring again.";
 
 // panels outlive the voice state that was true at render time, so every
 // mutation re-checks it at click time

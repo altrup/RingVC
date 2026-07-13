@@ -3,22 +3,16 @@ import {
 	navBar,
 	paginationRows,
 	row,
+	subNav,
 } from "@routes/lib/components";
 import { withFlash } from "@routes/lib/flash";
 import { PAGE_SIZE, paginate } from "@routes/lib/paging";
 import { Handler } from "@routes/types";
-import {
-	RouteButtonBuilder,
-	RouteChannelSelectMenuBuilder,
-} from "discord-embed-router";
-import {
-	ActionRowBuilder,
-	ButtonStyle,
-	ChannelType,
-	EmbedBuilder,
-} from "discord.js";
+import { RouteChannelSelectMenuBuilder } from "discord-embed-router";
+import { ActionRowBuilder, ChannelType, EmbedBuilder } from "discord.js";
 
 import {
+	canManageRoleSignups,
 	COLOR,
 	guildOnlyRender,
 	guildSignups,
@@ -72,18 +66,22 @@ export const signupsGet: Handler<"GET"> = async (
 						}),
 				)
 				.toJSON(),
-			row(
-				new RouteButtonBuilder(router)
-					.setLabel("Role signups")
-					.setStyle(ButtonStyle.Secondary)
-					.setTo(ROLES),
-			),
+			...paginationRows(router, PANEL, { page, pageCount }),
+			// the switch into role signups is a management action, so it only
+			// appears for members who can manage role signups
+			...(canManageRoleSignups(interaction)
+				? [
+						subNav(router, [
+							{ label: "My signups", path: PANEL, active: true },
+							{ label: "Role signups", path: ROLES },
+						]),
+					]
+				: []),
 			navBar(router, interaction, {
 				active: "signups",
 				path: PANEL,
 				queryParams: state.queryParams,
 			}),
-			...paginationRows(router, PANEL, { page, pageCount }),
 		],
 	};
 };

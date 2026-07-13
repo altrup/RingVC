@@ -21,6 +21,7 @@ export const commandsGet: Handler<"GET"> = (router, interaction, state) => {
 		["whitelist", "allow someone through your whitelist"],
 		["unwhitelist", "remove them from your whitelist"],
 		["ring", "ring someone into your voice channel (with a user)"],
+		["ring_defaults", "ring your saved defaults into your voice channel"],
 	];
 	const panels: [CommandName, string][] = [
 		["help", "the home panel"],

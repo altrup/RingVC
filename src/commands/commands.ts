@@ -13,6 +13,7 @@ import { help } from "@commands/help";
 import { mode } from "@commands/mode";
 import { quit } from "@commands/quit";
 import { ring } from "@commands/ring";
+import { ringDefaults } from "@commands/ringDefaults";
 import { signup } from "@commands/signup";
 import { signuprole } from "@commands/signuprole";
 import { unsignup } from "@commands/unsignup";
@@ -33,6 +34,7 @@ export const commands: CommandImplementation[] = [
 	catalog,
 	deleteData,
 	ring,
+	ringDefaults,
 	signup,
 	unsignup,
 	signuprole,

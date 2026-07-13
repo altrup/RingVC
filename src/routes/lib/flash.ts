@@ -24,7 +24,7 @@ const boldLead = (text: string): string => {
 	return `**${text.slice(0, periodIndex + 1)}**${text.slice(periodIndex + 1)}`;
 };
 
-// the notice a panel renders at the top of its embed, as a markdown
+// the notice a panel renders at the bottom of its embed, as a markdown
 // blockquote (Discord draws a grey left bar) so it separates from the body;
 // the level picks the icon and the opening clause is bolded
 export const flashLine = (queryParams: URLSearchParams): string | null => {
@@ -37,12 +37,12 @@ export const flashLine = (queryParams: URLSearchParams): string | null => {
 		.join("\n");
 };
 
-// an embed description with the flash notice, when present, above the body,
-// always with one blank line between the blockquote and the body
+// an embed description with the flash notice, when present, below the body,
+// always with one blank line between the body and the blockquote
 export const withFlash = (
 	queryParams: URLSearchParams,
 	body: string,
 ): string => {
 	const line = flashLine(queryParams);
-	return line ? `${line}\n\n${body}` : body;
+	return line ? `${body}\n\n${line}` : body;
 };

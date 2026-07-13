@@ -18,6 +18,9 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      # the lockfile is maintained with npm 11, which resolves vite's
+      # optional esbuild peer differently than node 22's bundled npm 10
+      - run: npm install -g npm@11
       - run: npm ci
       - run: npm run ${{ matrix.check }}
 

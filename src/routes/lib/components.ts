@@ -94,9 +94,10 @@ export const navBar = (
 		return builder;
 	};
 
+	// each option carries its own encoded target, and the builder's default
+	// pattern routes the submission to the selected one
 	const select = new RouteStringSelectMenuBuilder(router)
 		.setPlaceholder("Jump to a section")
-		.setPattern("/")
 		.setTos(SECTIONS.map(option));
 
 	return new ActionRowBuilder<RouteStringSelectMenuBuilder>()

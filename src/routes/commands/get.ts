@@ -50,11 +50,7 @@ export const commandsGet: Handler<"GET"> = (router, interaction, state) => {
 				.setDescription(description),
 		],
 		components: [
-			navBar(router, interaction, {
-				active: "commands",
-				path: "/commands",
-				queryParams: state.queryParams,
-			}),
+			navBar(router, interaction, { active: "commands" }),
 		],
 	};
 };

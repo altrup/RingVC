@@ -1,7 +1,11 @@
 import { buttonEmoji, VC_EMOJI_ID } from "@routes/lib/emoji";
 import { Page } from "@routes/lib/paging";
 import { RingButton, RingRouter } from "@routes/types";
-import { RouteButtonBuilder } from "discord-embed-router";
+import {
+	RouteButtonBuilder,
+	RouteStringSelectMenuBuilder,
+	RouteStringSelectMenuOptionBuilder,
+} from "discord-embed-router";
 import {
 	ActionRowBuilder,
 	APIActionRowComponent,
@@ -32,8 +36,9 @@ export const backButton = (
 		.setStyle(ButtonStyle.Secondary)
 		.setTo(path);
 
-// the top-level section a panel belongs to, so the section bar can render it
-// as the active tab. Panels with no section (Ring, error states) pass nothing
+// the top-level section a panel belongs to, so the section bar can mark it as
+// the current selection. Panels with no section (Ring quick-panel, error
+// states) pass nothing, and the menu shows its placeholder instead
 export type Section =
 	| "home"
 	| "signups"
@@ -46,84 +51,57 @@ export type Section =
 
 type Tab = { section: Section; label: string; path: string };
 
-// the eight section tabs split across two pages of four; a pager fills each
-// row's fifth slot, so the two pages together reach every section
-const PAGE_ONE: readonly Tab[] = [
+// every section in one menu; a string select holds all of them, so there is
+// no five-button row cap to page around
+const SECTIONS: readonly Tab[] = [
 	{ section: "home", label: "🏠 Home", path: "/" },
 	{ section: "signups", label: "🔔 Signups", path: "/signups" },
 	{ section: "filters", label: "🛡️ Filters", path: "/filter/global" },
 	{ section: "ringees", label: "📣 Ring", path: "/recipients/global" },
-];
-
-const PAGE_TWO: readonly Tab[] = [
 	{ section: "mode", label: "💤 Mode", path: "/mode" },
 	{ section: "commands", label: "📖 Commands", path: "/commands" },
 	{ section: "about", label: "ℹ️ About", path: "/about" },
 	{ section: "delete", label: "🗑️ Delete data", path: "/delete-data" },
 ];
 
-// the persistent section bar every panel ends on. The active section is a
-// Primary tab, inert only on its own root so that on a sub-page or another
-// scope it stays a live link back to that root. The Signups tab carries the
-// branded voice-chat emoji when the bot can use it, else a unicode bell
+// the persistent section bar every panel ends on, as a string select so all
+// sections fit one row. The active section is the menu's default option, so it
+// shows as the current value; reselecting it just reloads that section. The
+// Signups option carries the branded voice-chat emoji when the bot can use it,
+// else a unicode bell
 export const navBar = (
 	router: RingRouter,
 	interaction: Interaction,
-	{
-		active,
-		path,
-		queryParams,
-	}: { active?: Section; path: string; queryParams: URLSearchParams },
+	{ active }: { active?: Section },
 ): APIActionRowComponent<APIComponentInMessageActionRow> => {
-	// open on the page holding the active section so the current tab is always
-	// visible; the pager's nav param overrides that to peek at the other page
-	// without leaving the panel
-	const override = queryParams.get("nav");
-	const onPageTwo =
-		override === "2" ||
-		(override !== "1" && PAGE_TWO.some((t) => t.section === active));
 	const vc = buttonEmoji(interaction, VC_EMOJI_ID);
 	// the Ring section lands on the immediate ring action when the user is in a
-	// voice channel, and on the default-recipients settings otherwise, so the
-	// tab never opens the "not in a voice channel" notice by default
+	// voice channel, and on the default-recipients settings otherwise, so it
+	// never opens the "not in a voice channel" notice by default
 	const inVoice = !!(
 		interaction.member &&
 		"voice" in interaction.member &&
 		interaction.member.voice.channel
 	);
 
-	const tab = ({ section, label, path: to }: Tab): RingButton => {
-		const target = section === "ringees" && inVoice ? "/ring" : to;
-		const button = new RouteButtonBuilder(router)
-			// the active tab is Primary, except Delete data reads as its
-			// destructive Danger red when it is the one selected
-			.setStyle(
-				section !== active
-					? ButtonStyle.Secondary
-					: section === "delete"
-						? ButtonStyle.Danger
-						: ButtonStyle.Primary,
-			)
-			.setDisabled(section === active && target === path)
-			.setTo(target);
-		if (section === "signups" && vc) button.setLabel("Signups").setEmoji(vc);
-		else button.setLabel(label);
-		return button;
+	const option = ({ section, label, path }: Tab) => {
+		const target = section === "ringees" && inVoice ? "/ring" : path;
+		const builder = new RouteStringSelectMenuOptionBuilder(router)
+			.setTo(target)
+			.setDefault(section === active);
+		if (section === "signups" && vc) builder.setLabel("Signups").setEmoji(vc);
+		else builder.setLabel(label);
+		return builder;
 	};
 
-	// the pager reloads the current panel showing the other page of tabs
-	const pager = (label: string, page: "1" | "2"): RingButton =>
-		new RouteButtonBuilder(router)
-			.setLabel(label)
-			.setStyle(ButtonStyle.Secondary)
-			.setTo(path, { queryParams: { nav: page } });
+	const select = new RouteStringSelectMenuBuilder(router)
+		.setPlaceholder("Jump to a section")
+		.setPattern("/")
+		.setTos(SECTIONS.map(option));
 
-	const tabs = (onPageTwo ? PAGE_TWO : PAGE_ONE).map(tab);
-	return row(
-		...(onPageTwo
-			? [pager("◀ Back", "1"), ...tabs]
-			: [...tabs, pager("More ▶", "2")]),
-	);
+	return new ActionRowBuilder<RouteStringSelectMenuBuilder>()
+		.addComponents(select)
+		.toJSON();
 };
 
 // the sub-view switch a section shows just above the bar when it has sibling

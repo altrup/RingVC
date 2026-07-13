@@ -22,11 +22,7 @@ export const homeGet: Handler<"GET"> = (router, interaction, state) => {
 	return {
 		embeds: [embed],
 		components: [
-			navBar(router, interaction, {
-				active: "home",
-				path: "/",
-				queryParams: state.queryParams,
-			}),
+			navBar(router, interaction, { active: "home" }),
 		],
 	};
 };

@@ -33,11 +33,7 @@ export const ringGet: Handler<"GET"> = async (router, interaction, state) => {
 			],
 			components: [
 				ringViews,
-				navBar(router, interaction, {
-					active: "ringees",
-					path: PANEL,
-					queryParams: state.queryParams,
-				}),
+				navBar(router, interaction, { active: "ringees" }),
 			],
 		};
 
@@ -72,11 +68,7 @@ export const ringGet: Handler<"GET"> = async (router, interaction, state) => {
 					.setTo(`${PANEL}/default`, { method: "POST" }),
 			),
 			ringViews,
-			navBar(router, interaction, {
-				active: "ringees",
-				path: PANEL,
-				queryParams: state.queryParams,
-			}),
+			navBar(router, interaction, { active: "ringees" }),
 		],
 	};
 };

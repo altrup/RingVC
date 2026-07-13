@@ -156,13 +156,7 @@ export const renderRoleScope = ({
 				{ label: "By channel", path: BY_CHANNEL, active: active === "channel" },
 				{ label: "By role", path: BY_ROLE, active: active === "role" },
 			]),
-			navBar(router, interaction, {
-				active: "signups",
-				path:
-					(active === "channel" ? BY_CHANNEL : BY_ROLE) +
-					(scope ? `/${scope}` : ""),
-				queryParams,
-			}),
+			navBar(router, interaction, { active: "signups" }),
 		],
 	};
 };

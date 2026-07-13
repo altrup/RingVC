@@ -77,11 +77,7 @@ export const signupsGet: Handler<"GET"> = async (
 						]),
 					]
 				: []),
-			navBar(router, interaction, {
-				active: "signups",
-				path: PANEL,
-				queryParams: state.queryParams,
-			}),
+			navBar(router, interaction, { active: "signups" }),
 		],
 	};
 };

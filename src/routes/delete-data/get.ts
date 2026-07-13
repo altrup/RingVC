@@ -33,11 +33,7 @@ export const deleteDataGet: Handler<"GET"> = (router, interaction, state) => {
 					.setDisabled(done)
 					.setTo(PANEL, { method: "MODAL" }),
 			),
-			navBar(router, interaction, {
-				active: "delete",
-				path: PANEL,
-				queryParams: state.queryParams,
-			}),
+			navBar(router, interaction, { active: "delete" }),
 		],
 	};
 };

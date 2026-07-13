@@ -5,12 +5,12 @@ import {
 	SlashCommandBuilder,
 } from "discord.js";
 
-export const help = {
+export const ringvc = {
 	data: new SlashCommandBuilder()
-		.setName("help")
-		.setDescription("Getting started and the full command list"),
+		.setName("ringvc")
+		.setDescription("Open the RingVC home panel"),
 	async execute(router: RingRouter, interaction: ChatInputCommandInteraction) {
-		await router.dispatch(interaction, "/commands", {
+		await router.dispatch(interaction, "/", {
 			flags: [MessageFlags.Ephemeral],
 		});
 	},

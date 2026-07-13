@@ -24,8 +24,8 @@ export const commandsGet: Handler<"GET"> = (router, interaction, state) => {
 		["ring_defaults", "ring your saved defaults into your voice channel"],
 	];
 	const panels: [CommandName, string][] = [
-		["help", "the home panel"],
-		["catalog", "this command list"],
+		["ringvc", "the home panel"],
+		["help", "this help page"],
 		["signup", "your signups panel (bare, outside a voice channel)"],
 		["filter", "your filter panel"],
 		["default_ring_recipients", "ring recipients and auto-ring panel"],
@@ -38,7 +38,9 @@ export const commandsGet: Handler<"GET"> = (router, interaction, state) => {
 
 	const description = withFlash(
 		state.queryParams,
-		`**Quick actions**\n${list(quickActions)}\n\n` +
+		"Sign up for a voice channel to get pinged when someone starts a call " +
+			"there. Run a command below, or use the section menu to open any panel." +
+			`\n\n**Quick actions**\n${list(quickActions)}\n\n` +
 			`**Panel openers**\n${list(panels)}`,
 	);
 
@@ -49,8 +51,6 @@ export const commandsGet: Handler<"GET"> = (router, interaction, state) => {
 				.setTitle("📖 Commands")
 				.setDescription(description),
 		],
-		components: [
-			navBar(router, interaction, { active: "commands" }),
-		],
+		components: [navBar(router, interaction, { active: "commands" })],
 	};
 };

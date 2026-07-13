@@ -1,4 +1,4 @@
-import { navRow, paginationRows, row } from "@routes/lib/components";
+import { navBar, paginationRows, row } from "@routes/lib/components";
 import { withFlash } from "@routes/lib/flash";
 import { PAGE_SIZE, paginate } from "@routes/lib/paging";
 import { channelIdOf, scopeName, scopeOf } from "@routes/lib/scope";
@@ -101,7 +101,7 @@ export const filterGet: Handler<"GET"> = async (router, interaction, state) => {
 					.setStyle(ButtonStyle.Danger)
 					.setTo(`${panelPath(scope)}/reset`, { method: "MODAL" }),
 			),
-			navRow(router),
+			navBar(router, interaction, "filters"),
 			...paginationRows(router, panelPath(scope), { page, pageCount }),
 		],
 	};

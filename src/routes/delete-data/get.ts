@@ -1,4 +1,4 @@
-import { row } from "@routes/lib/components";
+import { navBar, row } from "@routes/lib/components";
 import { withFlash } from "@routes/lib/flash";
 import { Handler } from "@routes/types";
 import { RouteButtonBuilder } from "discord-embed-router";
@@ -38,6 +38,7 @@ export const deleteDataGet: Handler<"GET"> = (router, interaction, state) => {
 					.setDisabled(done)
 					.setTo("/"),
 			),
+			navBar(router, interaction),
 		],
 	};
 };

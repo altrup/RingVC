@@ -4,23 +4,22 @@ import { ComponentEmojiResolvable, Interaction } from "discord.js";
 export const RINGVC_EMOJI_ID = "1324809350899961877";
 export const VC_EMOJI_ID = "1326000686575521883";
 
-// custom emoji only render where the bot can resolve them; a client that
-// doesn't share a guild carrying the emoji would show a broken glyph, so
-// callers gate on availability and fall back to no emoji
-const hasEmoji = (interaction: Interaction, id: string): boolean =>
-	interaction.client.emojis.cache.has(id);
+// the emoji image on the CDN, usable as an embed author or thumbnail icon.
+// A plain image URL renders for anyone, so it needs no access check; an
+// invalid id simply 404s and the icon is dropped
+export const emojiIconURL = (id: string): string =>
+	`https://cdn.discordapp.com/emojis/${id}.webp`;
 
+// a custom emoji on a button only renders when the bot can use it: an
+// application emoji it owns (fetched into client.application.emojis at
+// startup) or an emoji from a guild it shares. Otherwise Discord shows a
+// broken glyph, so callers fall back to no emoji
 export const buttonEmoji = (
 	interaction: Interaction,
 	id: string,
-): ComponentEmojiResolvable | undefined =>
-	hasEmoji(interaction, id) ? { id } : undefined;
-
-// the animated/static emoji image, usable as an embed author or thumbnail icon
-export const emojiIconURL = (
-	interaction: Interaction,
-	id: string,
-): string | undefined =>
-	hasEmoji(interaction, id)
-		? `https://cdn.discordapp.com/emojis/${id}.webp`
+): ComponentEmojiResolvable | undefined => {
+	const client = interaction.client;
+	return client.application?.emojis.cache.has(id) || client.emojis.cache.has(id)
+		? { id }
 		: undefined;
+};

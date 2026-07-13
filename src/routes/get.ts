@@ -1,10 +1,5 @@
-import { row } from "@routes/lib/components";
-import {
-	buttonEmoji,
-	emojiIconURL,
-	RINGVC_EMOJI_ID,
-	VC_EMOJI_ID,
-} from "@routes/lib/emoji";
+import { navBar, row } from "@routes/lib/components";
+import { emojiIconURL, RINGVC_EMOJI_ID } from "@routes/lib/emoji";
 import { withFlash } from "@routes/lib/flash";
 import { Handler } from "@routes/types";
 import { RouteButtonBuilder } from "discord-embed-router";
@@ -16,12 +11,11 @@ const GITHUB_URL = "https://github.com/altrup/RingVC";
 const SUPPORT_URL = "https://discord.gg/bxBePEnndq";
 
 export const homeGet: Handler<"GET"> = (router, interaction, state) => {
-	const vc = buttonEmoji(interaction, VC_EMOJI_ID);
-	const brandIcon = emojiIconURL(interaction, RINGVC_EMOJI_ID);
-
+	// the branded author line (icon + "RingVC") is the panel's header, so
+	// there is no separate title to duplicate it
 	const embed = new EmbedBuilder()
 		.setColor(COLOR)
-		.setTitle("🔔 RingVC")
+		.setAuthor({ name: "RingVC", iconURL: emojiIconURL(RINGVC_EMOJI_ID) })
 		.setDescription(
 			withFlash(
 				state.queryParams,
@@ -29,34 +23,10 @@ export const homeGet: Handler<"GET"> = (router, interaction, state) => {
 					"-# Everything the commands do lives in the panels below.",
 			),
 		);
-	if (brandIcon) embed.setAuthor({ name: "RingVC", iconURL: brandIcon });
-
-	// the Signups button carries the branded voice-channel emoji when it
-	// resolves, falling back to a unicode bell otherwise
-	const signups = new RouteButtonBuilder(router)
-		.setStyle(ButtonStyle.Secondary)
-		.setTo("/signups");
-	if (vc) signups.setEmoji(vc).setLabel("Signups");
-	else signups.setLabel("🔔 Signups");
 
 	return {
 		embeds: [embed],
 		components: [
-			row(
-				signups,
-				new RouteButtonBuilder(router)
-					.setLabel("🛡️ Filter")
-					.setStyle(ButtonStyle.Secondary)
-					.setTo("/filter/global"),
-				new RouteButtonBuilder(router)
-					.setLabel("📣 Ring recipients")
-					.setStyle(ButtonStyle.Secondary)
-					.setTo("/recipients/global"),
-				new RouteButtonBuilder(router)
-					.setLabel("💤 Mode")
-					.setStyle(ButtonStyle.Secondary)
-					.setTo("/mode"),
-			),
 			row(
 				new RouteButtonBuilder(router)
 					.setLabel("📖 Commands")
@@ -66,6 +36,8 @@ export const homeGet: Handler<"GET"> = (router, interaction, state) => {
 					.setLabel("🗑️ Delete data")
 					.setStyle(ButtonStyle.Danger)
 					.setTo("/delete-data"),
+			),
+			row(
 				new ButtonBuilder()
 					.setLabel("Github")
 					.setStyle(ButtonStyle.Link)
@@ -75,6 +47,9 @@ export const homeGet: Handler<"GET"> = (router, interaction, state) => {
 					.setStyle(ButtonStyle.Link)
 					.setURL(SUPPORT_URL),
 			),
+			// the section bar sits last, same as every other panel; on Home the
+			// active tab is Home itself, rendered inert
+			navBar(router, interaction, "home"),
 		],
 	};
 };

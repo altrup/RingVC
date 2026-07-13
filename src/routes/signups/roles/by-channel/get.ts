@@ -76,6 +76,7 @@ export const rolesByChannelGet: Handler<"GET"> = async (
 
 	return renderRoleScope({
 		router,
+		interaction,
 		queryParams: state.queryParams,
 		active: "channel",
 		scope,

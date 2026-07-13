@@ -1,4 +1,4 @@
-import { navRow, paginationRows, row } from "@routes/lib/components";
+import { navBar, paginationRows, row } from "@routes/lib/components";
 import { flashRedirect, withFlash } from "@routes/lib/flash";
 import { Page } from "@routes/lib/paging";
 import { RingRouter } from "@routes/types";
@@ -9,11 +9,12 @@ import {
 	ButtonStyle,
 	EmbedBuilder,
 	Guild,
+	Interaction,
 } from "discord.js";
 
 import { joinWithAnd } from "@main/ring";
 
-import { COLOR, PANEL } from "../_shared";
+import { COLOR } from "../_shared";
 
 export const BY_CHANNEL = "/signups/roles/by-channel";
 export const BY_ROLE = "/signups/roles/by-role";
@@ -124,6 +125,7 @@ export const commitRoleEdit = async ({
 // supplies the scope's current links; the frame, copy, and rows are shared
 export const renderRoleScope = ({
 	router,
+	interaction,
 	queryParams,
 	active,
 	scope,
@@ -139,6 +141,7 @@ export const renderRoleScope = ({
 	pageCount,
 }: {
 	router: RingRouter;
+	interaction: Interaction;
 	queryParams: URLSearchParams;
 	active: Orientation;
 	scope: string | null;
@@ -171,7 +174,7 @@ export const renderRoleScope = ({
 			switchRow(router, active),
 			scopeSelectRow,
 			...(scope && editSelectRow ? [editSelectRow] : []),
-			navRow(router, PANEL),
+			navBar(router, interaction, "signups"),
 			...paginationRows(router, basePath, { page, pageCount }),
 		],
 	};

@@ -1,4 +1,4 @@
-import { homeButton, navRow, row } from "@routes/lib/components";
+import { homeButton, navBar, row } from "@routes/lib/components";
 import { withFlash } from "@routes/lib/flash";
 import { PAGE_SIZE } from "@routes/lib/paging";
 import { Handler } from "@routes/types";
@@ -58,7 +58,7 @@ export const ringGet: Handler<"GET"> = async (router, interaction, state) => {
 					.setStyle(ButtonStyle.Success)
 					.setTo(`${PANEL}/default`, { method: "POST" }),
 			),
-			navRow(router),
+			navBar(router, interaction),
 		],
 	};
 };

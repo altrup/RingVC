@@ -72,6 +72,10 @@ client.once("clientReady", async () => {
 			console.error("Unknown command was registered: ", command.name);
 		}
 	});
+
+	// populate client.application.emojis.cache so branded emoji on buttons
+	// resolve; the cache is empty until fetched
+	await client.application?.emojis.fetch();
 });
 client.on("shardError", async () => {
 	// console.log('disconnected');

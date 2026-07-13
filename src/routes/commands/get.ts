@@ -1,4 +1,4 @@
-import { navRow } from "@routes/lib/components";
+import { navBar } from "@routes/lib/components";
 import { withFlash } from "@routes/lib/flash";
 import { commandMention } from "@routes/lib/mentions";
 import { Handler } from "@routes/types";
@@ -33,21 +33,22 @@ export const commandsGet: Handler<"GET"> = (router, interaction, state) => {
 		["delete_data", "data deletion panel"],
 	];
 	const list = (entries: [CommandName, string][]) =>
-		entries.map(([name, blurb]) => `${mention(name)}: ${blurb}`).join("\n");
+		entries.map(([name, blurb]) => `${mention(name)} · ${blurb}`).join("\n");
+
+	const description = withFlash(
+		state.queryParams,
+		"Every command is clickable.\n\n" +
+			`**Quick actions**\n${list(quickActions)}\n\n` +
+			`**Panel openers**\n${list(panels)}`,
+	);
 
 	return {
 		embeds: [
 			new EmbedBuilder()
 				.setColor(COLOR)
 				.setTitle("📖 Commands")
-				.setDescription(
-					withFlash(state.queryParams, "Every command is clickable."),
-				)
-				.addFields(
-					{ name: "Quick actions", value: list(quickActions) },
-					{ name: "Panel openers", value: list(panels) },
-				),
+				.setDescription(description),
 		],
-		components: [navRow(router)],
+		components: [navBar(router, interaction)],
 	};
 };

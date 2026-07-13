@@ -1,4 +1,4 @@
-import { navRow, paginationRows, row } from "@routes/lib/components";
+import { navBar, paginationRows, row } from "@routes/lib/components";
 import { withFlash } from "@routes/lib/flash";
 import { PAGE_SIZE, paginate } from "@routes/lib/paging";
 import { channelIdOf, scopeOf } from "@routes/lib/scope";
@@ -144,7 +144,7 @@ export const recipientsGet: Handler<"GET"> = async (
 						]
 					: []),
 			),
-			navRow(router),
+			navBar(router, interaction, "ringees"),
 			...paginationRows(router, panelPath(scope), { page, pageCount }),
 		],
 	};

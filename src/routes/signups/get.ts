@@ -1,6 +1,6 @@
 import {
 	homeButton,
-	navRow,
+	navBar,
 	paginationRows,
 	row,
 } from "@routes/lib/components";
@@ -78,7 +78,7 @@ export const signupsGet: Handler<"GET"> = async (
 					.setStyle(ButtonStyle.Secondary)
 					.setTo(ROLES),
 			),
-			navRow(router),
+			navBar(router, interaction, "signups"),
 			...paginationRows(router, PANEL, { page, pageCount }),
 		],
 	};

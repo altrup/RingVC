@@ -1,3 +1,4 @@
+import { buttonEmoji, VC_EMOJI_ID } from "@routes/lib/emoji";
 import { Page } from "@routes/lib/paging";
 import { RingButton, RingRouter } from "@routes/types";
 import { RouteButtonBuilder } from "discord-embed-router";
@@ -7,6 +8,7 @@ import {
 	APIComponentInMessageActionRow,
 	ButtonBuilder,
 	ButtonStyle,
+	Interaction,
 } from "discord.js";
 
 export const row = (
@@ -30,16 +32,41 @@ export const backButton = (
 		.setStyle(ButtonStyle.Secondary)
 		.setTo(path);
 
-// the navigation row every panel ends on: Back (when the panel has a parent)
-// then Home, always last and on their own row, so navigation sits in the same
-// place regardless of a panel's action buttons
-export const navRow = (
+// the top-level section a panel belongs to, so the section bar can render it
+// as the active tab. Utility panels (Commands, Ring, Delete data) belong to no
+// section and pass nothing
+export type Section = "home" | "signups" | "filters" | "ringees" | "mode";
+
+// the persistent section bar every panel ends on: one button per top-level
+// section, always in the same place. The active section is an inert Primary so
+// it reads as "you are here"; the Signups entry carries the branded voice-chat
+// emoji when the bot can use it, falling back to a unicode bell
+export const navBar = (
 	router: RingRouter,
-	parentPath?: string,
-): APIActionRowComponent<APIComponentInMessageActionRow> =>
-	parentPath
-		? row(backButton(router, parentPath), homeButton(router))
-		: row(homeButton(router));
+	interaction: Interaction,
+	active?: Section,
+): APIActionRowComponent<APIComponentInMessageActionRow> => {
+	const tab = (section: Section, label: string, path: string): RingButton =>
+		new RouteButtonBuilder(router)
+			.setLabel(label)
+			.setStyle(
+				section === active ? ButtonStyle.Primary : ButtonStyle.Secondary,
+			)
+			.setDisabled(section === active)
+			.setTo(path);
+
+	const vc = buttonEmoji(interaction, VC_EMOJI_ID);
+	const signups = tab("signups", vc ? "Signups" : "🔔 Signups", "/signups");
+	if (vc) signups.setEmoji(vc);
+
+	return row(
+		tab("home", "🏠 Home", "/"),
+		signups,
+		tab("filters", "🛡️ Filters", "/filter/global"),
+		tab("ringees", "📣 Ringees", "/recipients/global"),
+		tab("mode", "💤 Mode", "/mode"),
+	);
+};
 
 // the conditional pagination row: absent for single-page lists, so the
 // result is spread into a components array

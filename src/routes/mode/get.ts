@@ -1,4 +1,4 @@
-import { navRow, row } from "@routes/lib/components";
+import { navBar, row } from "@routes/lib/components";
 import { withFlash } from "@routes/lib/flash";
 import { Handler } from "@routes/types";
 import { RouteButtonBuilder } from "discord-embed-router";
@@ -44,7 +44,7 @@ export const modeGet: Handler<"GET"> = async (router, interaction, state) => {
 						.setTo(PATH, { method: "POST", queryParams: { set: mode } }),
 				),
 			),
-			navRow(router),
+			navBar(router, interaction, "mode"),
 		],
 	};
 };

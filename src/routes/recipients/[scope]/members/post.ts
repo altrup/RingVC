@@ -1,5 +1,5 @@
 import { flashRedirect } from "@routes/lib/flash";
-import { diffSelection, paginate } from "@routes/lib/paging";
+import { resolveSelectionEdit } from "@routes/lib/paging";
 import { channelIdOf, scopeOf } from "@routes/lib/scope";
 import { Handler } from "@routes/types";
 
@@ -23,12 +23,14 @@ export const recipientsMembersPost: Handler<"POST"> = async (
 	const panel = panelPath(scope);
 
 	const ringees = [...(await getDefaultRingees(userId, channelId))].sort();
-	const { pageItems } = paginate(ringees, state.queryParams.get("page"));
-	const { added, removed } = diffSelection({
-		allItems: ringees,
-		pageItems,
-		submitted: state.values ?? pageItems,
+	const { addsRequested, removesRequested } = resolveSelectionEdit({
+		current: ringees,
+		values: state.values,
+		queryParams: state.queryParams,
 	});
+	const ringeeSet = new Set(ringees);
+	const added = addsRequested.filter((id) => !ringeeSet.has(id));
+	const removed = removesRequested.filter((id) => ringeeSet.has(id));
 
 	await Promise.all([
 		...added.map((id) => addDefaultRingee(userId, channelId, id)),

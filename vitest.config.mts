@@ -17,5 +17,15 @@ export default defineConfig({
 	},
 	test: {
 		include: ["src/**/*.test.ts"],
+		// config.ts and the supabase client validate these at import, and test
+		// modules pull them in transitively (e.g. mocking a db module with its
+		// real implementation). Dummy values keep the suite self-contained so it
+		// never depends on a developer's .env; the db layer is mocked in tests
+		env: {
+			DISCORD_TOKEN: "test-token",
+			DISCORD_CLIENT_ID: "test-client-id",
+			SUPABASE_URL: "http://localhost:54321",
+			SUPABASE_SERVICE_ROLE_KEY: "test-service-role-key",
+		},
 	},
 });

@@ -4,11 +4,19 @@ import { expect, test } from "vitest";
 const ids = (count: number, offset = 0) =>
 	Array.from({ length: count }, (_, i) => `${i + offset + 1}`);
 
-test("lists of 25 or fewer fit one page with no pagination", () => {
-	expect(paginate(ids(25), null)).toStrictEqual({
-		pageItems: ids(25),
+test("a partial page fits one page with no pagination", () => {
+	expect(paginate(ids(24), null)).toStrictEqual({
+		pageItems: ids(24),
 		page: 0,
 		pageCount: 1,
+	});
+});
+
+test("an exactly full page is followed by an empty page for adding", () => {
+	expect(paginate(ids(25), "1")).toStrictEqual({
+		pageItems: [],
+		page: 1,
+		pageCount: 2,
 	});
 });
 

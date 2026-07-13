@@ -1,5 +1,5 @@
 import { flashRedirect } from "@routes/lib/flash";
-import { diffSelection, paginate } from "@routes/lib/paging";
+import { resolveSelectionEdit } from "@routes/lib/paging";
 import { Handler } from "@routes/types";
 
 import { addVoiceChatUser, removeVoiceChatUser } from "@db/voice-chats";
@@ -24,33 +24,36 @@ export const signupsMembersPost: Handler<"POST"> = async (
 
 	const userId = interaction.user.id;
 	const query = state.queryParams;
-	let addsRequested: string[];
-	let removesRequested: string[];
-	if (state.values) {
-		const signups = await guildSignups(userId, guild);
-		const { pageItems } = paginate(signups, query.get("page"));
-		({ added: addsRequested, removed: removesRequested } = diffSelection({
-			allItems: signups,
-			pageItems,
-			submitted: state.values,
-		}));
-	} else {
-		addsRequested = query.getAll("add");
-		removesRequested = query.getAll("remove");
-	}
+	// only the select path needs the current signups to diff against; command
+	// adapters pass the ids to add/remove directly, so skip the fetch for them
+	const signups = state.values ? await guildSignups(userId, guild) : [];
+	const { addsRequested, removesRequested } = resolveSelectionEdit({
+		current: signups,
+		values: state.values,
+		queryParams: query,
+	});
 
-	const added: string[] = [];
-	const alreadySignedUp: string[] = [];
-	for (const channelId of addsRequested) {
-		if (await addVoiceChatUser(channelId, userId)) added.push(channelId);
-		else alreadySignedUp.push(channelId);
-	}
-	const removed: string[] = [];
-	const notSignedUp: string[] = [];
-	for (const channelId of removesRequested) {
-		if (await removeVoiceChatUser(channelId, userId)) removed.push(channelId);
-		else notSignedUp.push(channelId);
-	}
+	const addResults = await Promise.all(
+		addsRequested.map(async (channelId) => ({
+			channelId,
+			ok: await addVoiceChatUser(channelId, userId),
+		})),
+	);
+	const added = addResults.filter((r) => r.ok).map((r) => r.channelId);
+	const alreadySignedUp = addResults
+		.filter((r) => !r.ok)
+		.map((r) => r.channelId);
+
+	const removeResults = await Promise.all(
+		removesRequested.map(async (channelId) => ({
+			channelId,
+			ok: await removeVoiceChatUser(channelId, userId),
+		})),
+	);
+	const removed = removeResults.filter((r) => r.ok).map((r) => r.channelId);
+	const notSignedUp = removeResults
+		.filter((r) => !r.ok)
+		.map((r) => r.channelId);
 
 	const parts = [
 		...(added.length > 0

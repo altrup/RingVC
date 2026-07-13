@@ -31,8 +31,10 @@ export const flashLine = (queryParams: URLSearchParams): string | null => {
 	const flash = queryParams.get("flash");
 	if (!flash) return null;
 	const icon = queryParams.get("level") === "warn" ? "⚠️" : "✅";
-	return `${icon} ${boldLead(flash)}`
-		.split("\n")
+	// bold only the first line's lead: Discord bold can't span the newline
+	// between blockquote lines, so the markers must open and close on one line
+	const [first = "", ...rest] = flash.split("\n");
+	return [`${icon} ${boldLead(first)}`, ...rest]
 		.map((line) => `> ${line}`)
 		.join("\n");
 };

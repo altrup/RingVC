@@ -39,6 +39,17 @@ test("flashLine bolds only the opening clause through the first period", () => {
 	).toBe("> ✅ **Auto-ring enabled.** You'll ring these people.");
 });
 
+test("flashLine keeps the bold lead within the first line of a multi-line flash", () => {
+	expect(
+		flashLine(
+			new URLSearchParams({
+				flash: "Rang @a\nCan't ring @b because they blocked you.",
+				level: "warn",
+			}),
+		),
+	).toBe("> ⚠️ **Rang @a**\n> Can't ring @b because they blocked you.");
+});
+
 test("flashLine returns null when no flash is present", () => {
 	expect(flashLine(new URLSearchParams())).toBeNull();
 	expect(flashLine(new URLSearchParams({ flash: "" }))).toBeNull();

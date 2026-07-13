@@ -1,5 +1,6 @@
 import { RingRouter } from "@routes/types";
 
+import { aboutGet } from "./about/get";
 import { commandsGet } from "./commands/get";
 import { deleteDataGet } from "./delete-data/get";
 import { deleteDataModal } from "./delete-data/modal";
@@ -34,6 +35,7 @@ import { rolesByRoleGet } from "./signups/roles/by-role/get";
 export const registerRoutes = (router: RingRouter) => {
 	router.get("/", homeGet);
 	router.get("/commands", commandsGet);
+	router.get("/about", aboutGet);
 
 	// scoped panels answer their bare path as the global scope, so their
 	// scope-switch channel select can target "{/:channelId}" and fall back to

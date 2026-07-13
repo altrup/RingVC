@@ -144,7 +144,11 @@ export const recipientsGet: Handler<"GET"> = async (
 						]
 					: []),
 			),
-			navBar(router, interaction, "ringees"),
+			navBar(router, interaction, {
+				active: "ringees",
+				path: panelPath(scope),
+				queryParams: state.queryParams,
+			}),
 			...paginationRows(router, panelPath(scope), { page, pageCount }),
 		],
 	};

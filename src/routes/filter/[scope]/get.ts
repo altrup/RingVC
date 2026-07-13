@@ -101,7 +101,11 @@ export const filterGet: Handler<"GET"> = async (router, interaction, state) => {
 					.setStyle(ButtonStyle.Danger)
 					.setTo(`${panelPath(scope)}/reset`, { method: "MODAL" }),
 			),
-			navBar(router, interaction, "filters"),
+			navBar(router, interaction, {
+				active: "filters",
+				path: panelPath(scope),
+				queryParams: state.queryParams,
+			}),
 			...paginationRows(router, panelPath(scope), { page, pageCount }),
 		],
 	};

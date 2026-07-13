@@ -32,13 +32,12 @@ export const deleteDataGet: Handler<"GET"> = (router, interaction, state) => {
 					.setStyle(ButtonStyle.Danger)
 					.setDisabled(done)
 					.setTo(PANEL, { method: "MODAL" }),
-				new RouteButtonBuilder(router)
-					.setLabel("Cancel")
-					.setStyle(ButtonStyle.Secondary)
-					.setDisabled(done)
-					.setTo("/"),
 			),
-			navBar(router, interaction),
+			navBar(router, interaction, {
+				active: "delete",
+				path: PANEL,
+				queryParams: state.queryParams,
+			}),
 		],
 	};
 };

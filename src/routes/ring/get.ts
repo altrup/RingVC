@@ -58,7 +58,10 @@ export const ringGet: Handler<"GET"> = async (router, interaction, state) => {
 					.setStyle(ButtonStyle.Success)
 					.setTo(`${PANEL}/default`, { method: "POST" }),
 			),
-			navBar(router, interaction),
+			navBar(router, interaction, {
+				path: PANEL,
+				queryParams: state.queryParams,
+			}),
 		],
 	};
 };

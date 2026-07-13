@@ -174,7 +174,13 @@ export const renderRoleScope = ({
 			switchRow(router, active),
 			scopeSelectRow,
 			...(scope && editSelectRow ? [editSelectRow] : []),
-			navBar(router, interaction, "signups"),
+			navBar(router, interaction, {
+				active: "signups",
+				path:
+					(active === "channel" ? BY_CHANNEL : BY_ROLE) +
+					(scope ? `/${scope}` : ""),
+				queryParams,
+			}),
 			...paginationRows(router, basePath, { page, pageCount }),
 		],
 	};

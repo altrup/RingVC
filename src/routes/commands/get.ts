@@ -37,8 +37,7 @@ export const commandsGet: Handler<"GET"> = (router, interaction, state) => {
 
 	const description = withFlash(
 		state.queryParams,
-		"Every command is clickable.\n\n" +
-			`**Quick actions**\n${list(quickActions)}\n\n` +
+		`**Quick actions**\n${list(quickActions)}\n\n` +
 			`**Panel openers**\n${list(panels)}`,
 	);
 
@@ -49,6 +48,12 @@ export const commandsGet: Handler<"GET"> = (router, interaction, state) => {
 				.setTitle("📖 Commands")
 				.setDescription(description),
 		],
-		components: [navBar(router, interaction)],
+		components: [
+			navBar(router, interaction, {
+				active: "commands",
+				path: "/commands",
+				queryParams: state.queryParams,
+			}),
+		],
 	};
 };

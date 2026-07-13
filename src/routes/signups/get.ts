@@ -78,7 +78,11 @@ export const signupsGet: Handler<"GET"> = async (
 					.setStyle(ButtonStyle.Secondary)
 					.setTo(ROLES),
 			),
-			navBar(router, interaction, "signups"),
+			navBar(router, interaction, {
+				active: "signups",
+				path: PANEL,
+				queryParams: state.queryParams,
+			}),
 			...paginationRows(router, PANEL, { page, pageCount }),
 		],
 	};

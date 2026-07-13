@@ -28,7 +28,7 @@ export const filterTypePost: Handler<"POST"> = async (
 	await setFilterType(interaction.user.id, channelId, to === "whitelist");
 	return flashRedirect(
 		panel,
-		`${scopeName(scope, "filter", { capitalize: true })} was reset and changed to a ${to}`,
-		"warn",
+		`${scopeName(scope, "filter", { capitalize: true })} is now a ${to}`,
+		"success",
 	);
 };

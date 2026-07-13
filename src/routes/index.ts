@@ -32,63 +32,59 @@ import { rolesByRoleGet } from "./signups/roles/by-role/get";
 // handlers live in files mirroring their route: the folder is the path (with
 // [param] segments) and the file is the method
 export const registerRoutes = (router: RingRouter) => {
-	router.route("/", { get: homeGet });
-	router.route("/commands", { get: commandsGet });
+	router.get("/", homeGet);
+	router.get("/commands", commandsGet);
 
 	// scoped panels answer their bare path as the global scope, so their
 	// scope-switch channel select can target "{/:channelId}" and fall back to
 	// global when the selection is cleared
-	router.route(["/filter", "/filter/:scope"], { get: filterGet });
-	router.route("/filter/:scope/members", { post: filterMembersPost });
-	router.route("/filter/:scope/type", { post: filterTypePost });
+	router.get(["/filter", "/filter/:scope"], filterGet);
+	router.post("/filter/:scope/members", filterMembersPost);
+	router.post("/filter/:scope/type", filterTypePost);
 	router.route("/filter/:scope/reset", {
 		modal: filterResetModal,
 		post: filterResetPost,
 	});
 
-	router.route(["/recipients", "/recipients/:scope"], { get: recipientsGet });
-	router.route("/recipients/:scope/members", { post: recipientsMembersPost });
+	router.get(["/recipients", "/recipients/:scope"], recipientsGet);
+	router.post("/recipients/:scope/members", recipientsMembersPost);
 	router.route("/recipients/:scope/reset", {
 		modal: recipientsResetModal,
 		post: recipientsResetPost,
 	});
-	router.route("/recipients/:scope/auto-ring", {
-		post: recipientsAutoRingPost,
-	});
-	router.route("/recipients/:scope/auto-ring/unset", {
-		post: recipientsAutoRingUnsetPost,
-	});
+	router.post("/recipients/:scope/auto-ring", recipientsAutoRingPost);
+	router.post(
+		"/recipients/:scope/auto-ring/unset",
+		recipientsAutoRingUnsetPost,
+	);
 
 	router.route("/mode", { get: modeGet, post: modePost });
 
-	router.route("/signups", { get: signupsGet });
-	router.route("/signups/members", { post: signupsMembersPost });
+	router.get("/signups", signupsGet);
+	router.post("/signups/members", signupsMembersPost);
 
 	// role signups are a scoped panel like filter: an orientation segment
 	// (by-channel / by-role) then the scope id. The bare path lands on the
 	// by-channel view with nothing picked yet
-	router.route(
+	router.get(
 		[
 			"/signups/roles",
 			"/signups/roles/by-channel",
 			"/signups/roles/by-channel/:scope",
 		],
-		{ get: rolesByChannelGet },
+		rolesByChannelGet,
 	);
-	router.route("/signups/roles/by-channel/:scope/roles", {
-		post: rolesByChannelEditPost,
-	});
-	router.route(["/signups/roles/by-role", "/signups/roles/by-role/:scope"], {
-		get: rolesByRoleGet,
-	});
-	router.route("/signups/roles/by-role/:scope/channels", {
-		post: rolesByRoleEditPost,
-	});
+	router.post("/signups/roles/by-channel/:scope/roles", rolesByChannelEditPost);
+	router.get(
+		["/signups/roles/by-role", "/signups/roles/by-role/:scope"],
+		rolesByRoleGet,
+	);
+	router.post("/signups/roles/by-role/:scope/channels", rolesByRoleEditPost);
 
-	router.route("/ring", { get: ringGet });
-	router.route("/ring/users", { post: ringUsersPost });
-	router.route("/ring/user", { post: ringUserPost });
-	router.route("/ring/default", { post: ringDefaultPost });
+	router.get("/ring", ringGet);
+	router.post("/ring/users", ringUsersPost);
+	router.post("/ring/user", ringUserPost);
+	router.post("/ring/default", ringDefaultPost);
 
 	router.route("/delete-data", {
 		get: deleteDataGet,

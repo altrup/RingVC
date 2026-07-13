@@ -1,6 +1,7 @@
 import { RingRouter } from "@routes/types";
 import { ChatInputCommandInteraction, SharedSlashCommand } from "discord.js";
 
+import { catalog } from "@commands/catalog";
 import { defaultRingRecipients } from "@commands/defaultRingRecipient";
 import { deleteData } from "@commands/deleteData";
 import { block } from "@commands/filter/block";
@@ -29,6 +30,7 @@ export type CommandImplementation = {
 
 export const commands: CommandImplementation[] = [
 	help,
+	catalog,
 	deleteData,
 	ring,
 	signup,

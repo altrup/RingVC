@@ -24,6 +24,7 @@ export const commandsGet: Handler<"GET"> = (router, interaction, state) => {
 	];
 	const panels: [CommandName, string][] = [
 		["help", "the home panel"],
+		["catalog", "this command list"],
 		["signup", "your signups panel (bare, outside a voice channel)"],
 		["filter", "your filter panel"],
 		["default_ring_recipients", "ring recipients and auto-ring panel"],

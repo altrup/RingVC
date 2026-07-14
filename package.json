@@ -14,7 +14,7 @@
 	},
 	"dependencies": {
 		"@supabase/supabase-js": "^2.110.2",
-		"discord-embed-router": "^1.2.0",
+		"discord-embed-router": "^1.2.1",
 		"discord.js": "^14.22.1",
 		"dotenv": "^17.2.2",
 		"is-online": "^11.0.0",

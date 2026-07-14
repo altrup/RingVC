@@ -13,12 +13,10 @@ import {
 
 import { joinWithAnd } from "@main/ring";
 
-import { COLOR } from "../_shared";
+import { COLOR, PANEL, ROLES } from "../_shared";
 
 export const BY_CHANNEL = "/signups/roles/by-channel";
 export const BY_ROLE = "/signups/roles/by-role";
-
-export type Orientation = "channel" | "role";
 
 // the shared lead sentence; both orientations describe the same feature
 const LEAD =
@@ -98,20 +96,74 @@ export const commitRoleEdit = async ({
 	});
 };
 
-// assembles either orientation from its orientation-specific pieces: the
-// caller builds the scope and edit selects (their menu types differ) and
-// supplies the scope's current links; the frame, copy, and rows are shared
+// the frame every role-signups view ends in. Rows read low-to-high level top to
+// bottom: the caller's content rows, then the My signups / Role signups switch,
+// then the section bar
+const roleFrame = ({
+	router,
+	interaction,
+	queryParams,
+	body,
+	rows,
+}: {
+	router: RingRouter;
+	interaction: Interaction;
+	queryParams: URLSearchParams;
+	body: string;
+	rows: APIActionRowComponent<APIComponentInMessageActionRow>[];
+}) => ({
+	embeds: [
+		new EmbedBuilder()
+			.setColor(COLOR)
+			.setTitle("🔔 Role signups")
+			.setDescription(withFlash(queryParams, body)),
+	],
+	components: [
+		...rows,
+		subNav(router, [
+			{ label: "My signups", path: PANEL },
+			{ label: "Role signups", path: ROLES, active: true },
+		]),
+		navBar(router, interaction, { active: "signups" }),
+	],
+});
+
+// the entry view with nothing picked: a channel select and a role select. The
+// first one the user touches sets the orientation; clearing that scope later
+// returns here
+export const renderRoleNeutral = ({
+	router,
+	interaction,
+	queryParams,
+	channelSelectRow,
+	roleSelectRow,
+}: {
+	router: RingRouter;
+	interaction: Interaction;
+	queryParams: URLSearchParams;
+	channelSelectRow: APIActionRowComponent<APIComponentInMessageActionRow>;
+	roleSelectRow: APIActionRowComponent<APIComponentInMessageActionRow>;
+}) =>
+	roleFrame({
+		router,
+		interaction,
+		queryParams,
+		body: `${LEAD}\n\nPick a voice channel or a role above to view and edit its signups.`,
+		rows: [channelSelectRow, roleSelectRow],
+	});
+
+// an oriented view: one scope is picked (a channel or a role) and its linked
+// items are editable. The caller builds the scope and edit selects, since their
+// menu types differ; the frame, copy, and rows are shared
 export const renderRoleScope = ({
 	router,
 	interaction,
 	queryParams,
-	active,
 	scope,
 	scopeMention,
 	linkedLabel,
 	linkedItems,
 	itemMention,
-	emptyHint,
 	scopeSelectRow,
 	editSelectRow,
 	basePath,
@@ -121,42 +173,31 @@ export const renderRoleScope = ({
 	router: RingRouter;
 	interaction: Interaction;
 	queryParams: URLSearchParams;
-	active: Orientation;
-	scope: string | null;
+	scope: string;
 	scopeMention: (id: string) => string;
 	linkedLabel: string;
 	linkedItems: string[];
 	itemMention: (id: string) => string;
-	emptyHint: string;
 	scopeSelectRow: APIActionRowComponent<APIComponentInMessageActionRow>;
-	// present only when a scope is picked; the empty view shows no edit select
-	editSelectRow?:
-		APIActionRowComponent<APIComponentInMessageActionRow> | undefined;
+	editSelectRow: APIActionRowComponent<APIComponentInMessageActionRow>;
 	basePath: string;
 } & Pick<Page, "page" | "pageCount">) => {
 	const linkedList =
 		linkedItems.length > 0 ? linkedItems.map(itemMention).join(" ") : "None";
-	const body = scope
-		? `${LEAD}\n\n**Viewing** ${scopeMention(scope)}\n` +
-			`**${linkedLabel}${pageCount > 1 ? ` (page ${page + 1} of ${pageCount})` : ""}** · ${linkedList}`
-		: `${LEAD}\n\n${emptyHint}`;
-
-	return {
-		embeds: [
-			new EmbedBuilder()
-				.setColor(COLOR)
-				.setTitle("🔔 Role signups")
-				.setDescription(withFlash(queryParams, body)),
-		],
-		components: [
-			scopeSelectRow,
-			...(scope && editSelectRow ? [editSelectRow] : []),
+	const body =
+		`${LEAD}\n\n**Viewing** ${scopeMention(scope)}\n` +
+		`**${linkedLabel}${pageCount > 1 ? ` (page ${page + 1} of ${pageCount})` : ""}** · ${linkedList}`;
+	return roleFrame({
+		router,
+		interaction,
+		queryParams,
+		body,
+		// the scope select sits below its edit list and pager: it is the higher-
+		// level context the items hang off
+		rows: [
+			editSelectRow,
 			...paginationRows(router, basePath, { page, pageCount }),
-			subNav(router, [
-				{ label: "By channel", path: BY_CHANNEL, active: active === "channel" },
-				{ label: "By role", path: BY_ROLE, active: active === "role" },
-			]),
-			navBar(router, interaction, { active: "signups" }),
+			scopeSelectRow,
 		],
-	};
+	});
 };

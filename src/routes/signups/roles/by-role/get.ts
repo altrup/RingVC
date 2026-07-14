@@ -16,6 +16,7 @@ import {
 	roleScopeOf,
 	sortChannelIds,
 } from "../_shared";
+import { rolesGet } from "../get";
 import {
 	canManageRoleSignups,
 	guildOnlyRender,
@@ -35,14 +36,14 @@ export const rolesByRoleGet: Handler<"GET"> = async (
 	if (!canManageRoleSignups(interaction)) return noPermissionRender(router);
 
 	const scope = roleScopeOf(state.params);
-	const channelIds = scope
-		? sortChannelIds(
-				guild,
-				(await getVoiceChatRoleSignups(guildVoiceChannelIds(guild)))
-					.filter((mapping) => mapping.roleId === scope)
-					.map((mapping) => mapping.channelId),
-			)
-		: [];
+	if (!scope) return rolesGet(router, interaction, state);
+
+	const channelIds = sortChannelIds(
+		guild,
+		(await getVoiceChatRoleSignups(guildVoiceChannelIds(guild)))
+			.filter((mapping) => mapping.roleId === scope)
+			.map((mapping) => mapping.channelId),
+	);
 	const { pageItems, page, pageCount } = paginate(
 		channelIds,
 		state.queryParams.get("page"),
@@ -53,44 +54,36 @@ export const rolesByRoleGet: Handler<"GET"> = async (
 			new RouteRoleSelectMenuBuilder(router)
 				.setMinValues(0)
 				.setMaxValues(1)
-				.setPlaceholder(
-					scope
-						? "Viewing a role's channels (clear to pick another)"
-						: "View a role's channels",
-				)
-				.setDefaultRoles(...(scope ? [scope] : []))
+				.setPlaceholder("Viewing a role's voice channels (clear to pick another)")
+				.setDefaultRoles(scope)
 				.setPattern(`${BY_ROLE}{/:roleId}`),
 		)
 		.toJSON();
 
-	const editSelectRow = scope
-		? new ActionRowBuilder<RouteChannelSelectMenuBuilder>()
-				.addComponents(
-					new RouteChannelSelectMenuBuilder(router)
-						.setChannelTypes(ChannelType.GuildVoice)
-						.setMinValues(0)
-						.setMaxValues(PAGE_SIZE)
-						.setPlaceholder("Edit channels: select to add, deselect to remove")
-						.setDefaultChannels(...pageItems)
-						.setPattern(`${BY_ROLE}/${scope}/channels`, {
-							method: "POST",
-							queryParams: { page: String(page) },
-						}),
-				)
-				.toJSON()
-		: undefined;
+	const editSelectRow = new ActionRowBuilder<RouteChannelSelectMenuBuilder>()
+		.addComponents(
+			new RouteChannelSelectMenuBuilder(router)
+				.setChannelTypes(ChannelType.GuildVoice)
+				.setMinValues(0)
+				.setMaxValues(PAGE_SIZE)
+				.setPlaceholder("Edit voice channels: select to add, deselect to remove")
+				.setDefaultChannels(...pageItems)
+				.setPattern(`${BY_ROLE}/${scope}/channels`, {
+					method: "POST",
+					queryParams: { page: String(page) },
+				}),
+		)
+		.toJSON();
 
 	return renderRoleScope({
 		router,
 		interaction,
 		queryParams: state.queryParams,
-		active: "role",
 		scope,
 		scopeMention: mentionRole,
 		linkedLabel: "Signed up for",
 		linkedItems: pageItems,
 		itemMention: mentionChannel,
-		emptyHint: "Pick a role above to view or edit its channels.",
 		scopeSelectRow,
 		editSelectRow,
 		basePath: `${BY_ROLE}/${scope}`,

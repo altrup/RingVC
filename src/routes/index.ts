@@ -24,6 +24,7 @@ import { ringUserPost } from "./ring/user/post";
 import { ringUsersPost } from "./ring/users/post";
 import { signupsGet } from "./signups/get";
 import { signupsMembersPost } from "./signups/members/post";
+import { rolesGet } from "./signups/roles/get";
 import { rolesByChannelGet } from "./signups/roles/by-channel/get";
 import { rolesByChannelEditPost } from "./signups/roles/by-channel/roles/post";
 import { rolesByRoleEditPost } from "./signups/roles/by-role/channels/post";
@@ -60,22 +61,20 @@ export const registerRoutes = (router: RingRouter) => {
 	router.get("/signups", signupsGet);
 	router.post("/signups/members", signupsMembersPost);
 
-	// role signups are a scoped panel like filter: an orientation segment
-	// (by-channel / by-role) then the scope id. The bare path lands on the
-	// by-channel view with nothing picked yet
+	// role signups open on a neutral view offering a channel select and a role
+	// select; picking either sets the orientation and routes to its scoped view.
+	// Clearing a scope drops back to the bare orientation path, which is neutral
 	router.get(
 		[
 			"/signups/roles",
 			"/signups/roles/by-channel",
-			"/signups/roles/by-channel/:scope",
+			"/signups/roles/by-role",
 		],
-		rolesByChannelGet,
+		rolesGet,
 	);
+	router.get("/signups/roles/by-channel/:scope", rolesByChannelGet);
 	router.post("/signups/roles/by-channel/:scope/roles", rolesByChannelEditPost);
-	router.get(
-		["/signups/roles/by-role", "/signups/roles/by-role/:scope"],
-		rolesByRoleGet,
-	);
+	router.get("/signups/roles/by-role/:scope", rolesByRoleGet);
 	router.post("/signups/roles/by-role/:scope/channels", rolesByRoleEditPost);
 
 	router.get("/ring", ringGet);

@@ -1,8 +1,6 @@
 import { RingRouter } from "@routes/types";
 
 import { aboutGet } from "./about/get";
-import { helpGet } from "./help/get";
-import { catalogGet } from "./help/catalog/get";
 import { deleteDataGet } from "./delete-data/get";
 import { deleteDataModal } from "./delete-data/modal";
 import { deleteDataPost } from "./delete-data/post";
@@ -12,6 +10,8 @@ import { filterResetModal } from "./filter/[scope]/reset/modal";
 import { filterResetPost } from "./filter/[scope]/reset/post";
 import { filterTypePost } from "./filter/[scope]/type/post";
 import { homeGet } from "./get";
+import { catalogGet } from "./help/catalog/get";
+import { helpGet } from "./help/get";
 import { modeGet } from "./mode/get";
 import { modePost } from "./mode/post";
 import { recipientsAutoRingPost } from "./recipients/[scope]/auto-ring/post";
@@ -25,11 +25,11 @@ import { ringUserPost } from "./ring/user/post";
 import { ringUsersPost } from "./ring/users/post";
 import { signupsGet } from "./signups/get";
 import { signupsMembersPost } from "./signups/members/post";
-import { rolesGet } from "./signups/roles/get";
 import { rolesByChannelGet } from "./signups/roles/by-channel/get";
 import { rolesByChannelEditPost } from "./signups/roles/by-channel/roles/post";
 import { rolesByRoleEditPost } from "./signups/roles/by-role/channels/post";
 import { rolesByRoleGet } from "./signups/roles/by-role/get";
+import { rolesGet } from "./signups/roles/get";
 
 // handlers live in files mirroring their route: the folder is the path (with
 // [param] segments) and the file is the method
@@ -67,11 +67,7 @@ export const registerRoutes = (router: RingRouter) => {
 	// select; picking either sets the orientation and routes to its scoped view.
 	// Clearing a scope drops back to the bare orientation path, which is neutral
 	router.get(
-		[
-			"/signups/roles",
-			"/signups/roles/by-channel",
-			"/signups/roles/by-role",
-		],
+		["/signups/roles", "/signups/roles/by-channel", "/signups/roles/by-role"],
 		rolesGet,
 	);
 	router.get("/signups/roles/by-channel/:scope", rolesByChannelGet);

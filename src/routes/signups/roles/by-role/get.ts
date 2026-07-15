@@ -16,7 +16,6 @@ import {
 	roleScopeOf,
 	sortChannelIds,
 } from "../_shared";
-import { rolesGet } from "../get";
 import {
 	canManageRoleSignups,
 	guildOnlyRender,
@@ -24,6 +23,7 @@ import {
 	mentionChannel,
 	noPermissionRender,
 } from "../../_shared";
+import { rolesGet } from "../get";
 
 export const rolesByRoleGet: Handler<"GET"> = async (
 	router,
@@ -54,7 +54,9 @@ export const rolesByRoleGet: Handler<"GET"> = async (
 			new RouteRoleSelectMenuBuilder(router)
 				.setMinValues(0)
 				.setMaxValues(1)
-				.setPlaceholder("Viewing a role's voice channels (clear to pick another)")
+				.setPlaceholder(
+					"Viewing a role's voice channels (clear to pick another)",
+				)
 				.setDefaultRoles(scope)
 				.setPattern(`${BY_ROLE}{/:roleId}`),
 		)
@@ -66,7 +68,9 @@ export const rolesByRoleGet: Handler<"GET"> = async (
 				.setChannelTypes(ChannelType.GuildVoice)
 				.setMinValues(0)
 				.setMaxValues(PAGE_SIZE)
-				.setPlaceholder("Edit voice channels: select to add, deselect to remove")
+				.setPlaceholder(
+					"Edit voice channels: select to add, deselect to remove",
+				)
 				.setDefaultChannels(...pageItems)
 				.setPattern(`${BY_ROLE}/${scope}/channels`, {
 					method: "POST",

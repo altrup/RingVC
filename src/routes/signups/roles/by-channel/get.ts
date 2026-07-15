@@ -16,13 +16,13 @@ import {
 	roleScopeOf,
 	sortRoleIds,
 } from "../_shared";
-import { rolesGet } from "../get";
 import {
 	canManageRoleSignups,
 	guildOnlyRender,
 	mentionChannel,
 	noPermissionRender,
 } from "../../_shared";
+import { rolesGet } from "../get";
 
 export const rolesByChannelGet: Handler<"GET"> = async (
 	router,
@@ -52,7 +52,9 @@ export const rolesByChannelGet: Handler<"GET"> = async (
 				.setChannelTypes(ChannelType.GuildVoice)
 				.setMinValues(0)
 				.setMaxValues(1)
-				.setPlaceholder("Viewing a voice channel's roles (clear to pick another)")
+				.setPlaceholder(
+					"Viewing a voice channel's roles (clear to pick another)",
+				)
 				.setDefaultChannels(scope)
 				.setPattern(`${BY_CHANNEL}{/:channelId}`),
 		)

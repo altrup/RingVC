@@ -6,12 +6,12 @@ import {
 } from "discord-embed-router";
 import { ActionRowBuilder, ChannelType } from "discord.js";
 
-import { BY_CHANNEL, BY_ROLE, renderRoleNeutral } from "./_shared";
 import {
 	canManageRoleSignups,
 	guildOnlyRender,
 	noPermissionRender,
 } from "../_shared";
+import { BY_CHANNEL, BY_ROLE, renderRoleNeutral } from "./_shared";
 
 export const rolesGet: Handler<"GET"> = async (router, interaction, state) => {
 	const guild = interaction.guild;

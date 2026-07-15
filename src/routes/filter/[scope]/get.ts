@@ -1,11 +1,11 @@
-import { navBar, pagedControls, showOptionsOf } from "@routes/lib/components";
-import { withFlash } from "@routes/lib/flash";
 import {
-	pagedCountLine,
-	pagedEditPattern,
-	paginate,
-	SELECT_MAX_VALUES,
-} from "@routes/lib/paging";
+	editSelectRow,
+	navBar,
+	pagedControls,
+	showOptionsOf,
+} from "@routes/lib/components";
+import { withFlash } from "@routes/lib/flash";
+import { pagedCountLine, paginate } from "@routes/lib/paging";
 import { channelIdOf, scopeName, scopeOf } from "@routes/lib/scope";
 import { Handler } from "@routes/types";
 import {
@@ -62,19 +62,15 @@ export const filterGet: Handler<"GET"> = async (router, interaction, state) => {
 		)
 		.toJSON();
 
-	const editSelect = new ActionRowBuilder<RouteUserSelectMenuBuilder>()
-		.addComponents(
-			new RouteUserSelectMenuBuilder(router)
-				.setMinValues(0)
-				.setMaxValues(SELECT_MAX_VALUES)
-				.setPlaceholder("Edit members: select to add, deselect to remove")
-				.setDefaultUsers(...pageItems)
-				.setPattern(
-					`${panelPath(scope)}/members`,
-					pagedEditPattern(page, state.timestamp),
-				),
-		)
-		.toJSON();
+	const editSelect = editSelectRow(
+		new RouteUserSelectMenuBuilder(router).setDefaultUsers(...pageItems),
+		{
+			noun: "members",
+			pattern: `${panelPath(scope)}/members`,
+			page,
+			timestamp: state.timestamp,
+		},
+	);
 
 	const filterOptions = [
 		new RouteButtonBuilder(router)

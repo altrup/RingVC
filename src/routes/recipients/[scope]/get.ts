@@ -1,4 +1,5 @@
 import {
+	editSelectRow,
 	navBar,
 	pagedControls,
 	showOptionsOf,
@@ -6,12 +7,7 @@ import {
 } from "@routes/lib/components";
 import { withFlash } from "@routes/lib/flash";
 import { commandMention } from "@routes/lib/mentions";
-import {
-	pagedCountLine,
-	pagedEditPattern,
-	paginate,
-	SELECT_MAX_VALUES,
-} from "@routes/lib/paging";
+import { pagedCountLine, paginate } from "@routes/lib/paging";
 import { channelIdOf, scopeOf } from "@routes/lib/scope";
 import { Handler } from "@routes/types";
 import {
@@ -99,19 +95,15 @@ export const recipientsGet: Handler<"GET"> = async (
 		)
 		.toJSON();
 
-	const editSelect = new ActionRowBuilder<RouteUserSelectMenuBuilder>()
-		.addComponents(
-			new RouteUserSelectMenuBuilder(router)
-				.setMinValues(0)
-				.setMaxValues(SELECT_MAX_VALUES)
-				.setPlaceholder("Edit ringees: select to add, deselect to remove")
-				.setDefaultUsers(...pageItems)
-				.setPattern(
-					`${panelPath(scope)}/members`,
-					pagedEditPattern(page, state.timestamp),
-				),
-		)
-		.toJSON();
+	const editSelect = editSelectRow(
+		new RouteUserSelectMenuBuilder(router).setDefaultUsers(...pageItems),
+		{
+			noun: "ringees",
+			pattern: `${panelPath(scope)}/members`,
+			page,
+			timestamp: state.timestamp,
+		},
+	);
 
 	const ringOptions = [
 		new RouteButtonBuilder(router)

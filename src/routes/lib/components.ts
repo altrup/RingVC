@@ -1,11 +1,18 @@
 import { buttonEmoji, VC_EMOJI_ID } from "@routes/lib/emoji";
-import { Page } from "@routes/lib/paging";
+import {
+	Page,
+	pagedEditPattern,
+	SELECT_MAX_VALUES,
+} from "@routes/lib/paging";
 import { PAGE_JUMP } from "@routes/page-jump/_shared";
 import { RingButton, RingRouter } from "@routes/types";
 import {
 	RouteButtonBuilder,
+	RouteChannelSelectMenuBuilder,
+	RouteRoleSelectMenuBuilder,
 	RouteStringSelectMenuBuilder,
 	RouteStringSelectMenuOptionBuilder,
+	RouteUserSelectMenuBuilder,
 } from "discord-embed-router";
 import {
 	ActionRowBuilder,
@@ -20,6 +27,34 @@ export const row = (
 	...components: ButtonBuilder[]
 ): APIActionRowComponent<APIComponentInMessageActionRow> =>
 	new ActionRowBuilder<ButtonBuilder>().addComponents(...components).toJSON();
+
+// the add/remove select every paged member panel shares: the page's entries
+// ride in as the caller-set defaults, and selecting or deselecting them posts
+// the diff. The caller supplies the entity-specific builder (with its default
+// entries and any channel-type filter already set) and the noun the shared
+// placeholder reads; the row-reset key keeps a stale client selection from
+// surviving the next render
+export const editSelectRow = <
+	B extends
+		| RouteUserSelectMenuBuilder
+		| RouteRoleSelectMenuBuilder
+		| RouteChannelSelectMenuBuilder,
+>(
+	builder: B,
+	{
+		noun,
+		pattern,
+		page,
+		timestamp,
+	}: { noun: string; pattern: string; page: number; timestamp: number },
+): APIActionRowComponent<APIComponentInMessageActionRow> => {
+	builder
+		.setMinValues(0)
+		.setMaxValues(SELECT_MAX_VALUES)
+		.setPlaceholder(`Edit ${noun}: select to add, deselect to remove`)
+		.setPattern(pattern, pagedEditPattern(page, timestamp));
+	return new ActionRowBuilder<B>().addComponents(builder).toJSON();
+};
 
 export const homeButton = (router: RingRouter): RingButton =>
 	new RouteButtonBuilder(router)

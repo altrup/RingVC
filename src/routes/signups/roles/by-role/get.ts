@@ -1,10 +1,9 @@
-import { pagedControls, showOptionsOf } from "@routes/lib/components";
 import {
-	pagedCountLine,
-	pagedEditPattern,
-	paginate,
-	SELECT_MAX_VALUES,
-} from "@routes/lib/paging";
+	editSelectRow,
+	pagedControls,
+	showOptionsOf,
+} from "@routes/lib/components";
+import { pagedCountLine, paginate } from "@routes/lib/paging";
 import { Handler } from "@routes/types";
 import {
 	RouteButtonBuilder,
@@ -67,22 +66,17 @@ export const rolesByRoleGet: Handler<"GET"> = async (
 		)
 		.toJSON();
 
-	const editSelectRow = new ActionRowBuilder<RouteChannelSelectMenuBuilder>()
-		.addComponents(
-			new RouteChannelSelectMenuBuilder(router)
-				.setChannelTypes(ChannelType.GuildVoice)
-				.setMinValues(0)
-				.setMaxValues(SELECT_MAX_VALUES)
-				.setPlaceholder(
-					"Edit voice channels: select to add, deselect to remove",
-				)
-				.setDefaultChannels(...pageItems)
-				.setPattern(
-					`${BY_ROLE}/${scope}/channels`,
-					pagedEditPattern(page, state.timestamp),
-				),
-		)
-		.toJSON();
+	const editSelect = editSelectRow(
+		new RouteChannelSelectMenuBuilder(router)
+			.setChannelTypes(ChannelType.GuildVoice)
+			.setDefaultChannels(...pageItems),
+		{
+			noun: "voice channels",
+			pattern: `${BY_ROLE}/${scope}/channels`,
+			page,
+			timestamp: state.timestamp,
+		},
+	);
 
 	return roleFrame({
 		router,
@@ -95,7 +89,7 @@ export const rolesByRoleGet: Handler<"GET"> = async (
 		// pager; the switch and section bar follow in the frame
 		rows: [
 			scopeSelectRow,
-			editSelectRow,
+			editSelect,
 			...pagedControls(router, `${BY_ROLE}/${scope}`, {
 				page,
 				pageCount,

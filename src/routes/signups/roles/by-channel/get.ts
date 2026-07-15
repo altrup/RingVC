@@ -1,10 +1,9 @@
-import { pagedControls, showOptionsOf } from "@routes/lib/components";
 import {
-	pagedCountLine,
-	pagedEditPattern,
-	paginate,
-	SELECT_MAX_VALUES,
-} from "@routes/lib/paging";
+	editSelectRow,
+	pagedControls,
+	showOptionsOf,
+} from "@routes/lib/components";
+import { pagedCountLine, paginate } from "@routes/lib/paging";
 import { Handler } from "@routes/types";
 import {
 	RouteButtonBuilder,
@@ -65,19 +64,15 @@ export const rolesByChannelGet: Handler<"GET"> = async (
 		)
 		.toJSON();
 
-	const editSelectRow = new ActionRowBuilder<RouteRoleSelectMenuBuilder>()
-		.addComponents(
-			new RouteRoleSelectMenuBuilder(router)
-				.setMinValues(0)
-				.setMaxValues(SELECT_MAX_VALUES)
-				.setPlaceholder("Edit roles: select to add, deselect to remove")
-				.setDefaultRoles(...pageItems)
-				.setPattern(
-					`${BY_CHANNEL}/${scope}/roles`,
-					pagedEditPattern(page, state.timestamp),
-				),
-		)
-		.toJSON();
+	const editSelect = editSelectRow(
+		new RouteRoleSelectMenuBuilder(router).setDefaultRoles(...pageItems),
+		{
+			noun: "roles",
+			pattern: `${BY_CHANNEL}/${scope}/roles`,
+			page,
+			timestamp: state.timestamp,
+		},
+	);
 
 	return roleFrame({
 		router,
@@ -90,7 +85,7 @@ export const rolesByChannelGet: Handler<"GET"> = async (
 		// pager; the switch and section bar follow in the frame
 		rows: [
 			scopeSelectRow,
-			editSelectRow,
+			editSelect,
 			...pagedControls(router, `${BY_CHANNEL}/${scope}`, {
 				page,
 				pageCount,

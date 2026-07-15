@@ -1,5 +1,5 @@
 import { homeButton, row } from "@routes/lib/components";
-import { PAGE_SIZE, paginate } from "@routes/lib/paging";
+import { paginate, SELECT_MAX_VALUES } from "@routes/lib/paging";
 import { Handler } from "@routes/types";
 import {
 	RouteChannelSelectMenuBuilder,
@@ -67,7 +67,7 @@ export const rolesByRoleGet: Handler<"GET"> = async (
 			new RouteChannelSelectMenuBuilder(router)
 				.setChannelTypes(ChannelType.GuildVoice)
 				.setMinValues(0)
-				.setMaxValues(PAGE_SIZE)
+				.setMaxValues(SELECT_MAX_VALUES)
 				.setPlaceholder(
 					"Edit voice channels: select to add, deselect to remove",
 				)

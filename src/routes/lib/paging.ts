@@ -1,5 +1,8 @@
 // Discord's cap on select menu options and default values
 export const PAGE_SIZE = 10;
+// Discord's cap on select menu max_values; edit selects allow it in full so
+// users can add more entries per submit than one page displays.
+export const SELECT_MAX_VALUES = 25;
 
 export type Page = {
 	pageItems: string[];

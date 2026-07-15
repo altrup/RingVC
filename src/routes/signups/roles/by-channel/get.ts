@@ -1,5 +1,5 @@
 import { homeButton, row } from "@routes/lib/components";
-import { PAGE_SIZE, paginate } from "@routes/lib/paging";
+import { paginate, SELECT_MAX_VALUES } from "@routes/lib/paging";
 import { Handler } from "@routes/types";
 import {
 	RouteChannelSelectMenuBuilder,
@@ -64,7 +64,7 @@ export const rolesByChannelGet: Handler<"GET"> = async (
 		.addComponents(
 			new RouteRoleSelectMenuBuilder(router)
 				.setMinValues(0)
-				.setMaxValues(PAGE_SIZE)
+				.setMaxValues(SELECT_MAX_VALUES)
 				.setPlaceholder("Edit roles: select to add, deselect to remove")
 				.setDefaultRoles(...pageItems)
 				.setPattern(`${BY_CHANNEL}/${scope}/roles`, {

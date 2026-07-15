@@ -1,6 +1,6 @@
 import { navBar, paginationRows, row } from "@routes/lib/components";
 import { withFlash } from "@routes/lib/flash";
-import { PAGE_SIZE, paginate } from "@routes/lib/paging";
+import { paginate, SELECT_MAX_VALUES } from "@routes/lib/paging";
 import { channelIdOf, scopeName, scopeOf } from "@routes/lib/scope";
 import { Handler } from "@routes/types";
 import {
@@ -64,7 +64,7 @@ export const filterGet: Handler<"GET"> = async (router, interaction, state) => {
 		.addComponents(
 			new RouteUserSelectMenuBuilder(router)
 				.setMinValues(0)
-				.setMaxValues(PAGE_SIZE)
+				.setMaxValues(SELECT_MAX_VALUES)
 				.setPlaceholder("Edit members: select to add, deselect to remove")
 				.setDefaultUsers(...pageItems)
 				.setPattern(`${panelPath(scope)}/members`, {

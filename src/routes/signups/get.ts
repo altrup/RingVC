@@ -6,7 +6,7 @@ import {
 	subNav,
 } from "@routes/lib/components";
 import { withFlash } from "@routes/lib/flash";
-import { PAGE_SIZE, paginate } from "@routes/lib/paging";
+import { paginate, SELECT_MAX_VALUES } from "@routes/lib/paging";
 import { Handler } from "@routes/types";
 import { RouteChannelSelectMenuBuilder } from "discord-embed-router";
 import { ActionRowBuilder, ChannelType, EmbedBuilder } from "discord.js";
@@ -57,7 +57,7 @@ export const signupsGet: Handler<"GET"> = async (
 					new RouteChannelSelectMenuBuilder(router)
 						.setChannelTypes(ChannelType.GuildVoice)
 						.setMinValues(0)
-						.setMaxValues(PAGE_SIZE)
+						.setMaxValues(SELECT_MAX_VALUES)
 						.setPlaceholder("Edit signups: select to add, deselect to remove")
 						.setDefaultChannels(...pageItems)
 						.setPattern(`${PANEL}/members`, {

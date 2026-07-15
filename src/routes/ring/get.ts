@@ -1,6 +1,6 @@
 import { navBar, row, subNav } from "@routes/lib/components";
 import { withFlash } from "@routes/lib/flash";
-import { PAGE_SIZE } from "@routes/lib/paging";
+import { SELECT_MAX_VALUES } from "@routes/lib/paging";
 import { Handler } from "@routes/types";
 import {
 	RouteButtonBuilder,
@@ -56,7 +56,7 @@ export const ringGet: Handler<"GET"> = async (router, interaction, state) => {
 				.addComponents(
 					new RouteUserSelectMenuBuilder(router)
 						.setMinValues(1)
-						.setMaxValues(PAGE_SIZE)
+						.setMaxValues(SELECT_MAX_VALUES)
 						.setPlaceholder("Select up to 25 people to ring")
 						.setPattern(`${PANEL}/users`, { method: "POST" }),
 				)

@@ -18,7 +18,7 @@ export const helpGet: Handler<"GET"> = (router, interaction, state) => {
 			`**Sign up** · ${mention("signup")} in a voice channel's text chat signs you up, so you get pinged when someone starts a call there (joins it while it's empty). Manage several from the Signups panel.\n` +
 			`**Role signups** · with Manage Roles, sign a whole role up for a channel via ${mention("signuprole")} so its members get pinged.\n` +
 			`**Filters** · ${mention("block")} stops someone from ringing you, and ${mention("whitelist")} restricts ringing to only the people you list.\n` +
-			`**Modes** · Normal pings your signed-up people when you start a call, Stealth pings no one, Auto goes stealth only while you're invisible — set it with ${mention("mode")}.\n\n` +
+			`**Modes** · Normal pings your signed-up people when you start a call, Stealth pings no one, Auto goes stealth only while you're invisible. Set it with ${mention("mode")}.\n\n` +
 			"-# Full command list on the Catalog tab. Jump to any panel with the section menu below.",
 	);
 

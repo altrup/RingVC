@@ -15,6 +15,7 @@ export const pageJumpModal: Handler<"MODAL"> = (router, interaction, state) => {
 			queryParams: {
 				to: query.get("to") ?? "/",
 				page: query.get("page") ?? "0",
+				pageCount,
 			},
 		})
 		.setTitle("Go to page")

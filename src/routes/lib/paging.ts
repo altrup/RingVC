@@ -27,8 +27,9 @@ export const paginate = (items: string[], rawPage: string | null): Page => {
 
 // diffs a select submission against the visible page: entries missing from
 // the submission are removals, submitted values not in the whole list are
-// additions (checking the whole list keeps pages independent: re-selecting
-// a value that lives on another page is not an add)
+// additions. Submitted values that live in the list but on another page are
+// no-ops (pages stay independent) and are reported as `alreadyPresent` so
+// flashes can point at the existing entry instead of claiming "no changes"
 export const diffSelection = ({
 	allItems,
 	pageItems,
@@ -37,14 +38,25 @@ export const diffSelection = ({
 	allItems: string[];
 	pageItems: string[];
 	submitted: string[];
-}): { added: string[]; removed: string[] } => {
+}): { added: string[]; removed: string[]; alreadyPresent: string[] } => {
 	const allSet = new Set(allItems);
+	const pageSet = new Set(pageItems);
 	const submittedSet = new Set(submitted);
 	return {
 		added: submitted.filter((value) => !allSet.has(value)),
 		removed: pageItems.filter((value) => !submittedSet.has(value)),
+		alreadyPresent: submitted.filter(
+			(value) => allSet.has(value) && !pageSet.has(value),
+		),
 	};
 };
+
+// labels a value with the page that displays it, e.g. "#general (page 2)",
+// so a flash can point at where an existing entry lives
+export const withPageLabel =
+	(allItems: string[], mention: (id: string) => string) =>
+	(value: string): string =>
+		`${mention(value)} (page ${Math.floor(allItems.indexOf(value) / PAGE_SIZE) + 1})`;
 
 // resolves an add/remove edit for a paged member select from either input a
 // handler can receive: a select submission (diffed against the visible page)
@@ -58,18 +70,27 @@ export const resolveSelectionEdit = ({
 	current: string[];
 	values: string[] | undefined;
 	queryParams: URLSearchParams;
-}): { addsRequested: string[]; removesRequested: string[] } => {
+}): {
+	addsRequested: string[];
+	removesRequested: string[];
+	alreadyPresent: string[];
+} => {
 	if (values) {
 		const { pageItems } = paginate(current, queryParams.get("page"));
-		const { added, removed } = diffSelection({
+		const { added, removed, alreadyPresent } = diffSelection({
 			allItems: current,
 			pageItems,
 			submitted: values,
 		});
-		return { addsRequested: added, removesRequested: removed };
+		return {
+			addsRequested: added,
+			removesRequested: removed,
+			alreadyPresent,
+		};
 	}
 	return {
 		addsRequested: queryParams.getAll("add"),
 		removesRequested: queryParams.getAll("remove"),
+		alreadyPresent: [],
 	};
 };

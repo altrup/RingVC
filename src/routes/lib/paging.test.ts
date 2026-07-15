@@ -1,4 +1,9 @@
-import { diffSelection, PAGE_SIZE, paginate } from "@routes/lib/paging";
+import {
+	diffSelection,
+	PAGE_SIZE,
+	paginate,
+	withPageLabel,
+} from "@routes/lib/paging";
 import { expect, test } from "vitest";
 
 const ids = (count: number, offset = 0) =>
@@ -53,7 +58,7 @@ test("selecting new values adds them without touching other pages", () => {
 	const { pageItems } = paginate(allItems, "1");
 	expect(
 		diffSelection({ allItems, pageItems, submitted: [...pageItems, "999"] }),
-	).toStrictEqual({ added: ["999"], removed: [] });
+	).toStrictEqual({ added: ["999"], removed: [], alreadyPresent: [] });
 });
 
 test("deselecting page entries removes only them", () => {
@@ -61,7 +66,7 @@ test("deselecting page entries removes only them", () => {
 	const { pageItems } = paginate(allItems, "1");
 	expect(
 		diffSelection({ allItems, pageItems, submitted: pageItems.slice(1) }),
-	).toStrictEqual({ added: [], removed: [pageItems[0]] });
+	).toStrictEqual({ added: [], removed: [pageItems[0]], alreadyPresent: [] });
 });
 
 test("adds and removes apply together from one submission", () => {
@@ -73,7 +78,11 @@ test("adds and removes apply together from one submission", () => {
 			pageItems,
 			submitted: [...pageItems.slice(1), "999"],
 		}),
-	).toStrictEqual({ added: ["999"], removed: [pageItems[0]] });
+	).toStrictEqual({
+		added: ["999"],
+		removed: [pageItems[0]],
+		alreadyPresent: [],
+	});
 });
 
 test("a submitted value that already lives on another page is not re-added", () => {
@@ -82,7 +91,7 @@ test("a submitted value that already lives on another page is not re-added", () 
 	// "1" is on page 0; selecting it on page 1 must not report an add
 	expect(
 		diffSelection({ allItems, pageItems, submitted: [...pageItems, "1"] }),
-	).toStrictEqual({ added: [], removed: [] });
+	).toStrictEqual({ added: [], removed: [], alreadyPresent: ["1"] });
 });
 
 test("deselecting everything on a page removes the whole page only", () => {
@@ -91,5 +100,13 @@ test("deselecting everything on a page removes the whole page only", () => {
 	expect(diffSelection({ allItems, pageItems, submitted: [] })).toStrictEqual({
 		added: [],
 		removed: pageItems,
+		alreadyPresent: [],
 	});
+});
+
+test("withPageLabel points at the page an existing entry lives on", () => {
+	const allItems = ids(PAGE_SIZE * 2);
+	const label = withPageLabel(allItems, (id) => `#${id}`);
+	expect(label("1")).toBe("#1 (page 1)");
+	expect(label(`${PAGE_SIZE + 1}`)).toBe(`#${PAGE_SIZE + 1} (page 2)`);
 });

@@ -1,6 +1,6 @@
 import { navBar, paginationRows, subNav } from "@routes/lib/components";
 import { flashRedirect, withFlash } from "@routes/lib/flash";
-import { Page } from "@routes/lib/paging";
+import { Page, withPageLabel } from "@routes/lib/paging";
 import { RingRouter } from "@routes/types";
 import { RouteRedirect } from "discord-embed-router";
 import {
@@ -57,6 +57,7 @@ export const commitRoleEdit = async ({
 	current,
 	addsRequested,
 	removesRequested,
+	alreadyPresent = [],
 	mutateAdd,
 	mutateRemove,
 	itemMention,
@@ -66,6 +67,7 @@ export const commitRoleEdit = async ({
 	current: string[];
 	addsRequested: string[];
 	removesRequested: string[];
+	alreadyPresent?: string[];
 	mutateAdd: (item: string) => Promise<boolean>;
 	mutateRemove: (item: string) => Promise<boolean>;
 	itemMention: (id: string) => string;
@@ -82,15 +84,21 @@ export const commitRoleEdit = async ({
 		...(toRemove.length > 0
 			? [`Removed ${joinWithAnd(toRemove.map(itemMention))}`]
 			: []),
+		...(alreadyPresent.length > 0
+			? [
+					`${joinWithAnd(alreadyPresent.map(withPageLabel(current, itemMention)))} ${alreadyPresent.length > 1 ? "are" : "is"} already signed up`,
+				]
+			: []),
 	];
 	const changed = toAdd.length > 0 || toRemove.length > 0;
-	const flash = changed
-		? parts.join(". ")
-		: addsRequested.length > 0
-			? "Already signed up."
-			: removesRequested.length > 0
-				? "Those weren't signed up."
-				: "No changes to role signups.";
+	const flash =
+		parts.length > 0
+			? parts.join(". ")
+			: addsRequested.length > 0
+				? "Already signed up."
+				: removesRequested.length > 0
+					? "Those weren't signed up."
+					: "No changes to role signups.";
 	return flashRedirect(redirect, flash, changed ? "success" : "warn", {
 		page: String(page),
 	});

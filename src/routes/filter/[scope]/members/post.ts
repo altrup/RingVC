@@ -1,5 +1,5 @@
 import { flashRedirect } from "@routes/lib/flash";
-import { resolveSelectionEdit } from "@routes/lib/paging";
+import { resolveSelectionEdit, withPageLabel } from "@routes/lib/paging";
 import { channelIdOf, scopeName, scopeOf } from "@routes/lib/scope";
 import { Handler } from "@routes/types";
 
@@ -46,11 +46,12 @@ export const filterMembersPost: Handler<"POST"> = async (
 		);
 
 	const entries = [...(filter?.entries ?? [])].sort();
-	const { addsRequested, removesRequested } = resolveSelectionEdit({
-		current: entries,
-		values: state.values,
-		queryParams: query,
-	});
+	const { addsRequested, removesRequested, alreadyPresent } =
+		resolveSelectionEdit({
+			current: entries,
+			values: state.values,
+			queryParams: query,
+		});
 
 	const entrySet = new Set(entries);
 	const toAdd = addsRequested.filter((id) => !entrySet.has(id));
@@ -88,6 +89,11 @@ export const filterMembersPost: Handler<"POST"> = async (
 				: []),
 			...(toRemove.length > 0
 				? [`Removed ${joinWithAnd(toRemove.map(mentionUser))}`]
+				: []),
+			...(alreadyPresent.length > 0
+				? [
+						`${joinWithAnd(alreadyPresent.map(withPageLabel(entries, mentionUser)))} ${alreadyPresent.length > 1 ? "are" : "is"} already listed`,
+					]
 				: []),
 		];
 		flash =

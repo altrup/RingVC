@@ -56,9 +56,14 @@ export const rolesByRoleEditPost: Handler<"POST"> = async (
 
 	let addsRequested: string[];
 	let removesRequested: string[];
+	let alreadyPresent: string[] = [];
 	if (state.values) {
 		const { pageItems } = paginate(current, query.get("page"));
-		({ added: addsRequested, removed: removesRequested } = diffSelection({
+		({
+			added: addsRequested,
+			removed: removesRequested,
+			alreadyPresent,
+		} = diffSelection({
 			allItems: current,
 			pageItems,
 			submitted: state.values,
@@ -77,6 +82,7 @@ export const rolesByRoleEditPost: Handler<"POST"> = async (
 		current,
 		addsRequested,
 		removesRequested,
+		alreadyPresent,
 		mutateAdd: (channelId) => addVoiceChatRole(channelId, scope),
 		mutateRemove: (channelId) => removeVoiceChatRole(channelId, scope),
 		itemMention: mentionChannel,

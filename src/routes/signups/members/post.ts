@@ -1,5 +1,5 @@
 import { flashRedirect } from "@routes/lib/flash";
-import { resolveSelectionEdit } from "@routes/lib/paging";
+import { resolveSelectionEdit, withPageLabel } from "@routes/lib/paging";
 import { Handler } from "@routes/types";
 
 import { addVoiceChatUser, removeVoiceChatUser } from "@db/voice-chats";
@@ -27,11 +27,12 @@ export const signupsMembersPost: Handler<"POST"> = async (
 	// only the select path needs the current signups to diff against; command
 	// adapters pass the ids to add/remove directly, so skip the fetch for them
 	const signups = state.values ? await guildSignups(userId, guild) : [];
-	const { addsRequested, removesRequested } = resolveSelectionEdit({
-		current: signups,
-		values: state.values,
-		queryParams: query,
-	});
+	const { addsRequested, removesRequested, alreadyPresent } =
+		resolveSelectionEdit({
+			current: signups,
+			values: state.values,
+			queryParams: query,
+		});
 
 	const addResults = await Promise.all(
 		addsRequested.map(async (channelId) => ({
@@ -62,6 +63,11 @@ export const signupsMembersPost: Handler<"POST"> = async (
 		...(alreadySignedUp.length > 0
 			? [
 					`You are already signed up for ${joinWithAnd(alreadySignedUp.map(mentionChannel))}`,
+				]
+			: []),
+		...(alreadyPresent.length > 0
+			? [
+					`You are already signed up for ${joinWithAnd(alreadyPresent.map(withPageLabel(signups, mentionChannel)))}`,
 				]
 			: []),
 		...(removed.length > 0

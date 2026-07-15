@@ -1,5 +1,5 @@
 import { flashRedirect } from "@routes/lib/flash";
-import { resolveSelectionEdit } from "@routes/lib/paging";
+import { resolveSelectionEdit, withPageLabel } from "@routes/lib/paging";
 import { channelIdOf, scopeOf } from "@routes/lib/scope";
 import { Handler } from "@routes/types";
 
@@ -23,11 +23,12 @@ export const recipientsMembersPost: Handler<"POST"> = async (
 	const panel = panelPath(scope);
 
 	const ringees = [...(await getDefaultRingees(userId, channelId))].sort();
-	const { addsRequested, removesRequested } = resolveSelectionEdit({
-		current: ringees,
-		values: state.values,
-		queryParams: state.queryParams,
-	});
+	const { addsRequested, removesRequested, alreadyPresent } =
+		resolveSelectionEdit({
+			current: ringees,
+			values: state.values,
+			queryParams: state.queryParams,
+		});
 	const ringeeSet = new Set(ringees);
 	const added = addsRequested.filter((id) => !ringeeSet.has(id));
 	const removed = removesRequested.filter((id) => ringeeSet.has(id));
@@ -44,11 +45,16 @@ export const recipientsMembersPost: Handler<"POST"> = async (
 		...(removed.length > 0
 			? [`Removed ${joinWithAnd(removed.map(mentionUser))}`]
 			: []),
+		...(alreadyPresent.length > 0
+			? [
+					`${joinWithAnd(alreadyPresent.map(withPageLabel(ringees, mentionUser)))} ${alreadyPresent.length > 1 ? "are" : "is"} already added`,
+				]
+			: []),
 	];
-	const changed = parts.length > 0;
+	const changed = added.length > 0 || removed.length > 0;
 	return flashRedirect(
 		panel,
-		changed
+		parts.length > 0
 			? `${parts.join(". ")} (default ring recipients ${scopeSuffix(scope)})`
 			: `No changes to your default ring recipients ${scopeSuffix(scope)}`,
 		changed ? "success" : "warn",

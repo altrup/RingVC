@@ -146,16 +146,17 @@ export const pagedControls = (
 	},
 ): APIActionRowComponent<APIComponentInMessageActionRow>[] => {
 	if (pageCount <= 1) return options.length > 0 ? [row(...options)] : [];
-	// the ⚙ toggle sits at the row's end in both modes, highlighted while the
-	// options are open; clicking it again returns to the page controls
+	// the ⚙ toggle leads the row in both modes — the leading slot is the only
+	// position variable-width neighbors can't shift — and is highlighted while
+	// the options are open; clicking it again returns to the page controls
 	if (showOptions && options.length > 0)
 		return [
 			row(
-				...options,
 				new RouteButtonBuilder(router)
 					.setLabel("⚙ Options")
 					.setStyle(ButtonStyle.Primary)
 					.setTo(basePath, { queryParams: { page: String(page) } }),
+				...options,
 			),
 		];
 	const pageButton = (label: string, target: number, disabled: boolean) =>
@@ -166,6 +167,16 @@ export const pagedControls = (
 			.setTo(basePath, { queryParams: { page: String(target) } });
 	return [
 		row(
+			...(options.length > 0
+				? [
+						new RouteButtonBuilder(router)
+							.setLabel("⚙ Options")
+							.setStyle(ButtonStyle.Secondary)
+							.setTo(basePath, {
+								queryParams: { page: String(page), options: "1" },
+							}),
+					]
+				: []),
 			pageButton("◀ Prev", page - 1, page === 0),
 			// the middle button doubles as a page jump: it opens a modal asking
 			// which page to show, which redirects back to basePath
@@ -181,16 +192,6 @@ export const pagedControls = (
 					},
 				}),
 			pageButton("Next ▶", page + 1, page === pageCount - 1),
-			...(options.length > 0
-				? [
-						new RouteButtonBuilder(router)
-							.setLabel("⚙ Options")
-							.setStyle(ButtonStyle.Secondary)
-							.setTo(basePath, {
-								queryParams: { page: String(page), options: "1" },
-							}),
-					]
-				: []),
 		),
 	];
 };

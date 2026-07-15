@@ -13,12 +13,12 @@ export const helpGet: Handler<"GET"> = (router, interaction, state) => {
 
 	const description = withFlash(
 		state.queryParams,
-		"RingVC replicates group-chat voice calls in Discord servers: sign up for a voice channel and get pinged when someone starts a call there.\n\n" +
-			`**Sign up** · ${mention("signup")} in a voice channel's text chat, or open the Signups panel to manage several at once.\n` +
-			`**Role signups** · with Manage Roles, sign a whole role up for a channel via ${mention("signuprole")} or the Role signups view.\n` +
-			`**Ring people in** · ${mention("ring")} pulls someone into your call; save defaults for ${mention("ring_defaults")}, or turn on auto-ring to ping them on every join.\n` +
-			`**Filters** · ${mention("block")} and ${mention("whitelist")} control who can ring you.\n` +
-			`**Modes** · Normal rings everyone, Stealth rings nobody, Auto goes stealth while you're invisible — set it with ${mention("mode")}.\n\n` +
+		"RingVC replicates group-chat calls in Discord servers. A server can't ring people the way a group chat does, so RingVC pings them in the voice channel's text chat instead.\n\n" +
+			`**Ring** · ${mention("ring")} pings someone to join the voice channel you're in. Save default people and ping them with ${mention("ring_defaults")}, or turn on auto-ring to ping them automatically whenever you start a call.\n` +
+			`**Sign up** · ${mention("signup")} in a voice channel's text chat signs you up, so you get pinged when someone starts a call there (joins it while it's empty). Manage several from the Signups panel.\n` +
+			`**Role signups** · with Manage Roles, sign a whole role up for a channel via ${mention("signuprole")} so its members get pinged.\n` +
+			`**Filters** · ${mention("block")} stops someone from ringing you, and ${mention("whitelist")} restricts ringing to only the people you list.\n` +
+			`**Modes** · Normal pings your signed-up people when you start a call, Stealth pings no one, Auto goes stealth only while you're invisible — set it with ${mention("mode")}.\n\n` +
 			"-# Full command list on the Catalog tab. Jump to any panel with the section menu below.",
 	);
 

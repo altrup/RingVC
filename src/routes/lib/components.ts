@@ -146,14 +146,16 @@ export const pagedControls = (
 	},
 ): APIActionRowComponent<APIComponentInMessageActionRow>[] => {
 	if (pageCount <= 1) return options.length > 0 ? [row(...options)] : [];
+	// the ⚙ toggle sits at the row's end in both modes, highlighted while the
+	// options are open; clicking it again returns to the page controls
 	if (showOptions && options.length > 0)
 		return [
 			row(
-				new RouteButtonBuilder(router)
-					.setLabel("◀ Back")
-					.setStyle(ButtonStyle.Secondary)
-					.setTo(basePath, { queryParams: { page: String(page) } }),
 				...options,
+				new RouteButtonBuilder(router)
+					.setLabel("⚙ Options")
+					.setStyle(ButtonStyle.Primary)
+					.setTo(basePath, { queryParams: { page: String(page) } }),
 			),
 		];
 	const pageButton = (label: string, target: number, disabled: boolean) =>

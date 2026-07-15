@@ -59,7 +59,7 @@ export const catalogGet: Handler<"GET"> = (router, interaction, state) => {
 				["filter", "your filter panel"],
 				["default_ring_recipients", "ring recipients and auto-ring panel"],
 				["mode", "mode panel"],
-				["ring", "ring panel (bare)"],
+				["ring", "ring panel (without a user)"],
 				["delete_data", "data deletion panel"],
 			],
 		},

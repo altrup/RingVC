@@ -17,6 +17,7 @@ import { getVoiceChatSignups } from "@db/voice-chats";
 
 export const mentionUser = (userId: string) => `<@${userId}>`;
 export const mentionRole = (roleId: string) => `<@&${roleId}>`;
+export const mentionChannel = (channelId: string) => `<#${channelId}>`;
 
 export const joinWithAnd = (list: string[]): string => {
 	return list.length >= 2

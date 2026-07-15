@@ -14,6 +14,7 @@ import {
 import { ActionRowBuilder, ButtonStyle, ChannelType } from "discord.js";
 
 import { getVoiceChatSignups } from "@db/voice-chats";
+import { mentionChannel } from "@main/ring";
 
 import {
 	BY_CHANNEL,
@@ -25,7 +26,6 @@ import {
 import {
 	canManageRoleSignups,
 	guildOnlyRender,
-	mentionChannel,
 	noPermissionRender,
 } from "../../_shared";
 import { rolesGet } from "../get";

@@ -1,5 +1,4 @@
-import { flashRedirect } from "@routes/lib/flash";
-import { diffSelection, paginate } from "@routes/lib/paging";
+import { resolveSelectionEdit } from "@routes/lib/paging";
 import { Handler } from "@routes/types";
 
 import {
@@ -7,18 +6,15 @@ import {
 	getVoiceChatRoleSignups,
 	removeVoiceChatRole,
 } from "@db/voice-chats";
+import { mentionChannel } from "@main/ring";
 
 import {
 	BY_ROLE,
 	commitRoleEdit,
-	roleScopeOf,
+	roleEditGuard,
 	sortChannelIds,
 } from "../../_shared";
-import {
-	canManageRoleSignups,
-	guildVoiceChannelIds,
-	mentionChannel,
-} from "../../../_shared";
+import { guildVoiceChannelIds } from "../../../_shared";
 
 // edits the channels one role is signed up to. Serves the panel's channel
 // multi-select (diffed against the shown page) and the /unsignuprole adapter
@@ -28,22 +24,12 @@ export const rolesByRoleEditPost: Handler<"POST"> = async (
 	interaction,
 	state,
 ) => {
-	const guild = interaction.guild;
-	if (!guild)
-		return flashRedirect(
-			BY_ROLE,
-			"Signups only work inside a Discord server",
-			"warn",
-		);
-	if (!canManageRoleSignups(interaction))
-		return flashRedirect(
-			BY_ROLE,
-			"You need the Manage Roles permission to manage role signups",
-			"warn",
-		);
-
-	const scope = roleScopeOf(state.params);
-	if (!scope) return flashRedirect(BY_ROLE, "Pick a role first", "warn");
+	const guard = roleEditGuard(interaction, state.params, {
+		base: BY_ROLE,
+		noun: "role",
+	});
+	if (!("guild" in guard)) return guard;
+	const { guild, scope } = guard;
 
 	const query = state.queryParams;
 	const current = sortChannelIds(
@@ -53,24 +39,12 @@ export const rolesByRoleEditPost: Handler<"POST"> = async (
 			.map((mapping) => mapping.channelId),
 	);
 
-	let addsRequested: string[];
-	let removesRequested: string[];
-	let alreadyPresent: string[] = [];
-	if (state.values) {
-		const { pageItems } = paginate(current, query.get("page"));
-		({
-			added: addsRequested,
-			removed: removesRequested,
-			alreadyPresent,
-		} = diffSelection({
-			allItems: current,
-			pageItems,
-			submitted: state.values,
-		}));
-	} else {
-		addsRequested = query.getAll("add");
-		removesRequested = query.getAll("remove");
-	}
+	const { addsRequested, removesRequested, alreadyPresent } =
+		resolveSelectionEdit({
+			current,
+			values: state.values,
+			queryParams: query,
+		});
 
 	return commitRoleEdit({
 		redirect: `${BY_ROLE}/${scope}`,

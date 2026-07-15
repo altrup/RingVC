@@ -5,8 +5,8 @@ import { Handler } from "@routes/types";
 import { getVoiceChatRoleSignups, removeVoiceChatRole } from "@db/voice-chats";
 import { mentionRole } from "@main/ring";
 
-import { BY_ROLE, roleScopeOf } from "../../_shared";
-import { canManageRoleSignups, guildVoiceChannelIds } from "../../../_shared";
+import { BY_ROLE, roleEditGuard } from "../../_shared";
+import { guildVoiceChannelIds } from "../../../_shared";
 
 // clears every voice channel one role is signed up for
 export const rolesByRoleResetPost: Handler<"POST"> = async (
@@ -14,21 +14,12 @@ export const rolesByRoleResetPost: Handler<"POST"> = async (
 	interaction,
 	state,
 ) => {
-	const guild = interaction.guild;
-	if (!guild)
-		return flashRedirect(
-			BY_ROLE,
-			"Signups only work inside a Discord server",
-			"warn",
-		);
-	if (!canManageRoleSignups(interaction))
-		return flashRedirect(
-			BY_ROLE,
-			"You need the Manage Roles permission to manage role signups",
-			"warn",
-		);
-	const scope = roleScopeOf(state.params);
-	if (!scope) return flashRedirect(BY_ROLE, "Pick a role first", "warn");
+	const guard = roleEditGuard(interaction, state.params, {
+		base: BY_ROLE,
+		noun: "role",
+	});
+	if (!("guild" in guard)) return guard;
+	const { guild, scope } = guard;
 
 	const panel = `${BY_ROLE}/${scope}`;
 	if (!confirmed(state.fields, "RESET"))

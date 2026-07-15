@@ -3,9 +3,9 @@ import { flashRedirect } from "@routes/lib/flash";
 import { Handler } from "@routes/types";
 
 import { getVoiceChatSignups, removeVoiceChatRole } from "@db/voice-chats";
+import { mentionChannel } from "@main/ring";
 
-import { BY_CHANNEL, roleScopeOf } from "../../_shared";
-import { canManageRoleSignups, mentionChannel } from "../../../_shared";
+import { BY_CHANNEL, roleEditGuard } from "../../_shared";
 
 // clears every role pinged in one voice channel
 export const rolesByChannelResetPost: Handler<"POST"> = async (
@@ -13,20 +13,12 @@ export const rolesByChannelResetPost: Handler<"POST"> = async (
 	interaction,
 	state,
 ) => {
-	if (!interaction.guild)
-		return flashRedirect(
-			BY_CHANNEL,
-			"Signups only work inside a Discord server",
-			"warn",
-		);
-	if (!canManageRoleSignups(interaction))
-		return flashRedirect(
-			BY_CHANNEL,
-			"You need the Manage Roles permission to manage role signups",
-			"warn",
-		);
-	const scope = roleScopeOf(state.params);
-	if (!scope) return flashRedirect(BY_CHANNEL, "Pick a channel first", "warn");
+	const guard = roleEditGuard(interaction, state.params, {
+		base: BY_CHANNEL,
+		noun: "channel",
+	});
+	if (!("guild" in guard)) return guard;
+	const { scope } = guard;
 
 	const panel = `${BY_CHANNEL}/${scope}`;
 	if (!confirmed(state.fields, "RESET"))

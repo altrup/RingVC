@@ -13,7 +13,7 @@ import {
 
 import { joinWithAnd } from "@main/ring";
 
-import { COLOR, PANEL, ROLES } from "../_shared";
+import { canManageRoleSignups, COLOR, PANEL, ROLES } from "../_shared";
 
 export const BY_CHANNEL = "/signups/roles/by-channel";
 export const BY_ROLE = "/signups/roles/by-role";
@@ -30,6 +30,32 @@ export const roleScopeOf = (
 	typeof params.scope === "string" && params.scope.length > 0
 		? params.scope
 		: null;
+
+// the guard every role-signups mutation shares: rejects edits outside a
+// guild, without Manage Roles, or before a scope is picked. On success
+// returns the resolved guild and scope; otherwise the flash to redirect with
+export const roleEditGuard = (
+	interaction: Interaction,
+	params: Partial<Record<string, string | string[]>>,
+	{ base, noun }: { base: string; noun: string },
+): { guild: Guild; scope: string } | RouteRedirect => {
+	const guild = interaction.guild;
+	if (!guild)
+		return flashRedirect(
+			base,
+			"Signups only work inside a Discord server",
+			"warn",
+		);
+	if (!canManageRoleSignups(interaction))
+		return flashRedirect(
+			base,
+			"You need the Manage Roles permission to manage role signups",
+			"warn",
+		);
+	const scope = roleScopeOf(params);
+	if (!scope) return flashRedirect(base, `Pick a ${noun} first`, "warn");
+	return { guild, scope };
+};
 
 // stable name ordering so a scope's links paginate the same way on the GET
 // that renders the select and the POST that diffs its submission

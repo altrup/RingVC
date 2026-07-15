@@ -16,8 +16,6 @@ export const COLOR = "#31a5a5";
 export const PANEL = "/signups";
 export const ROLES = "/signups/roles";
 
-export const mentionChannel = (channelId: string) => `<#${channelId}>`;
-
 export const canManageRoleSignups = (interaction: Interaction): boolean =>
 	interaction.memberPermissions?.has(PermissionsBitField.Flags.ManageRoles) ===
 		true ||

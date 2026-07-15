@@ -7,9 +7,9 @@ import {
 import { Handler } from "@routes/types";
 
 import { addVoiceChatUser, removeVoiceChatUser } from "@db/voice-chats";
-import { joinWithAnd } from "@main/ring";
+import { joinWithAnd, mentionChannel } from "@main/ring";
 
-import { guildSignups, mentionChannel, PANEL } from "../_shared";
+import { guildSignups, PANEL } from "../_shared";
 
 // serves the panel's diff select and the /signup, /unsignup and /quit
 // adapters (which pass add/remove channel ids as query params)

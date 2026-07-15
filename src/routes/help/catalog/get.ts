@@ -7,6 +7,7 @@ import { EmbedBuilder } from "discord.js";
 import { CommandName } from "@commands/commandNames";
 
 import { COLOR, helpSubNav } from "../_shared";
+import { canManageRoleSignups } from "../../signups/_shared";
 
 export const catalogGet: Handler<"GET"> = (router, interaction, state) => {
 	const mention = (name: CommandName) => commandMention(state.globals, name);
@@ -26,13 +27,19 @@ export const catalogGet: Handler<"GET"> = (router, interaction, state) => {
 				["quit", "same as /unsignup"],
 			],
 		},
-		{
-			title: "Role signups (Manage Roles)",
-			entries: [
-				["signuprole", "sign up a role for a channel"],
-				["unsignuprole", "remove a role signup"],
-			],
-		},
+		// role signups are a Manage Roles action, so the group only shows to
+		// members who can use it
+		...(canManageRoleSignups(interaction)
+			? [
+					{
+						title: "Role signups (Manage Roles)",
+						entries: [
+							["signuprole", "sign up a role for a channel"],
+							["unsignuprole", "remove a role signup"],
+						] as [CommandName, string][],
+					},
+				]
+			: []),
 		{
 			title: "Filters",
 			entries: [

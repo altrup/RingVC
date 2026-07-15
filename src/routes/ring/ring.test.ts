@@ -19,6 +19,7 @@ const makeInteraction = (inVoice: boolean) =>
 	({
 		user: { id: "caller" },
 		member: { voice: { channel: inVoice ? voiceChannel : null } },
+		inGuild: () => true,
 	}) as unknown as Interaction;
 
 const state = (query: string, values?: string[]) =>
@@ -48,6 +49,26 @@ test("ringing while not in a voice channel flashes the join hint and rings nobod
 	);
 	expect(flashParams.get("level")).toBe("warn");
 	expect(flashParams.get("flash")).toContain("voice channel");
+});
+
+test("ringing from a DM flashes the server-only hint and rings nobody", async () => {
+	const dmInteraction = {
+		user: { id: "caller" },
+		member: null,
+		inGuild: () => false,
+	} as unknown as Interaction;
+	const result = await ringUsersPost(
+		undefined as never,
+		dmInteraction,
+		state("", ["9"]),
+	);
+
+	expect(ring).not.toHaveBeenCalled();
+	const flashParams = new URLSearchParams(
+		result.queryParams as Record<string, string>,
+	);
+	expect(flashParams.get("level")).toBe("warn");
+	expect(flashParams.get("flash")).toContain("Discord server");
 });
 
 test("a selection rings the submitted users and reports per-user outcomes", async () => {

@@ -4,7 +4,12 @@ import { Handler } from "@routes/types";
 
 import { getErrorMessage, ringDefaultUsers } from "@main/ring";
 
-import { NOT_IN_VC, PANEL, ringResultsFlash, voiceChannelOf } from "../_shared";
+import {
+	noVoiceChannelFlash,
+	PANEL,
+	ringResultsFlash,
+	voiceChannelOf,
+} from "../_shared";
 
 export const ringDefaultPost: Handler<"POST"> = async (
 	router,
@@ -12,7 +17,8 @@ export const ringDefaultPost: Handler<"POST"> = async (
 	state,
 ) => {
 	const channel = voiceChannelOf(interaction);
-	if (!channel) return flashRedirect(PANEL, NOT_IN_VC, "warn");
+	if (!channel)
+		return flashRedirect(PANEL, noVoiceChannelFlash(interaction), "warn");
 
 	try {
 		const results = await ringDefaultUsers(

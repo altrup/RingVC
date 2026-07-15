@@ -17,11 +17,11 @@ test("a partial page fits one page with no pagination", () => {
 	});
 });
 
-test("an exactly full page is followed by an empty page for adding", () => {
-	expect(paginate(ids(PAGE_SIZE), "1")).toStrictEqual({
-		pageItems: [],
-		page: 1,
-		pageCount: 2,
+test("an exactly full page adds no trailing page while the select has room", () => {
+	expect(paginate(ids(PAGE_SIZE), null)).toStrictEqual({
+		pageItems: ids(PAGE_SIZE),
+		page: 0,
+		pageCount: 1,
 	});
 });
 
@@ -34,12 +34,12 @@ test("lists over the page size split into pages of PAGE_SIZE", () => {
 	});
 });
 
-test("a full last page is followed by an empty page for adding", () => {
+test("a list that is an exact multiple of the page size adds no trailing page", () => {
 	const items = ids(PAGE_SIZE * 2);
-	expect(paginate(items, "2")).toStrictEqual({
-		pageItems: [],
-		page: 2,
-		pageCount: 3,
+	expect(paginate(items, "1")).toStrictEqual({
+		pageItems: items.slice(PAGE_SIZE),
+		page: 1,
+		pageCount: 2,
 	});
 });
 

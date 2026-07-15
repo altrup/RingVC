@@ -22,8 +22,7 @@ import {
 
 // edits the channels one role is signed up to. Serves the panel's channel
 // multi-select (diffed against the shown page) and the /unsignuprole adapter
-// (a `remove` query param, or `removeAll` to clear every channel); the scope
-// is the role id in the path
+// (a `remove` query param); the scope is the role id in the path
 export const rolesByRoleEditPost: Handler<"POST"> = async (
 	router,
 	interaction,
@@ -68,9 +67,6 @@ export const rolesByRoleEditPost: Handler<"POST"> = async (
 			pageItems,
 			submitted: state.values,
 		}));
-	} else if (query.get("removeAll")) {
-		addsRequested = [];
-		removesRequested = current;
 	} else {
 		addsRequested = query.getAll("add");
 		removesRequested = query.getAll("remove");

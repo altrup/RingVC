@@ -10,7 +10,7 @@ import { ActionRowBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 
 import { getAllDefaultRingees } from "@db/default-ringees";
 
-import { NOT_IN_VC, PANEL, voiceChannelOf } from "./_shared";
+import { noVoiceChannelFlash, PANEL, voiceChannelOf } from "./_shared";
 
 const COLOR = "#c87a6d";
 
@@ -28,7 +28,7 @@ export const ringGet: Handler<"GET"> = async (router, interaction, state) => {
 				new EmbedBuilder()
 					.setColor(COLOR)
 					.setTitle("📣 Quick ring")
-					.setDescription(`⚠️ ${NOT_IN_VC}`),
+					.setDescription(`⚠️ ${noVoiceChannelFlash(interaction)}`),
 			],
 			components: [
 				ringViews,

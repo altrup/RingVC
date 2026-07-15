@@ -12,6 +12,8 @@ import {
 export const PANEL = "/ring";
 export const NOT_IN_VC =
 	"RingVC needs to know which voice channel to ring people in. Join one, then run /ring again.";
+export const SERVER_ONLY =
+	"RingVC can only ring people from within a Discord server. Run /ring in a server instead.";
 
 // panels outlive the voice state that was true at render time, so every
 // mutation re-checks it at click time
@@ -21,6 +23,11 @@ export const voiceChannelOf = (
 	interaction.member && "voice" in interaction.member
 		? interaction.member.voice.channel
 		: null;
+
+// why there is no channel to ring in: server-only outside a guild, otherwise
+// a prompt to join a voice channel
+export const noVoiceChannelFlash = (interaction: Interaction): string =>
+	interaction.inGuild() ? NOT_IN_VC : SERVER_ONLY;
 
 export const ringResultsFlash = (results: UserRingResult[]) => {
 	const ringed = results
@@ -46,7 +53,8 @@ export const ringUserIds = async (
 	userIds: string[],
 ) => {
 	const channel = voiceChannelOf(interaction);
-	if (!channel) return flashRedirect(PANEL, NOT_IN_VC, "warn");
+	if (!channel)
+		return flashRedirect(PANEL, noVoiceChannelFlash(interaction), "warn");
 	if (userIds.length === 0)
 		return flashRedirect(PANEL, "Nobody was selected to ring", "warn");
 

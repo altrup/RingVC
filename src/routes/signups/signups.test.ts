@@ -13,7 +13,6 @@ import {
 import { signupsResetPost } from "./reset/post";
 import { rolesByChannelResetPost } from "./roles/by-channel/reset/post";
 import { rolesByChannelEditPost } from "./roles/by-channel/roles/post";
-import { rolesByRoleEditPost } from "./roles/by-role/channels/post";
 import { rolesByRoleResetPost } from "./roles/by-role/reset/post";
 
 vi.mock("@db/voice-chats", () => ({
@@ -121,25 +120,6 @@ test("a role edit without Manage Roles mutates nothing", async () => {
 	expect(addVoiceChatRole).not.toHaveBeenCalled();
 	expect(flashOf(result).get("level")).toBe("warn");
 	expect(flashOf(result).get("flash")).toContain("Manage Roles");
-});
-
-test("unsignuprole removeAll clears every channel the role is signed up to", async () => {
-	vi.mocked(getVoiceChatRoleSignups).mockResolvedValue([
-		{ roleId: "role1", channelId: "vcA" },
-		{ roleId: "role1", channelId: "vcB" },
-		{ roleId: "other", channelId: "vcC" },
-	]);
-
-	const result = await rolesByRoleEditPost(
-		undefined as never,
-		makeInteraction(true),
-		editState({ scope: "role1", query: "removeAll=1" }),
-	);
-
-	expect(removeVoiceChatRole).toHaveBeenCalledWith("vcA", "role1");
-	expect(removeVoiceChatRole).toHaveBeenCalledWith("vcB", "role1");
-	expect(removeVoiceChatRole).not.toHaveBeenCalledWith("vcC", "role1");
-	expect(result.redirect).toBe("/signups/roles/by-role/role1");
 });
 
 const resetState = (confirmation: string, scope?: string) =>

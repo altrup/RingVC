@@ -36,12 +36,21 @@ export const pagedEditPattern = (
 	key: timestamp.toString(36),
 });
 
-// slices one select-menu page out of a list. The last page is always
-// partial (a length that is an exact multiple of PAGE_SIZE gets a trailing
-// empty page), so adding stays possible even when every existing page is
-// full; stale page indexes clamp to the last page
+// how many pages a list of this size spans. A full last page only gets a
+// trailing empty page when a page fills the whole edit select (PAGE_SIZE >=
+// SELECT_MAX_VALUES), since otherwise the select still has room to add
+// entries on the last page; an empty list still shows one page
+export const pageCountOf = (total: number): number => {
+	const fullPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+	const needsAddPage =
+		PAGE_SIZE >= SELECT_MAX_VALUES && total > 0 && total % PAGE_SIZE === 0;
+	return fullPages + (needsAddPage ? 1 : 0);
+};
+
+// slices one select-menu page out of a list; stale page indexes clamp to
+// the last page
 export const paginate = (items: string[], rawPage: string | null): Page => {
-	const pageCount = Math.floor(items.length / PAGE_SIZE) + 1;
+	const pageCount = pageCountOf(items.length);
 	const parsed = parseInt(rawPage ?? "0");
 	const page = Math.min(Math.max(isNaN(parsed) ? 0 : parsed, 0), pageCount - 1);
 	return {

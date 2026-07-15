@@ -28,15 +28,24 @@ export const unsignuprole = {
 	async execute(router: RingRouter, interaction: ChatInputCommandInteraction) {
 		const role = interaction.options.getRole("role", true);
 		const channel = interaction.options.getChannel("channel");
-		// a channel removes just that link; no channel clears every channel
-		await router.dispatch(
-			interaction,
-			`/signups/roles/by-role/${role.id}/channels`,
-			{
-				method: "POST",
-				queryParams: channel ? { remove: channel.id } : { removeAll: "1" },
-				flags: [MessageFlags.Ephemeral],
-			},
-		);
+		// a channel removes just that link; clearing every channel is
+		// destructive, so it goes through the same typed-confirmation modal as
+		// the panel's Reset button
+		if (channel)
+			await router.dispatch(
+				interaction,
+				`/signups/roles/by-role/${role.id}/channels`,
+				{
+					method: "POST",
+					queryParams: { remove: channel.id },
+					flags: [MessageFlags.Ephemeral],
+				},
+			);
+		else
+			await router.dispatch(
+				interaction,
+				`/signups/roles/by-role/${role.id}/reset`,
+				{ method: "MODAL", flags: [MessageFlags.Ephemeral] },
+			);
 	},
 };

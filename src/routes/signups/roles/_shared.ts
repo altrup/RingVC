@@ -1,6 +1,6 @@
 import { navBar, subNav } from "@routes/lib/components";
 import { flashRedirect, withFlash } from "@routes/lib/flash";
-import { withPageLabel } from "@routes/lib/paging";
+import { paginate, withPageLabel } from "@routes/lib/paging";
 import { RingRouter } from "@routes/types";
 import { RouteRedirect } from "discord-embed-router";
 import {
@@ -61,6 +61,7 @@ export const commitRoleEdit = async ({
 	mutateAdd,
 	mutateRemove,
 	itemMention,
+	sortItems,
 }: {
 	redirect: string;
 	page: number;
@@ -71,22 +72,31 @@ export const commitRoleEdit = async ({
 	mutateAdd: (item: string) => Promise<boolean>;
 	mutateRemove: (item: string) => Promise<boolean>;
 	itemMention: (id: string) => string;
+	sortItems: (items: string[]) => string[];
 }): Promise<RouteRedirect> => {
 	const currentSet = new Set(current);
 	const toAdd = addsRequested.filter((item) => !currentSet.has(item));
 	const toRemove = removesRequested.filter((item) => currentSet.has(item));
 	await Promise.all([...toAdd.map(mutateAdd), ...toRemove.map(mutateRemove)]);
 
+	// the post-edit list places every entry the flash mentions, so entries
+	// that land or live off the rendered page get a page label
+	const removeSet = new Set(toRemove);
+	const after = sortItems([
+		...current.filter((item) => !removeSet.has(item)),
+		...toAdd,
+	]);
+	const { page: viewedPage } = paginate(after, String(page));
+	const label = withPageLabel(after, itemMention, viewedPage);
+
 	const parts = [
-		...(toAdd.length > 0
-			? [`Added ${joinWithAnd(toAdd.map(itemMention))}`]
-			: []),
+		...(toAdd.length > 0 ? [`Added ${joinWithAnd(toAdd.map(label))}`] : []),
 		...(toRemove.length > 0
 			? [`Removed ${joinWithAnd(toRemove.map(itemMention))}`]
 			: []),
 		...(alreadyPresent.length > 0
 			? [
-					`${joinWithAnd(alreadyPresent.map(withPageLabel(current, itemMention)))} ${alreadyPresent.length > 1 ? "are" : "is"} already signed up`,
+					`${joinWithAnd(alreadyPresent.map(label))} ${alreadyPresent.length > 1 ? "are" : "is"} already signed up`,
 				]
 			: []),
 	];

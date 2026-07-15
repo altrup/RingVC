@@ -1,5 +1,9 @@
 import { flashRedirect } from "@routes/lib/flash";
-import { resolveSelectionEdit, withPageLabel } from "@routes/lib/paging";
+import {
+	paginate,
+	resolveSelectionEdit,
+	withPageLabel,
+} from "@routes/lib/paging";
 import { channelIdOf, scopeName, scopeOf } from "@routes/lib/scope";
 import { Handler } from "@routes/types";
 
@@ -62,14 +66,28 @@ export const filterMembersPost: Handler<"POST"> = async (
 	]);
 
 	const changed = toAdd.length > 0 || toRemove.length > 0;
-	const target = mentionUser(addsRequested[0] ?? removesRequested[0] ?? "");
+	// the post-edit list places every entry the flash mentions, so entries
+	// that land or live off the rendered page get a page label
+	const removeSet = new Set(toRemove);
+	const after = [
+		...entries.filter((id) => !removeSet.has(id)),
+		...toAdd,
+	].sort();
+	const { page } = paginate(after, query.get("page"));
+	const label = withPageLabel(after, mentionUser, page);
+
+	const targetId = addsRequested[0] ?? removesRequested[0] ?? "";
+	// mention with a page label when the target is in the list, plain when
+	// the flash says it isn't
+	const target = mentionUser(targetId);
+	const listedTarget = label(targetId);
 	let flash: string;
 	if (intent === "block") {
 		flash =
 			addsRequested.length > 0
 				? toAdd.length > 0
-					? `Blocked ${target}`
-					: `${target} is already blocked`
+					? `Blocked ${listedTarget}`
+					: `${listedTarget} is already blocked`
 				: toRemove.length > 0
 					? `Unblocked ${target}`
 					: `${target} isn't blocked`;
@@ -77,22 +95,20 @@ export const filterMembersPost: Handler<"POST"> = async (
 		flash =
 			addsRequested.length > 0
 				? toAdd.length > 0
-					? `Whitelisted ${target}`
-					: `${target} is already whitelisted`
+					? `Whitelisted ${listedTarget}`
+					: `${listedTarget} is already whitelisted`
 				: toRemove.length > 0
 					? `Removed ${target} from your whitelist`
 					: `${target} isn't on your whitelist`;
 	} else {
 		const parts = [
-			...(toAdd.length > 0
-				? [`Added ${joinWithAnd(toAdd.map(mentionUser))}`]
-				: []),
+			...(toAdd.length > 0 ? [`Added ${joinWithAnd(toAdd.map(label))}`] : []),
 			...(toRemove.length > 0
 				? [`Removed ${joinWithAnd(toRemove.map(mentionUser))}`]
 				: []),
 			...(alreadyPresent.length > 0
 				? [
-						`${joinWithAnd(alreadyPresent.map(withPageLabel(entries, mentionUser)))} ${alreadyPresent.length > 1 ? "are" : "is"} already listed`,
+						`${joinWithAnd(alreadyPresent.map(label))} ${alreadyPresent.length > 1 ? "are" : "is"} already listed`,
 					]
 				: []),
 		];

@@ -76,11 +76,16 @@ export const diffSelection = ({
 };
 
 // labels a value with the page that displays it, e.g. "#general (page 2)",
-// so a flash can point at where an existing entry lives
+// so a flash can point at where an entry lives — except on the page in
+// view, where the entry is already visible and the label is noise
 export const withPageLabel =
-	(allItems: string[], mention: (id: string) => string) =>
-	(value: string): string =>
-		`${mention(value)} (page ${Math.floor(allItems.indexOf(value) / PAGE_SIZE) + 1})`;
+	(allItems: string[], mention: (id: string) => string, viewedPage: number) =>
+	(value: string): string => {
+		const page = Math.floor(allItems.indexOf(value) / PAGE_SIZE);
+		return page === viewedPage
+			? mention(value)
+			: `${mention(value)} (page ${page + 1})`;
+	};
 
 // resolves an add/remove edit for a paged member select from either input a
 // handler can receive: a select submission (diffed against the visible page)

@@ -86,5 +86,6 @@ export const rolesByRoleEditPost: Handler<"POST"> = async (
 		mutateAdd: (channelId) => addVoiceChatRole(channelId, scope),
 		mutateRemove: (channelId) => removeVoiceChatRole(channelId, scope),
 		itemMention: mentionChannel,
+		sortItems: (channelIds) => sortChannelIds(guild, channelIds),
 	});
 };

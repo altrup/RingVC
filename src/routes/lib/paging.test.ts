@@ -106,7 +106,15 @@ test("deselecting everything on a page removes the whole page only", () => {
 
 test("withPageLabel points at the page an existing entry lives on", () => {
 	const allItems = ids(PAGE_SIZE * 2);
-	const label = withPageLabel(allItems, (id) => `#${id}`);
+	const label = withPageLabel(allItems, (id) => `#${id}`, 2);
 	expect(label("1")).toBe("#1 (page 1)");
 	expect(label(`${PAGE_SIZE + 1}`)).toBe(`#${PAGE_SIZE + 1} (page 2)`);
+});
+
+test("withPageLabel leaves entries on the viewed page unlabeled", () => {
+	const allItems = ids(PAGE_SIZE * 2);
+	expect(withPageLabel(allItems, (id) => `#${id}`, 0)("1")).toBe("#1");
+	expect(withPageLabel(allItems, (id) => `#${id}`, 1)(`${PAGE_SIZE + 1}`)).toBe(
+		`#${PAGE_SIZE + 1}`,
+	);
 });

@@ -1,5 +1,9 @@
 import { flashRedirect } from "@routes/lib/flash";
-import { resolveSelectionEdit, withPageLabel } from "@routes/lib/paging";
+import {
+	paginate,
+	resolveSelectionEdit,
+	withPageLabel,
+} from "@routes/lib/paging";
 import { channelIdOf, scopeOf } from "@routes/lib/scope";
 import { Handler } from "@routes/types";
 
@@ -38,16 +42,24 @@ export const recipientsMembersPost: Handler<"POST"> = async (
 		...removed.map((id) => removeDefaultRingee(userId, channelId, id)),
 	]);
 
+	// the post-edit list places every entry the flash mentions, so entries
+	// that land or live off the rendered page get a page label
+	const removedSet = new Set(removed);
+	const after = [
+		...ringees.filter((id) => !removedSet.has(id)),
+		...added,
+	].sort();
+	const { page } = paginate(after, state.queryParams.get("page"));
+	const label = withPageLabel(after, mentionUser, page);
+
 	const parts = [
-		...(added.length > 0
-			? [`Added ${joinWithAnd(added.map(mentionUser))}`]
-			: []),
+		...(added.length > 0 ? [`Added ${joinWithAnd(added.map(label))}`] : []),
 		...(removed.length > 0
 			? [`Removed ${joinWithAnd(removed.map(mentionUser))}`]
 			: []),
 		...(alreadyPresent.length > 0
 			? [
-					`${joinWithAnd(alreadyPresent.map(withPageLabel(ringees, mentionUser)))} ${alreadyPresent.length > 1 ? "are" : "is"} already added`,
+					`${joinWithAnd(alreadyPresent.map(label))} ${alreadyPresent.length > 1 ? "are" : "is"} already added`,
 				]
 			: []),
 	];

@@ -1,5 +1,9 @@
 import { flashRedirect } from "@routes/lib/flash";
-import { resolveSelectionEdit, withPageLabel } from "@routes/lib/paging";
+import {
+	paginate,
+	resolveSelectionEdit,
+	withPageLabel,
+} from "@routes/lib/paging";
 import { Handler } from "@routes/types";
 
 import { addVoiceChatUser, removeVoiceChatUser } from "@db/voice-chats";
@@ -56,18 +60,19 @@ export const signupsMembersPost: Handler<"POST"> = async (
 		.filter((r) => !r.ok)
 		.map((r) => r.channelId);
 
+	// the re-fetched list places every entry the flash mentions, so entries
+	// that land or live off the rendered page get a page label
+	const after = await guildSignups(userId, guild);
+	const { page } = paginate(after, query.get("page"));
+	const label = withPageLabel(after, mentionChannel, page);
+
 	const parts = [
 		...(added.length > 0
-			? [`Signed up for ${joinWithAnd(added.map(mentionChannel))}`]
+			? [`Signed up for ${joinWithAnd(added.map(label))}`]
 			: []),
-		...(alreadySignedUp.length > 0
+		...(alreadySignedUp.length > 0 || alreadyPresent.length > 0
 			? [
-					`You are already signed up for ${joinWithAnd(alreadySignedUp.map(mentionChannel))}`,
-				]
-			: []),
-		...(alreadyPresent.length > 0
-			? [
-					`You are already signed up for ${joinWithAnd(alreadyPresent.map(withPageLabel(signups, mentionChannel)))}`,
+					`You are already signed up for ${joinWithAnd([...alreadySignedUp, ...alreadyPresent].map(label))}`,
 				]
 			: []),
 		...(removed.length > 0

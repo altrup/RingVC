@@ -3,6 +3,7 @@ import { withFlash } from "@routes/lib/flash";
 import { commandMention } from "@routes/lib/mentions";
 import {
 	pagedCountLine,
+	pagedEditParams,
 	paginate,
 	SELECT_MAX_VALUES,
 } from "@routes/lib/paging";
@@ -102,7 +103,7 @@ export const recipientsGet: Handler<"GET"> = async (
 				.setDefaultUsers(...pageItems)
 				.setPattern(`${panelPath(scope)}/members`, {
 					method: "POST",
-					queryParams: { page: String(page) },
+					queryParams: pagedEditParams(page, state.timestamp),
 				}),
 		)
 		.toJSON();

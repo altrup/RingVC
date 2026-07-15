@@ -2,6 +2,7 @@ import { navBar, paginationRows, subNav } from "@routes/lib/components";
 import { withFlash } from "@routes/lib/flash";
 import {
 	pagedCountLine,
+	pagedEditParams,
 	paginate,
 	SELECT_MAX_VALUES,
 } from "@routes/lib/paging";
@@ -56,7 +57,7 @@ export const signupsGet: Handler<"GET"> = async (
 						.setDefaultChannels(...pageItems)
 						.setPattern(`${PANEL}/members`, {
 							method: "POST",
-							queryParams: { page: String(page) },
+							queryParams: pagedEditParams(page, state.timestamp),
 						}),
 				)
 				.toJSON(),

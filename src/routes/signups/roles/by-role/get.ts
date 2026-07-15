@@ -1,6 +1,7 @@
 import { paginationRows } from "@routes/lib/components";
 import {
 	pagedCountLine,
+	pagedEditParams,
 	paginate,
 	SELECT_MAX_VALUES,
 } from "@routes/lib/paging";
@@ -77,7 +78,7 @@ export const rolesByRoleGet: Handler<"GET"> = async (
 				.setDefaultChannels(...pageItems)
 				.setPattern(`${BY_ROLE}/${scope}/channels`, {
 					method: "POST",
-					queryParams: { page: String(page) },
+					queryParams: pagedEditParams(page, state.timestamp),
 				}),
 		)
 		.toJSON();

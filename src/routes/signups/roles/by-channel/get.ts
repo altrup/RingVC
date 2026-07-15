@@ -1,5 +1,9 @@
-import { homeButton, row } from "@routes/lib/components";
-import { paginate, SELECT_MAX_VALUES } from "@routes/lib/paging";
+import { homeButton, paginationRows, row } from "@routes/lib/components";
+import {
+	pagedCountLine,
+	paginate,
+	SELECT_MAX_VALUES,
+} from "@routes/lib/paging";
 import { Handler } from "@routes/types";
 import {
 	RouteChannelSelectMenuBuilder,
@@ -11,7 +15,8 @@ import { getVoiceChatSignups } from "@db/voice-chats";
 
 import {
 	BY_CHANNEL,
-	renderRoleScope,
+	LEAD,
+	roleFrame,
 	roleScopeOf,
 	sortRoleIds,
 } from "../_shared";
@@ -73,18 +78,19 @@ export const rolesByChannelGet: Handler<"GET"> = async (
 		)
 		.toJSON();
 
-	return renderRoleScope({
+	return roleFrame({
 		router,
 		interaction,
 		queryParams: state.queryParams,
-		scope,
-		scopeMention: mentionChannel,
-		linkedLabel: "Roles pinged here",
-		linkedCount: roleIds.length,
-		scopeSelectRow,
-		editSelectRow,
-		basePath: `${BY_CHANNEL}/${scope}`,
-		page,
-		pageCount,
+		body:
+			`${LEAD}\n\n**Viewing** ${mentionChannel(scope)}\n` +
+			pagedCountLine("Roles pinged here", roleIds.length, pageCount),
+		// the scope select leads as the page's context, then its edit list and
+		// pager; the switch and section bar follow in the frame
+		rows: [
+			scopeSelectRow,
+			editSelectRow,
+			...paginationRows(router, `${BY_CHANNEL}/${scope}`, { page, pageCount }),
+		],
 	});
 };

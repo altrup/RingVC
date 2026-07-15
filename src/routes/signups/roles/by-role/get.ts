@@ -1,5 +1,9 @@
-import { homeButton, row } from "@routes/lib/components";
-import { paginate, SELECT_MAX_VALUES } from "@routes/lib/paging";
+import { homeButton, paginationRows, row } from "@routes/lib/components";
+import {
+	pagedCountLine,
+	paginate,
+	SELECT_MAX_VALUES,
+} from "@routes/lib/paging";
 import { Handler } from "@routes/types";
 import {
 	RouteChannelSelectMenuBuilder,
@@ -12,7 +16,8 @@ import { mentionRole } from "@main/ring";
 
 import {
 	BY_ROLE,
-	renderRoleScope,
+	LEAD,
+	roleFrame,
 	roleScopeOf,
 	sortChannelIds,
 } from "../_shared";
@@ -78,18 +83,19 @@ export const rolesByRoleGet: Handler<"GET"> = async (
 		)
 		.toJSON();
 
-	return renderRoleScope({
+	return roleFrame({
 		router,
 		interaction,
 		queryParams: state.queryParams,
-		scope,
-		scopeMention: mentionRole,
-		linkedLabel: "Signed up for",
-		linkedCount: channelIds.length,
-		scopeSelectRow,
-		editSelectRow,
-		basePath: `${BY_ROLE}/${scope}`,
-		page,
-		pageCount,
+		body:
+			`${LEAD}\n\n**Viewing** ${mentionRole(scope)}\n` +
+			pagedCountLine("Signed up for", channelIds.length, pageCount),
+		// the scope select leads as the page's context, then its edit list and
+		// pager; the switch and section bar follow in the frame
+		rows: [
+			scopeSelectRow,
+			editSelectRow,
+			...paginationRows(router, `${BY_ROLE}/${scope}`, { page, pageCount }),
+		],
 	});
 };

@@ -1,6 +1,6 @@
-import { navBar, paginationRows, subNav } from "@routes/lib/components";
+import { navBar, subNav } from "@routes/lib/components";
 import { flashRedirect, withFlash } from "@routes/lib/flash";
-import { Page, pagedCountLine, withPageLabel } from "@routes/lib/paging";
+import { withPageLabel } from "@routes/lib/paging";
 import { RingRouter } from "@routes/types";
 import { RouteRedirect } from "discord-embed-router";
 import {
@@ -19,7 +19,7 @@ export const BY_CHANNEL = "/signups/roles/by-channel";
 export const BY_ROLE = "/signups/roles/by-role";
 
 // the shared lead sentence; both orientations describe the same feature
-const LEAD =
+export const LEAD =
 	"When someone joins a voice channel, its signed-up roles get pinged.";
 
 // the scope carried in the path, or null when nothing is picked yet (unlike
@@ -107,7 +107,7 @@ export const commitRoleEdit = async ({
 // the frame every role-signups view ends in. Rows read low-to-high level top to
 // bottom: the caller's content rows, then the My signups / Role signups switch,
 // then the section bar
-const roleFrame = ({
+export const roleFrame = ({
 	router,
 	interaction,
 	queryParams,
@@ -135,73 +135,3 @@ const roleFrame = ({
 		navBar(router, interaction, { active: "signups" }),
 	],
 });
-
-// the entry view with nothing picked: a channel select and a role select. The
-// first one the user touches sets the orientation; clearing that scope later
-// returns here
-export const renderRoleNeutral = ({
-	router,
-	interaction,
-	queryParams,
-	channelSelectRow,
-	roleSelectRow,
-}: {
-	router: RingRouter;
-	interaction: Interaction;
-	queryParams: URLSearchParams;
-	channelSelectRow: APIActionRowComponent<APIComponentInMessageActionRow>;
-	roleSelectRow: APIActionRowComponent<APIComponentInMessageActionRow>;
-}) =>
-	roleFrame({
-		router,
-		interaction,
-		queryParams,
-		body: `${LEAD}\n\nPick a voice channel or a role above to view and edit its signups.`,
-		rows: [channelSelectRow, roleSelectRow],
-	});
-
-// an oriented view: one scope is picked (a channel or a role) and its linked
-// items are editable. The caller builds the scope and edit selects, since their
-// menu types differ; the frame, copy, and rows are shared
-export const renderRoleScope = ({
-	router,
-	interaction,
-	queryParams,
-	scope,
-	scopeMention,
-	linkedLabel,
-	linkedCount,
-	scopeSelectRow,
-	editSelectRow,
-	basePath,
-	page,
-	pageCount,
-}: {
-	router: RingRouter;
-	interaction: Interaction;
-	queryParams: URLSearchParams;
-	scope: string;
-	scopeMention: (id: string) => string;
-	linkedLabel: string;
-	linkedCount: number;
-	scopeSelectRow: APIActionRowComponent<APIComponentInMessageActionRow>;
-	editSelectRow: APIActionRowComponent<APIComponentInMessageActionRow>;
-	basePath: string;
-} & Pick<Page, "page" | "pageCount">) => {
-	const body =
-		`${LEAD}\n\n**Viewing** ${scopeMention(scope)}\n` +
-		pagedCountLine(linkedLabel, linkedCount, pageCount);
-	return roleFrame({
-		router,
-		interaction,
-		queryParams,
-		body,
-		// the scope select leads as the page's context, then its edit list and
-		// pager; the switch and section bar follow in the frame
-		rows: [
-			scopeSelectRow,
-			editSelectRow,
-			...paginationRows(router, basePath, { page, pageCount }),
-		],
-	});
-};

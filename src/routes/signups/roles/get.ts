@@ -11,7 +11,7 @@ import {
 	guildOnlyRender,
 	noPermissionRender,
 } from "../_shared";
-import { BY_CHANNEL, BY_ROLE, renderRoleNeutral } from "./_shared";
+import { BY_CHANNEL, BY_ROLE, LEAD, roleFrame } from "./_shared";
 
 export const rolesGet: Handler<"GET"> = async (router, interaction, state) => {
 	const guild = interaction.guild;
@@ -40,11 +40,13 @@ export const rolesGet: Handler<"GET"> = async (router, interaction, state) => {
 		)
 		.toJSON();
 
-	return renderRoleNeutral({
+	// the entry view with nothing picked: the first select the user touches
+	// sets the orientation; clearing that scope later returns here
+	return roleFrame({
 		router,
 		interaction,
 		queryParams: state.queryParams,
-		channelSelectRow,
-		roleSelectRow,
+		body: `${LEAD}\n\nPick a voice channel or a role above to view and edit its signups.`,
+		rows: [channelSelectRow, roleSelectRow],
 	});
 };

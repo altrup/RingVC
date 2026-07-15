@@ -1,5 +1,5 @@
 // Discord's cap on select menu options and default values
-export const PAGE_SIZE = 25;
+export const PAGE_SIZE = 10;
 
 export type Page = {
 	pageItems: string[];

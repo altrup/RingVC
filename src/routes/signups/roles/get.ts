@@ -1,4 +1,3 @@
-import { homeButton, row } from "@routes/lib/components";
 import { Handler } from "@routes/types";
 import {
 	RouteChannelSelectMenuBuilder,
@@ -15,8 +14,7 @@ import { BY_CHANNEL, BY_ROLE, LEAD, roleFrame } from "./_shared";
 
 export const rolesGet: Handler<"GET"> = async (router, interaction, state) => {
 	const guild = interaction.guild;
-	if (!guild)
-		return { ...guildOnlyRender, components: [row(homeButton(router))] };
+	if (!guild) return guildOnlyRender(router);
 	if (!canManageRoleSignups(interaction)) return noPermissionRender(router);
 
 	const channelSelectRow = new ActionRowBuilder<RouteChannelSelectMenuBuilder>()

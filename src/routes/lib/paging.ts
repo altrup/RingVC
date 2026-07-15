@@ -1,4 +1,5 @@
-// Discord's cap on select menu options and default values
+// how many entries a paged panel shows at once; a deliberate readability
+// choice well under SELECT_MAX_VALUES
 export const PAGE_SIZE = 10;
 // Discord's cap on select menu max_values; edit selects allow it in full so
 // users can add more entries per submit than one page displays.

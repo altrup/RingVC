@@ -32,15 +32,15 @@ export const guildVoiceChannelIds = (guild: Guild): string[] =>
 
 // panels are ephemeral and per-guild; anything reached outside a guild
 // (e.g. a DM) has nothing to show
-export const guildOnlyRender = {
+export const guildOnlyRender = (router: Parameters<Handler<"GET">>[0]) => ({
 	embeds: [
 		new EmbedBuilder()
 			.setColor(COLOR)
 			.setTitle("Signups")
 			.setDescription("⚠️ Signups only work inside a Discord server"),
 	],
-	components: [],
-};
+	components: [row(homeButton(router))],
+});
 
 // the user's signups, restricted to this guild's voice channels and sorted
 // by channel name for stable paging

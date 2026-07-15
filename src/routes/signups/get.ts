@@ -1,10 +1,4 @@
-import {
-	homeButton,
-	navBar,
-	paginationRows,
-	row,
-	subNav,
-} from "@routes/lib/components";
+import { navBar, paginationRows, subNav } from "@routes/lib/components";
 import { withFlash } from "@routes/lib/flash";
 import {
 	pagedCountLine,
@@ -30,8 +24,7 @@ export const signupsGet: Handler<"GET"> = async (
 	state,
 ) => {
 	const guild = interaction.guild;
-	if (!guild)
-		return { ...guildOnlyRender, components: [row(homeButton(router))] };
+	if (!guild) return guildOnlyRender(router);
 
 	const signups = await guildSignups(interaction.user.id, guild);
 	const { pageItems, page, pageCount } = paginate(

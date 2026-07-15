@@ -1,4 +1,4 @@
-import { homeButton, paginationRows, row } from "@routes/lib/components";
+import { paginationRows } from "@routes/lib/components";
 import {
 	pagedCountLine,
 	paginate,
@@ -35,8 +35,7 @@ export const rolesByRoleGet: Handler<"GET"> = async (
 	state,
 ) => {
 	const guild = interaction.guild;
-	if (!guild)
-		return { ...guildOnlyRender, components: [row(homeButton(router))] };
+	if (!guild) return guildOnlyRender(router);
 	if (!canManageRoleSignups(interaction)) return noPermissionRender(router);
 
 	const scope = roleScopeOf(state.params);

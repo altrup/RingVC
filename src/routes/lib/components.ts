@@ -1,5 +1,6 @@
 import { buttonEmoji, VC_EMOJI_ID } from "@routes/lib/emoji";
 import { Page } from "@routes/lib/paging";
+import { PAGE_JUMP } from "@routes/page-jump/_shared";
 import { RingButton, RingRouter } from "@routes/types";
 import {
 	RouteButtonBuilder,
@@ -142,7 +143,19 @@ export const paginationRows = (
 	return [
 		row(
 			pageButton("◀ Prev", page - 1, page === 0),
-			pageButton(`Page ${page + 1} of ${pageCount}`, page, true),
+			// the middle button doubles as a page jump: it opens a modal asking
+			// which page to show, which redirects back to basePath
+			new RouteButtonBuilder(router)
+				.setLabel(`Page ${page + 1} of ${pageCount}`)
+				.setStyle(ButtonStyle.Secondary)
+				.setTo(PAGE_JUMP, {
+					method: "MODAL",
+					queryParams: {
+						to: basePath,
+						page: String(page),
+						pageCount: String(pageCount),
+					},
+				}),
 			pageButton("Next ▶", page + 1, page === pageCount - 1),
 		),
 	];

@@ -14,6 +14,8 @@ import { catalogGet } from "./help/catalog/get";
 import { helpGet } from "./help/get";
 import { modeGet } from "./mode/get";
 import { modePost } from "./mode/post";
+import { pageJumpModal } from "./page-jump/modal";
+import { pageJumpPost } from "./page-jump/post";
 import { recipientsAutoRingPost } from "./recipients/[scope]/auto-ring/post";
 import { recipientsGet } from "./recipients/[scope]/get";
 import { recipientsMembersPost } from "./recipients/[scope]/members/post";
@@ -59,6 +61,10 @@ export const registerRoutes = (router: RingRouter) => {
 	router.post("/recipients/:scope/auto-ring", recipientsAutoRingPost);
 
 	router.route("/mode", { get: modeGet, post: modePost });
+
+	// the shared page-jump modal every paginated panel's middle button opens;
+	// the originating panel rides along in the `to` query param
+	router.route("/page-jump", { modal: pageJumpModal, post: pageJumpPost });
 
 	router.get("/signups", signupsGet);
 	router.post("/signups/members", signupsMembersPost);

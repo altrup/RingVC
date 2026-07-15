@@ -1,4 +1,9 @@
-import { navBar, paginationRows, subNav } from "@routes/lib/components";
+import {
+	navBar,
+	pagedControls,
+	showOptionsOf,
+	subNav,
+} from "@routes/lib/components";
 import { withFlash } from "@routes/lib/flash";
 import {
 	pagedCountLine,
@@ -7,8 +12,16 @@ import {
 	SELECT_MAX_VALUES,
 } from "@routes/lib/paging";
 import { Handler } from "@routes/types";
-import { RouteChannelSelectMenuBuilder } from "discord-embed-router";
-import { ActionRowBuilder, ChannelType, EmbedBuilder } from "discord.js";
+import {
+	RouteButtonBuilder,
+	RouteChannelSelectMenuBuilder,
+} from "discord-embed-router";
+import {
+	ActionRowBuilder,
+	ButtonStyle,
+	ChannelType,
+	EmbedBuilder,
+} from "discord.js";
 
 import {
 	canManageRoleSignups,
@@ -61,7 +74,17 @@ export const signupsGet: Handler<"GET"> = async (
 						}),
 				)
 				.toJSON(),
-			...paginationRows(router, PANEL, { page, pageCount }),
+			...pagedControls(router, PANEL, {
+				page,
+				pageCount,
+				showOptions: showOptionsOf(state.queryParams),
+				options: [
+					new RouteButtonBuilder(router)
+						.setLabel("Reset")
+						.setStyle(ButtonStyle.Danger)
+						.setTo(`${PANEL}/reset`, { method: "MODAL" }),
+				],
+			}),
 			// the switch into role signups is a management action, so it only
 			// appears for members who can manage role signups
 			...(canManageRoleSignups(interaction)

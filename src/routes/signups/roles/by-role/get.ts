@@ -1,4 +1,4 @@
-import { paginationRows } from "@routes/lib/components";
+import { pagedControls, showOptionsOf } from "@routes/lib/components";
 import {
 	pagedCountLine,
 	pagedEditParams,
@@ -7,10 +7,11 @@ import {
 } from "@routes/lib/paging";
 import { Handler } from "@routes/types";
 import {
+	RouteButtonBuilder,
 	RouteChannelSelectMenuBuilder,
 	RouteRoleSelectMenuBuilder,
 } from "discord-embed-router";
-import { ActionRowBuilder, ChannelType } from "discord.js";
+import { ActionRowBuilder, ButtonStyle, ChannelType } from "discord.js";
 
 import { getVoiceChatRoleSignups } from "@db/voice-chats";
 import { mentionRole } from "@main/ring";
@@ -95,7 +96,17 @@ export const rolesByRoleGet: Handler<"GET"> = async (
 		rows: [
 			scopeSelectRow,
 			editSelectRow,
-			...paginationRows(router, `${BY_ROLE}/${scope}`, { page, pageCount }),
+			...pagedControls(router, `${BY_ROLE}/${scope}`, {
+				page,
+				pageCount,
+				showOptions: showOptionsOf(state.queryParams),
+				options: [
+					new RouteButtonBuilder(router)
+						.setLabel("Reset")
+						.setStyle(ButtonStyle.Danger)
+						.setTo(`${BY_ROLE}/${scope}/reset`, { method: "MODAL" }),
+				],
+			}),
 		],
 	});
 };

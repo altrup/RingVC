@@ -3,13 +3,18 @@ import { beforeEach, expect, test, vi } from "vitest";
 
 import {
 	addVoiceChatRole,
+	getUserVoiceChatSignups,
 	getVoiceChatRoleSignups,
 	getVoiceChatSignups,
 	removeVoiceChatRole,
+	removeVoiceChatUser,
 } from "@db/voice-chats";
 
+import { signupsResetPost } from "./reset/post";
+import { rolesByChannelResetPost } from "./roles/by-channel/reset/post";
 import { rolesByChannelEditPost } from "./roles/by-channel/roles/post";
 import { rolesByRoleEditPost } from "./roles/by-role/channels/post";
+import { rolesByRoleResetPost } from "./roles/by-role/reset/post";
 
 vi.mock("@db/voice-chats", () => ({
 	getUserVoiceChatSignups: vi.fn(),
@@ -134,5 +139,86 @@ test("unsignuprole removeAll clears every channel the role is signed up to", asy
 	expect(removeVoiceChatRole).toHaveBeenCalledWith("vcA", "role1");
 	expect(removeVoiceChatRole).toHaveBeenCalledWith("vcB", "role1");
 	expect(removeVoiceChatRole).not.toHaveBeenCalledWith("vcC", "role1");
+	expect(result.redirect).toBe("/signups/roles/by-role/role1");
+});
+
+const resetState = (confirmation: string, scope?: string) =>
+	({
+		params: scope === undefined ? {} : { scope },
+		queryParams: new URLSearchParams(),
+		timestamp: 0,
+		fields: { getTextInputValue: () => confirmation },
+	}) as unknown as Parameters<typeof signupsResetPost>[2];
+
+test("a signups reset clears only this guild's signups", async () => {
+	vi.mocked(getUserVoiceChatSignups).mockResolvedValue(["vc1", "elsewhere"]);
+	vi.mocked(removeVoiceChatUser).mockResolvedValue(true);
+
+	const result = await signupsResetPost(
+		undefined as never,
+		makeInteraction(false),
+		resetState("RESET"),
+	);
+
+	expect(removeVoiceChatUser).toHaveBeenCalledExactlyOnceWith("vc1", "caller");
+	expect(flashOf(result).get("level")).toBe("success");
+});
+
+test("a signups reset without matching confirmation mutates nothing", async () => {
+	vi.mocked(getUserVoiceChatSignups).mockResolvedValue(["vc1"]);
+
+	const result = await signupsResetPost(
+		undefined as never,
+		makeInteraction(false),
+		resetState("nope"),
+	);
+
+	expect(removeVoiceChatUser).not.toHaveBeenCalled();
+	expect(flashOf(result).get("level")).toBe("warn");
+	expect(flashOf(result).get("flash")).toContain("did not match");
+});
+
+test("a channel-roles reset clears every role pinged in the channel", async () => {
+	vi.mocked(getVoiceChatSignups).mockResolvedValue({
+		userIds: [],
+		roleIds: ["r1", "r2"],
+	});
+
+	const result = await rolesByChannelResetPost(
+		undefined as never,
+		makeInteraction(true),
+		resetState("RESET", "vc1"),
+	);
+
+	expect(removeVoiceChatRole).toHaveBeenCalledWith("vc1", "r1");
+	expect(removeVoiceChatRole).toHaveBeenCalledWith("vc1", "r2");
+	expect(result.redirect).toBe("/signups/roles/by-channel/vc1");
+});
+
+test("a role-signups reset without Manage Roles mutates nothing", async () => {
+	const result = await rolesByRoleResetPost(
+		undefined as never,
+		makeInteraction(false),
+		resetState("RESET", "role1"),
+	);
+
+	expect(removeVoiceChatRole).not.toHaveBeenCalled();
+	expect(flashOf(result).get("flash")).toContain("Manage Roles");
+});
+
+test("a role-channels reset clears every channel the role is signed up for", async () => {
+	vi.mocked(getVoiceChatRoleSignups).mockResolvedValue([
+		{ roleId: "role1", channelId: "vcA" },
+		{ roleId: "other", channelId: "vcC" },
+	]);
+
+	const result = await rolesByRoleResetPost(
+		undefined as never,
+		makeInteraction(true),
+		resetState("RESET", "role1"),
+	);
+
+	expect(removeVoiceChatRole).toHaveBeenCalledExactlyOnceWith("vcA", "role1");
+	expect(flashOf(result).get("level")).toBe("success");
 	expect(result.redirect).toBe("/signups/roles/by-role/role1");
 });

@@ -27,10 +27,16 @@ import { ringUserPost } from "./ring/user/post";
 import { ringUsersPost } from "./ring/users/post";
 import { signupsGet } from "./signups/get";
 import { signupsMembersPost } from "./signups/members/post";
+import { signupsResetModal } from "./signups/reset/modal";
+import { signupsResetPost } from "./signups/reset/post";
 import { rolesByChannelGet } from "./signups/roles/by-channel/get";
+import { rolesByChannelResetModal } from "./signups/roles/by-channel/reset/modal";
+import { rolesByChannelResetPost } from "./signups/roles/by-channel/reset/post";
 import { rolesByChannelEditPost } from "./signups/roles/by-channel/roles/post";
 import { rolesByRoleEditPost } from "./signups/roles/by-role/channels/post";
 import { rolesByRoleGet } from "./signups/roles/by-role/get";
+import { rolesByRoleResetModal } from "./signups/roles/by-role/reset/modal";
+import { rolesByRoleResetPost } from "./signups/roles/by-role/reset/post";
 import { rolesGet } from "./signups/roles/get";
 
 // handlers live in files mirroring their route: the folder is the path (with
@@ -68,6 +74,10 @@ export const registerRoutes = (router: RingRouter) => {
 
 	router.get("/signups", signupsGet);
 	router.post("/signups/members", signupsMembersPost);
+	router.route("/signups/reset", {
+		modal: signupsResetModal,
+		post: signupsResetPost,
+	});
 
 	// role signups open on a neutral view offering a channel select and a role
 	// select; picking either sets the orientation and routes to its scoped view.
@@ -78,8 +88,16 @@ export const registerRoutes = (router: RingRouter) => {
 	);
 	router.get("/signups/roles/by-channel/:scope", rolesByChannelGet);
 	router.post("/signups/roles/by-channel/:scope/roles", rolesByChannelEditPost);
+	router.route("/signups/roles/by-channel/:scope/reset", {
+		modal: rolesByChannelResetModal,
+		post: rolesByChannelResetPost,
+	});
 	router.get("/signups/roles/by-role/:scope", rolesByRoleGet);
 	router.post("/signups/roles/by-role/:scope/channels", rolesByRoleEditPost);
+	router.route("/signups/roles/by-role/:scope/reset", {
+		modal: rolesByRoleResetModal,
+		post: rolesByRoleResetPost,
+	});
 
 	router.get("/ring", ringGet);
 	router.post("/ring/users", ringUsersPost);

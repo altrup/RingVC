@@ -1,4 +1,4 @@
-import { navBar, paginationRows, row } from "@routes/lib/components";
+import { navBar, pagedControls, showOptionsOf } from "@routes/lib/components";
 import { withFlash } from "@routes/lib/flash";
 import {
 	pagedCountLine,
@@ -76,7 +76,7 @@ export const filterGet: Handler<"GET"> = async (router, interaction, state) => {
 		)
 		.toJSON();
 
-	const filterActions = row(
+	const filterOptions = [
 		new RouteButtonBuilder(router)
 			.setLabel(
 				type === "blacklist" ? "Switch to Whitelist" : "Switch to Blacklist",
@@ -90,7 +90,7 @@ export const filterGet: Handler<"GET"> = async (router, interaction, state) => {
 			.setLabel("Reset")
 			.setStyle(ButtonStyle.Danger)
 			.setTo(`${panelPath(scope)}/reset`, { method: "MODAL" }),
-	);
+	];
 
 	return {
 		embeds: [
@@ -102,13 +102,17 @@ export const filterGet: Handler<"GET"> = async (router, interaction, state) => {
 				.setDescription(description),
 		],
 		// top to bottom within the page: the scope select leads as context, then
-		// the member list with its pager and the filter-wide actions; the section
-		// bar is the global nav pinned at the bottom
+		// the member list and its control row (pager or the filter-wide options);
+		// the section bar is the global nav pinned at the bottom
 		components: [
 			scopeSelect,
 			editSelect,
-			...paginationRows(router, panelPath(scope), { page, pageCount }),
-			filterActions,
+			...pagedControls(router, panelPath(scope), {
+				page,
+				pageCount,
+				showOptions: showOptionsOf(state.queryParams),
+				options: filterOptions,
+			}),
 			navBar(router, interaction, { active: "filters" }),
 		],
 	};

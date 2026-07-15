@@ -126,14 +126,36 @@ export const subNav = (
 		),
 	);
 
-// the conditional pagination row: absent for single-page lists, so the
-// result is spread into a components array
-export const paginationRows = (
+// a paged panel's control row: the page controls with a switch into the
+// panel's option buttons (reset and friends), or the options with the way
+// back, keyed by the `options` query param. A single-page list has no pager
+// to share the row with, so its options show directly; a panel with no
+// options and one page contributes no row, so the result is spread into a
+// components array
+export const pagedControls = (
 	router: RingRouter,
 	basePath: string,
-	{ page, pageCount }: Pick<Page, "page" | "pageCount">,
+	{
+		page,
+		pageCount,
+		showOptions,
+		options,
+	}: Pick<Page, "page" | "pageCount"> & {
+		showOptions: boolean;
+		options: RingButton[];
+	},
 ): APIActionRowComponent<APIComponentInMessageActionRow>[] => {
-	if (pageCount <= 1) return [];
+	if (pageCount <= 1) return options.length > 0 ? [row(...options)] : [];
+	if (showOptions && options.length > 0)
+		return [
+			row(
+				new RouteButtonBuilder(router)
+					.setLabel("◀ Back")
+					.setStyle(ButtonStyle.Secondary)
+					.setTo(basePath, { queryParams: { page: String(page) } }),
+				...options,
+			),
+		];
 	const pageButton = (label: string, target: number, disabled: boolean) =>
 		new RouteButtonBuilder(router)
 			.setLabel(label)
@@ -157,6 +179,20 @@ export const paginationRows = (
 					},
 				}),
 			pageButton("Next ▶", page + 1, page === pageCount - 1),
+			...(options.length > 0
+				? [
+						new RouteButtonBuilder(router)
+							.setLabel("⚙ Options")
+							.setStyle(ButtonStyle.Secondary)
+							.setTo(basePath, {
+								queryParams: { page: String(page), options: "1" },
+							}),
+					]
+				: []),
 		),
 	];
 };
+
+// reads the `options` query param pagedControls' switch buttons carry
+export const showOptionsOf = (queryParams: URLSearchParams): boolean =>
+	queryParams.get("options") === "1";

@@ -6,7 +6,11 @@ import {
 	subNav,
 } from "@routes/lib/components";
 import { withFlash } from "@routes/lib/flash";
-import { paginate, SELECT_MAX_VALUES } from "@routes/lib/paging";
+import {
+	pagedCountLine,
+	paginate,
+	SELECT_MAX_VALUES,
+} from "@routes/lib/paging";
 import { Handler } from "@routes/types";
 import { RouteChannelSelectMenuBuilder } from "discord-embed-router";
 import { ActionRowBuilder, ChannelType, EmbedBuilder } from "discord.js";
@@ -16,7 +20,6 @@ import {
 	COLOR,
 	guildOnlyRender,
 	guildSignups,
-	mentionChannel,
 	PANEL,
 	ROLES,
 } from "./_shared";
@@ -36,12 +39,10 @@ export const signupsGet: Handler<"GET"> = async (
 		state.queryParams.get("page"),
 	);
 
-	const channelList =
-		pageItems.length > 0 ? pageItems.map(mentionChannel).join(" ") : "None";
 	const description = withFlash(
 		state.queryParams,
-		"You get rung when someone starts a call in one of these channels.\n\n" +
-			`**Signups${pageCount > 1 ? ` (page ${page + 1} of ${pageCount})` : ""}** · ${channelList}`,
+		"You get rung when someone starts a call in one of your signed-up channels. Edit them below.\n\n" +
+			pagedCountLine("Signups", signups.length, pageCount),
 	);
 
 	return {

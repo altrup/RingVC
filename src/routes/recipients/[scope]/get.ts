@@ -1,7 +1,11 @@
 import { navBar, row, subNav } from "@routes/lib/components";
 import { withFlash } from "@routes/lib/flash";
 import { commandMention } from "@routes/lib/mentions";
-import { paginate, SELECT_MAX_VALUES } from "@routes/lib/paging";
+import {
+	pagedCountLine,
+	paginate,
+	SELECT_MAX_VALUES,
+} from "@routes/lib/paging";
 import { channelIdOf, scopeOf } from "@routes/lib/scope";
 import { Handler } from "@routes/types";
 import {
@@ -18,7 +22,6 @@ import {
 
 import { getAutoRingSetting } from "@db/auto-ring";
 import { getDefaultRingees } from "@db/default-ringees";
-import { mentionUser } from "@main/ring";
 
 import { panelPath } from "../_shared";
 
@@ -67,13 +70,11 @@ export const recipientsGet: Handler<"GET"> = async (
 				? `${autoRing.override ? "On" : "Off"} for <#${channelId}> (global: ${autoRing.global ? "on" : "off"})`
 				: `${autoRing.effective ? "On" : "Off"} (from your global setting)`;
 
-	const memberList =
-		pageItems.length > 0 ? pageItems.map(mentionUser).join(" ") : "None";
 	const description = withFlash(
 		state.queryParams,
 		`These people get rung when you use ${commandMention(state.globals, "ring_defaults")}${channelId ? ` in <#${channelId}>` : ""}, or on every voice channel join if auto-ring is on.\n\n` +
 			`**Auto-ring** · ${autoRingValue}\n` +
-			`**Ringees${pageCount > 1 ? ` (page ${page + 1} of ${pageCount})` : ""}** · ${memberList}`,
+			pagedCountLine("Ringees", sorted.length, pageCount),
 	);
 
 	const scopeSelect = new ActionRowBuilder<RouteChannelSelectMenuBuilder>()

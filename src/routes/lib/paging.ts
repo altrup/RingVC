@@ -10,6 +10,16 @@ export type Page = {
 	pageCount: number;
 };
 
+// the "**Label** · 23 across 3 pages" line paged panels show instead of
+// repeating the entries the select below already displays as its selection;
+// the pager button carries which page is being viewed
+export const pagedCountLine = (
+	label: string,
+	total: number,
+	pageCount: number,
+): string =>
+	`**${label}** · ${total > 0 ? total : "None"}${pageCount > 1 ? ` across ${pageCount} pages` : ""}`;
+
 // slices one select-menu page out of a list. The last page is always
 // partial (a length that is an exact multiple of PAGE_SIZE gets a trailing
 // empty page), so adding stays possible even when every existing page is

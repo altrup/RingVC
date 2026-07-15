@@ -20,7 +20,6 @@ import {
 	canManageRoleSignups,
 	guildOnlyRender,
 	guildVoiceChannelIds,
-	mentionChannel,
 	noPermissionRender,
 } from "../../_shared";
 import { rolesGet } from "../get";
@@ -86,8 +85,7 @@ export const rolesByRoleGet: Handler<"GET"> = async (
 		scope,
 		scopeMention: mentionRole,
 		linkedLabel: "Signed up for",
-		linkedItems: pageItems,
-		itemMention: mentionChannel,
+		linkedCount: channelIds.length,
 		scopeSelectRow,
 		editSelectRow,
 		basePath: `${BY_ROLE}/${scope}`,

@@ -8,7 +8,6 @@ import {
 import { ActionRowBuilder, ChannelType } from "discord.js";
 
 import { getVoiceChatSignups } from "@db/voice-chats";
-import { mentionRole } from "@main/ring";
 
 import {
 	BY_CHANNEL,
@@ -81,8 +80,7 @@ export const rolesByChannelGet: Handler<"GET"> = async (
 		scope,
 		scopeMention: mentionChannel,
 		linkedLabel: "Roles pinged here",
-		linkedItems: pageItems,
-		itemMention: mentionRole,
+		linkedCount: roleIds.length,
 		scopeSelectRow,
 		editSelectRow,
 		basePath: `${BY_CHANNEL}/${scope}`,

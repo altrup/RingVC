@@ -1,6 +1,6 @@
 import { navBar, paginationRows, subNav } from "@routes/lib/components";
 import { flashRedirect, withFlash } from "@routes/lib/flash";
-import { Page, withPageLabel } from "@routes/lib/paging";
+import { Page, pagedCountLine, withPageLabel } from "@routes/lib/paging";
 import { RingRouter } from "@routes/types";
 import { RouteRedirect } from "discord-embed-router";
 import {
@@ -170,8 +170,7 @@ export const renderRoleScope = ({
 	scope,
 	scopeMention,
 	linkedLabel,
-	linkedItems,
-	itemMention,
+	linkedCount,
 	scopeSelectRow,
 	editSelectRow,
 	basePath,
@@ -184,17 +183,14 @@ export const renderRoleScope = ({
 	scope: string;
 	scopeMention: (id: string) => string;
 	linkedLabel: string;
-	linkedItems: string[];
-	itemMention: (id: string) => string;
+	linkedCount: number;
 	scopeSelectRow: APIActionRowComponent<APIComponentInMessageActionRow>;
 	editSelectRow: APIActionRowComponent<APIComponentInMessageActionRow>;
 	basePath: string;
 } & Pick<Page, "page" | "pageCount">) => {
-	const linkedList =
-		linkedItems.length > 0 ? linkedItems.map(itemMention).join(" ") : "None";
 	const body =
 		`${LEAD}\n\n**Viewing** ${scopeMention(scope)}\n` +
-		`**${linkedLabel}${pageCount > 1 ? ` (page ${page + 1} of ${pageCount})` : ""}** · ${linkedList}`;
+		pagedCountLine(linkedLabel, linkedCount, pageCount);
 	return roleFrame({
 		router,
 		interaction,

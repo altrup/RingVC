@@ -1,6 +1,10 @@
 import { navBar, paginationRows, row } from "@routes/lib/components";
 import { withFlash } from "@routes/lib/flash";
-import { paginate, SELECT_MAX_VALUES } from "@routes/lib/paging";
+import {
+	pagedCountLine,
+	paginate,
+	SELECT_MAX_VALUES,
+} from "@routes/lib/paging";
 import { channelIdOf, scopeName, scopeOf } from "@routes/lib/scope";
 import { Handler } from "@routes/types";
 import {
@@ -16,7 +20,6 @@ import {
 } from "discord.js";
 
 import { filterType, getFilter } from "@db/filters";
-import { mentionUser } from "@main/ring";
 
 import { panelPath } from "../_shared";
 
@@ -33,15 +36,13 @@ export const filterGet: Handler<"GET"> = async (router, interaction, state) => {
 		state.queryParams.get("page"),
 	);
 
-	const memberList =
-		pageItems.length > 0 ? pageItems.map(mentionUser).join(" ") : "None";
 	const description = withFlash(
 		state.queryParams,
 		`${scopeName(scope, "filter", { capitalize: true })} is a **${type}**.\n` +
 			(type === "whitelist"
-				? "Only the people listed here can ring you, and you only ring them."
-				: "The people listed here can't ring you, and you won't ring them.") +
-			`\n\n**Members${pageCount > 1 ? ` (page ${page + 1} of ${pageCount})` : ""}** · ${memberList}`,
+				? "Only the people listed below can ring you, and you only ring them."
+				: "The people listed below can't ring you, and you won't ring them.") +
+			`\n\n${pagedCountLine("Members", entries.length, pageCount)}`,
 	);
 
 	const scopeSelect = new ActionRowBuilder<RouteChannelSelectMenuBuilder>()

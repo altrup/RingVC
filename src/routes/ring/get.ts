@@ -9,7 +9,6 @@ import {
 import { ActionRowBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 
 import { getAllDefaultRingees } from "@db/default-ringees";
-import { joinWithAnd, mentionUser } from "@main/ring";
 
 import { NOT_IN_VC, PANEL, voiceChannelOf } from "./_shared";
 
@@ -41,7 +40,7 @@ export const ringGet: Handler<"GET"> = async (router, interaction, state) => {
 	const description = withFlash(
 		state.queryParams,
 		`Ringing people in <#${channel.id}>.\n\n` +
-			`**Your defaults** · ${defaults.length > 0 ? joinWithAnd(defaults.map(mentionUser)) : "None"}`,
+			`**Your defaults** · ${defaults.length > 0 ? defaults.length : "None"}`,
 	);
 
 	return {

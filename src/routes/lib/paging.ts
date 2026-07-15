@@ -21,17 +21,19 @@ export const pagedCountLine = (
 ): string =>
 	`**${label}** · ${total > 0 ? total : "None"}${pageCount > 1 ? ` across ${pageCount} pages` : ""}`;
 
-// query params for a paged edit select's POST pattern. The ts nonce gives
-// every render a fresh customId: the Discord client keeps a select's
+// setPattern options for a paged edit select's POST. The per-render key
+// gives every render a fresh customId: the Discord client keeps a select's
 // in-flight selection when a message edit leaves the component unchanged,
-// so without it a submission's picks stay visibly selected instead of
-// resetting to the page's default values
-export const pagedEditParams = (
+// so without it a submission's picks would stay visibly selected instead
+// of resetting to the page's default values
+export const pagedEditPattern = (
 	page: number,
 	timestamp: number,
-): Record<string, string> => ({
-	page: String(page),
-	ts: String(timestamp),
+): { method: "POST"; queryParams: Record<string, string>; key: string } => ({
+	method: "POST",
+	queryParams: { page: String(page) },
+	// base36 for compactness; the key only needs to differ between renders
+	key: timestamp.toString(36),
 });
 
 // slices one select-menu page out of a list. The last page is always

@@ -8,7 +8,7 @@ import { withFlash } from "@routes/lib/flash";
 import { commandMention } from "@routes/lib/mentions";
 import {
 	pagedCountLine,
-	pagedEditParams,
+	pagedEditPattern,
 	paginate,
 	SELECT_MAX_VALUES,
 } from "@routes/lib/paging";
@@ -106,10 +106,10 @@ export const recipientsGet: Handler<"GET"> = async (
 				.setMaxValues(SELECT_MAX_VALUES)
 				.setPlaceholder("Edit ringees: select to add, deselect to remove")
 				.setDefaultUsers(...pageItems)
-				.setPattern(`${panelPath(scope)}/members`, {
-					method: "POST",
-					queryParams: pagedEditParams(page, state.timestamp),
-				}),
+				.setPattern(
+					`${panelPath(scope)}/members`,
+					pagedEditPattern(page, state.timestamp),
+				),
 		)
 		.toJSON();
 

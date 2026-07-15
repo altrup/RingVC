@@ -7,7 +7,7 @@ import {
 import { withFlash } from "@routes/lib/flash";
 import {
 	pagedCountLine,
-	pagedEditParams,
+	pagedEditPattern,
 	paginate,
 	SELECT_MAX_VALUES,
 } from "@routes/lib/paging";
@@ -68,10 +68,10 @@ export const signupsGet: Handler<"GET"> = async (
 						.setMaxValues(SELECT_MAX_VALUES)
 						.setPlaceholder("Edit signups: select to add, deselect to remove")
 						.setDefaultChannels(...pageItems)
-						.setPattern(`${PANEL}/members`, {
-							method: "POST",
-							queryParams: pagedEditParams(page, state.timestamp),
-						}),
+						.setPattern(
+							`${PANEL}/members`,
+							pagedEditPattern(page, state.timestamp),
+						),
 				)
 				.toJSON(),
 			...pagedControls(router, PANEL, {

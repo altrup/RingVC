@@ -2,7 +2,7 @@ import { navBar, pagedControls, showOptionsOf } from "@routes/lib/components";
 import { withFlash } from "@routes/lib/flash";
 import {
 	pagedCountLine,
-	pagedEditParams,
+	pagedEditPattern,
 	paginate,
 	SELECT_MAX_VALUES,
 } from "@routes/lib/paging";
@@ -69,10 +69,10 @@ export const filterGet: Handler<"GET"> = async (router, interaction, state) => {
 				.setMaxValues(SELECT_MAX_VALUES)
 				.setPlaceholder("Edit members: select to add, deselect to remove")
 				.setDefaultUsers(...pageItems)
-				.setPattern(`${panelPath(scope)}/members`, {
-					method: "POST",
-					queryParams: pagedEditParams(page, state.timestamp),
-				}),
+				.setPattern(
+					`${panelPath(scope)}/members`,
+					pagedEditPattern(page, state.timestamp),
+				),
 		)
 		.toJSON();
 

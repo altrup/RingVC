@@ -1,7 +1,7 @@
 import { pagedControls, showOptionsOf } from "@routes/lib/components";
 import {
 	pagedCountLine,
-	pagedEditParams,
+	pagedEditPattern,
 	paginate,
 	SELECT_MAX_VALUES,
 } from "@routes/lib/paging";
@@ -72,10 +72,10 @@ export const rolesByChannelGet: Handler<"GET"> = async (
 				.setMaxValues(SELECT_MAX_VALUES)
 				.setPlaceholder("Edit roles: select to add, deselect to remove")
 				.setDefaultRoles(...pageItems)
-				.setPattern(`${BY_CHANNEL}/${scope}/roles`, {
-					method: "POST",
-					queryParams: pagedEditParams(page, state.timestamp),
-				}),
+				.setPattern(
+					`${BY_CHANNEL}/${scope}/roles`,
+					pagedEditPattern(page, state.timestamp),
+				),
 		)
 		.toJSON();
 

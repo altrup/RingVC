@@ -1,7 +1,7 @@
 import { pagedControls, showOptionsOf } from "@routes/lib/components";
 import {
 	pagedCountLine,
-	pagedEditParams,
+	pagedEditPattern,
 	paginate,
 	SELECT_MAX_VALUES,
 } from "@routes/lib/paging";
@@ -77,10 +77,10 @@ export const rolesByRoleGet: Handler<"GET"> = async (
 					"Edit voice channels: select to add, deselect to remove",
 				)
 				.setDefaultChannels(...pageItems)
-				.setPattern(`${BY_ROLE}/${scope}/channels`, {
-					method: "POST",
-					queryParams: pagedEditParams(page, state.timestamp),
-				}),
+				.setPattern(
+					`${BY_ROLE}/${scope}/channels`,
+					pagedEditPattern(page, state.timestamp),
+				),
 		)
 		.toJSON();
 

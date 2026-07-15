@@ -45,7 +45,7 @@ export type Section =
 	| "filters"
 	| "ringees"
 	| "mode"
-	| "commands"
+	| "help"
 	| "about"
 	| "delete";
 
@@ -59,7 +59,7 @@ const SECTIONS: readonly Tab[] = [
 	{ section: "filters", label: "🛡️ Filters", path: "/filter/global" },
 	{ section: "ringees", label: "📣 Ring", path: "/recipients/global" },
 	{ section: "mode", label: "💤 Mode", path: "/mode" },
-	{ section: "commands", label: "📖 Commands", path: "/commands" },
+	{ section: "help", label: "📖 Help", path: "/help" },
 	{ section: "about", label: "ℹ️ About", path: "/about" },
 	{ section: "delete", label: "🗑️ Delete data", path: "/delete-data" },
 ];

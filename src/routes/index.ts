@@ -1,7 +1,8 @@
 import { RingRouter } from "@routes/types";
 
 import { aboutGet } from "./about/get";
-import { commandsGet } from "./commands/get";
+import { helpGet } from "./help/get";
+import { catalogGet } from "./help/catalog/get";
 import { deleteDataGet } from "./delete-data/get";
 import { deleteDataModal } from "./delete-data/modal";
 import { deleteDataPost } from "./delete-data/post";
@@ -34,7 +35,8 @@ import { rolesByRoleGet } from "./signups/roles/by-role/get";
 // [param] segments) and the file is the method
 export const registerRoutes = (router: RingRouter) => {
 	router.get("/", homeGet);
-	router.get("/commands", commandsGet);
+	router.get("/help", helpGet);
+	router.get("/help/catalog", catalogGet);
 	router.get("/about", aboutGet);
 
 	// scoped panels answer their bare path as the global scope, so their

@@ -6,9 +6,9 @@ import { EmbedBuilder } from "discord.js";
 
 import { CommandName } from "@commands/commandNames";
 
-const COLOR = "#6197cd";
+import { COLOR, helpSubNav } from "../_shared";
 
-export const commandsGet: Handler<"GET"> = (router, interaction, state) => {
+export const catalogGet: Handler<"GET"> = (router, interaction, state) => {
 	const mention = (name: CommandName) => commandMention(state.globals, name);
 	const quickActions: [CommandName, string][] = [
 		["signup", "sign up for a voice channel (bare, in a VC's text chat)"],
@@ -25,7 +25,8 @@ export const commandsGet: Handler<"GET"> = (router, interaction, state) => {
 	];
 	const panels: [CommandName, string][] = [
 		["ringvc", "the home panel"],
-		["help", "this help page"],
+		["help", "getting started"],
+		["catalog", "this command catalog"],
 		["signup", "your signups panel (bare, outside a voice channel)"],
 		["filter", "your filter panel"],
 		["default_ring_recipients", "ring recipients and auto-ring panel"],
@@ -38,8 +39,7 @@ export const commandsGet: Handler<"GET"> = (router, interaction, state) => {
 
 	const description = withFlash(
 		state.queryParams,
-		"Sign up for a voice channel to get pinged when someone starts a call " +
-			"there. Run a command below, or use the section menu to open any panel." +
+		"Every RingVC command. Run one below, or use the section menu to open any panel." +
 			`\n\n**Quick actions**\n${list(quickActions)}\n\n` +
 			`**Panel openers**\n${list(panels)}`,
 	);
@@ -48,9 +48,12 @@ export const commandsGet: Handler<"GET"> = (router, interaction, state) => {
 		embeds: [
 			new EmbedBuilder()
 				.setColor(COLOR)
-				.setTitle("📖 Commands")
+				.setTitle("📖 Catalog")
 				.setDescription(description),
 		],
-		components: [navBar(router, interaction, { active: "commands" })],
+		components: [
+			helpSubNav(router, "catalog"),
+			navBar(router, interaction, { active: "help" }),
+		],
 	};
 };

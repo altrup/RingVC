@@ -10,7 +10,7 @@ export const help = {
 		.setName("help")
 		.setDescription("Getting started and the full command list"),
 	async execute(router: RingRouter, interaction: ChatInputCommandInteraction) {
-		await router.dispatch(interaction, "/commands", {
+		await router.dispatch(interaction, "/help", {
 			flags: [MessageFlags.Ephemeral],
 		});
 	},

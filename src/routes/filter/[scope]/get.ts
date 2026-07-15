@@ -44,6 +44,52 @@ export const filterGet: Handler<"GET"> = async (router, interaction, state) => {
 			`\n\n**Members${pageCount > 1 ? ` (page ${page + 1} of ${pageCount})` : ""}** · ${memberList}`,
 	);
 
+	const scopeSelect = new ActionRowBuilder<RouteChannelSelectMenuBuilder>()
+		.addComponents(
+			new RouteChannelSelectMenuBuilder(router)
+				.setChannelTypes(ChannelType.GuildVoice)
+				.setMinValues(0)
+				.setMaxValues(1)
+				.setPlaceholder(
+					channelId
+						? "Viewing a channel filter (clear for global)"
+						: "View a voice channel's filter",
+				)
+				.setDefaultChannels(...(channelId ? [channelId] : []))
+				.setPattern("/filter{/:channelId}"),
+		)
+		.toJSON();
+
+	const editSelect = new ActionRowBuilder<RouteUserSelectMenuBuilder>()
+		.addComponents(
+			new RouteUserSelectMenuBuilder(router)
+				.setMinValues(0)
+				.setMaxValues(PAGE_SIZE)
+				.setPlaceholder("Edit members: select to add, deselect to remove")
+				.setDefaultUsers(...pageItems)
+				.setPattern(`${panelPath(scope)}/members`, {
+					method: "POST",
+					queryParams: { page: String(page) },
+				}),
+		)
+		.toJSON();
+
+	const filterActions = row(
+		new RouteButtonBuilder(router)
+			.setLabel(
+				type === "blacklist" ? "Switch to Whitelist" : "Switch to Blacklist",
+			)
+			.setStyle(ButtonStyle.Primary)
+			.setTo(`${panelPath(scope)}/type`, {
+				method: "POST",
+				queryParams: { to: type === "blacklist" ? "whitelist" : "blacklist" },
+			}),
+		new RouteButtonBuilder(router)
+			.setLabel("Reset")
+			.setStyle(ButtonStyle.Danger)
+			.setTo(`${panelPath(scope)}/reset`, { method: "MODAL" }),
+	);
+
 	return {
 		embeds: [
 			new EmbedBuilder()
@@ -53,56 +99,15 @@ export const filterGet: Handler<"GET"> = async (router, interaction, state) => {
 				)
 				.setDescription(description),
 		],
+		// top to bottom within the page: the scope select leads as context, then
+		// the member list with its pager and the filter-wide actions; the section
+		// bar is the global nav pinned at the bottom
 		components: [
-			new ActionRowBuilder<RouteChannelSelectMenuBuilder>()
-				.addComponents(
-					new RouteChannelSelectMenuBuilder(router)
-						.setChannelTypes(ChannelType.GuildVoice)
-						.setMinValues(0)
-						.setMaxValues(1)
-						.setPlaceholder(
-							channelId
-								? "Viewing a channel filter (clear for global)"
-								: "View a voice channel's filter",
-						)
-						.setDefaultChannels(...(channelId ? [channelId] : []))
-						.setPattern("/filter{/:channelId}"),
-				)
-				.toJSON(),
-			new ActionRowBuilder<RouteUserSelectMenuBuilder>()
-				.addComponents(
-					new RouteUserSelectMenuBuilder(router)
-						.setMinValues(0)
-						.setMaxValues(PAGE_SIZE)
-						.setPlaceholder("Edit members: select to add, deselect to remove")
-						.setDefaultUsers(...pageItems)
-						.setPattern(`${panelPath(scope)}/members`, {
-							method: "POST",
-							queryParams: { page: String(page) },
-						}),
-				)
-				.toJSON(),
-			row(
-				new RouteButtonBuilder(router)
-					.setLabel(
-						type === "blacklist"
-							? "Switch to Whitelist"
-							: "Switch to Blacklist",
-					)
-					.setStyle(ButtonStyle.Primary)
-					.setTo(`${panelPath(scope)}/type`, {
-						method: "POST",
-						queryParams: {
-							to: type === "blacklist" ? "whitelist" : "blacklist",
-						},
-					}),
-				new RouteButtonBuilder(router)
-					.setLabel("Reset")
-					.setStyle(ButtonStyle.Danger)
-					.setTo(`${panelPath(scope)}/reset`, { method: "MODAL" }),
-			),
-			navBar(router, interaction, { active: "filters" }),
+			scopeSelect,
+			editSelect,
 			...paginationRows(router, panelPath(scope), { page, pageCount }),
+			filterActions,
+			navBar(router, interaction, { active: "filters" }),
 		],
 	};
 };

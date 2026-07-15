@@ -76,6 +76,74 @@ export const recipientsGet: Handler<"GET"> = async (
 			`**Ringees${pageCount > 1 ? ` (page ${page + 1} of ${pageCount})` : ""}** · ${memberList}`,
 	);
 
+	const scopeSelect = new ActionRowBuilder<RouteChannelSelectMenuBuilder>()
+		.addComponents(
+			new RouteChannelSelectMenuBuilder(router)
+				.setChannelTypes(ChannelType.GuildVoice)
+				.setMinValues(0)
+				.setMaxValues(1)
+				.setPlaceholder(
+					channelId
+						? "Viewing channel ringees (clear for global)"
+						: "View a voice channel's ringees",
+				)
+				.setDefaultChannels(...(channelId ? [channelId] : []))
+				.setPattern("/recipients{/:channelId}"),
+		)
+		.toJSON();
+
+	const editSelect = new ActionRowBuilder<RouteUserSelectMenuBuilder>()
+		.addComponents(
+			new RouteUserSelectMenuBuilder(router)
+				.setMinValues(0)
+				.setMaxValues(PAGE_SIZE)
+				.setPlaceholder("Edit ringees: select to add, deselect to remove")
+				.setDefaultUsers(...pageItems)
+				.setPattern(`${panelPath(scope)}/members`, {
+					method: "POST",
+					queryParams: { page: String(page) },
+				}),
+		)
+		.toJSON();
+
+	const ringActions = row(
+		// prev/next page the recipient list inline, so this dense panel
+		// spends no separate row on pagination
+		...(page > 0
+			? [
+					new RouteButtonBuilder(router)
+						.setLabel("◀")
+						.setStyle(ButtonStyle.Secondary)
+						.setTo(panelPath(scope), {
+							queryParams: { page: String(page - 1) },
+						}),
+				]
+			: []),
+		new RouteButtonBuilder(router)
+			.setLabel(autoRing.effective ? "Disable auto-ring" : "Enable auto-ring")
+			.setStyle(
+				autoRing.effective ? ButtonStyle.Secondary : ButtonStyle.Success,
+			)
+			.setTo(`${panelPath(scope)}/auto-ring`, {
+				method: "POST",
+				queryParams: { enable: autoRing.effective ? "0" : "1" },
+			}),
+		new RouteButtonBuilder(router)
+			.setLabel("Reset")
+			.setStyle(ButtonStyle.Danger)
+			.setTo(`${panelPath(scope)}/reset`, { method: "MODAL" }),
+		...(page < pageCount - 1
+			? [
+					new RouteButtonBuilder(router)
+						.setLabel("▶")
+						.setStyle(ButtonStyle.Secondary)
+						.setTo(panelPath(scope), {
+							queryParams: { page: String(page + 1) },
+						}),
+				]
+			: []),
+	);
+
 	return {
 		embeds: [
 			new EmbedBuilder()
@@ -85,74 +153,13 @@ export const recipientsGet: Handler<"GET"> = async (
 				)
 				.setDescription(description),
 		],
+		// top to bottom within the page: the scope select leads as context, then
+		// the ringee list and the actions (with the inline pager); the sub-nav and
+		// section bar are navigation pinned at the bottom
 		components: [
-			new ActionRowBuilder<RouteChannelSelectMenuBuilder>()
-				.addComponents(
-					new RouteChannelSelectMenuBuilder(router)
-						.setChannelTypes(ChannelType.GuildVoice)
-						.setMinValues(0)
-						.setMaxValues(1)
-						.setPlaceholder(
-							channelId
-								? "Viewing channel ringees (clear for global)"
-								: "View a voice channel's ringees",
-						)
-						.setDefaultChannels(...(channelId ? [channelId] : []))
-						.setPattern("/recipients{/:channelId}"),
-				)
-				.toJSON(),
-			new ActionRowBuilder<RouteUserSelectMenuBuilder>()
-				.addComponents(
-					new RouteUserSelectMenuBuilder(router)
-						.setMinValues(0)
-						.setMaxValues(PAGE_SIZE)
-						.setPlaceholder("Edit ringees: select to add, deselect to remove")
-						.setDefaultUsers(...pageItems)
-						.setPattern(`${panelPath(scope)}/members`, {
-							method: "POST",
-							queryParams: { page: String(page) },
-						}),
-				)
-				.toJSON(),
-			row(
-				// prev/next page the recipient list inline, so this dense panel
-				// spends no separate row on pagination
-				...(page > 0
-					? [
-							new RouteButtonBuilder(router)
-								.setLabel("◀")
-								.setStyle(ButtonStyle.Secondary)
-								.setTo(panelPath(scope), {
-									queryParams: { page: String(page - 1) },
-								}),
-						]
-					: []),
-				new RouteButtonBuilder(router)
-					.setLabel(
-						autoRing.effective ? "Disable auto-ring" : "Enable auto-ring",
-					)
-					.setStyle(
-						autoRing.effective ? ButtonStyle.Secondary : ButtonStyle.Success,
-					)
-					.setTo(`${panelPath(scope)}/auto-ring`, {
-						method: "POST",
-						queryParams: { enable: autoRing.effective ? "0" : "1" },
-					}),
-				new RouteButtonBuilder(router)
-					.setLabel("Reset")
-					.setStyle(ButtonStyle.Danger)
-					.setTo(`${panelPath(scope)}/reset`, { method: "MODAL" }),
-				...(page < pageCount - 1
-					? [
-							new RouteButtonBuilder(router)
-								.setLabel("▶")
-								.setStyle(ButtonStyle.Secondary)
-								.setTo(panelPath(scope), {
-									queryParams: { page: String(page + 1) },
-								}),
-						]
-					: []),
-			),
+			scopeSelect,
+			editSelect,
+			ringActions,
 			subNav(router, [
 				{ label: "Quick ring", path: "/ring" },
 				{ label: "Default ringees", path: panelPath(scope), active: true },

@@ -192,12 +192,12 @@ export const renderRoleScope = ({
 		interaction,
 		queryParams,
 		body,
-		// the scope select sits below its edit list and pager: it is the higher-
-		// level context the items hang off
+		// the scope select leads as the page's context, then its edit list and
+		// pager; the switch and section bar follow in the frame
 		rows: [
+			scopeSelectRow,
 			editSelectRow,
 			...paginationRows(router, basePath, { page, pageCount }),
-			scopeSelectRow,
 		],
 	});
 };

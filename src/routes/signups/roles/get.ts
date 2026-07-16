@@ -45,7 +45,7 @@ export const rolesGet: Handler<"GET"> = async (router, interaction, state) => {
 		router,
 		interaction,
 		queryParams: state.queryParams,
-		body: `${LEAD}\n\nPick a voice channel or a role above to view and edit its signups.`,
+		body: `${LEAD}\n\nPick a voice channel or a role below to view and edit its signups.`,
 		rows: [channelSelectRow, roleSelectRow],
 	});
 };

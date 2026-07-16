@@ -160,10 +160,11 @@ export const subNav = (
 
 // a paged panel's control row: the page controls with a switch into the
 // panel's option buttons (reset and friends), or the options with the way
-// back, keyed by the `options` query param. A single-page list has no pager
-// to share the row with, so its options show directly; a panel with no
-// options and one page contributes no row, so the result is spread into a
-// components array
+// back, keyed by the `options` query param. Options always hide behind the
+// toggle — destructive buttons like Reset stay one deliberate click away —
+// so a single-page list shows just the toggle; a panel with no options and
+// one page contributes no row, so the result is spread into a components
+// array
 export const pagedControls = (
 	router: RingRouter,
 	basePath: string,
@@ -177,11 +178,37 @@ export const pagedControls = (
 		options: RingButton[];
 	},
 ): APIActionRowComponent<APIComponentInMessageActionRow>[] => {
-	if (pageCount <= 1) return options.length > 0 ? [row(...options)] : [];
+	const pageButton = (label: string, target: number, disabled: boolean) =>
+		new RouteButtonBuilder(router)
+			.setLabel(label)
+			.setStyle(ButtonStyle.Secondary)
+			.setDisabled(disabled)
+			.setTo(basePath, { queryParams: { page: String(target) } });
+	const pager =
+		pageCount <= 1
+			? []
+			: [
+					pageButton("◀ Prev", page - 1, page === 0),
+					// the middle button doubles as a page jump: it opens a modal asking
+					// which page to show, which redirects back to basePath
+					new RouteButtonBuilder(router)
+						.setLabel(`Page ${page + 1} of ${pageCount}`)
+						.setStyle(ButtonStyle.Secondary)
+						.setTo(PAGE_JUMP, {
+							method: "MODAL",
+							queryParams: {
+								to: basePath,
+								page: String(page),
+								pageCount: String(pageCount),
+							},
+						}),
+					pageButton("Next ▶", page + 1, page === pageCount - 1),
+				];
+	if (options.length === 0) return pager.length > 0 ? [row(...pager)] : [];
 	// the toggle leads the row in both modes — the leading slot is the only
 	// position variable-width neighbors can't shift; open options lead with
 	// the way back to the page controls
-	if (showOptions && options.length > 0)
+	if (showOptions)
 		return [
 			row(
 				new RouteButtonBuilder(router)
@@ -191,39 +218,15 @@ export const pagedControls = (
 				...options,
 			),
 		];
-	const pageButton = (label: string, target: number, disabled: boolean) =>
-		new RouteButtonBuilder(router)
-			.setLabel(label)
-			.setStyle(ButtonStyle.Secondary)
-			.setDisabled(disabled)
-			.setTo(basePath, { queryParams: { page: String(target) } });
 	return [
 		row(
-			...(options.length > 0
-				? [
-						new RouteButtonBuilder(router)
-							.setLabel("⚙ Options")
-							.setStyle(ButtonStyle.Secondary)
-							.setTo(basePath, {
-								queryParams: { page: String(page), options: "1" },
-							}),
-					]
-				: []),
-			pageButton("◀ Prev", page - 1, page === 0),
-			// the middle button doubles as a page jump: it opens a modal asking
-			// which page to show, which redirects back to basePath
 			new RouteButtonBuilder(router)
-				.setLabel(`Page ${page + 1} of ${pageCount}`)
+				.setLabel("⚙ Options")
 				.setStyle(ButtonStyle.Secondary)
-				.setTo(PAGE_JUMP, {
-					method: "MODAL",
-					queryParams: {
-						to: basePath,
-						page: String(page),
-						pageCount: String(pageCount),
-					},
+				.setTo(basePath, {
+					queryParams: { page: String(page), options: "1" },
 				}),
-			pageButton("Next ▶", page + 1, page === pageCount - 1),
+			...pager,
 		),
 	];
 };

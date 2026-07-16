@@ -46,7 +46,7 @@ export const unsignuprole = {
 			await router.dispatch(
 				interaction,
 				`/signups/roles/by-role/${role.id}/reset`,
-				{ method: "MODAL", flags: [MessageFlags.Ephemeral] },
+				{ method: "MODAL" },
 			);
 	},
 };

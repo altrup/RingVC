@@ -1,5 +1,10 @@
 import { RouteModalBuilder } from "discord-embed-router";
-import { LabelBuilder, TextInputBuilder, TextInputStyle } from "discord.js";
+import {
+	LabelBuilder,
+	MessageFlags,
+	TextInputBuilder,
+	TextInputStyle,
+} from "discord.js";
 
 import { RingModal, RingRouter } from "@routes/types";
 
@@ -10,7 +15,7 @@ export const confirmModal = (
 	{ to, title, word }: { to: string; title: string; word: string },
 ): RingModal =>
 	new RouteModalBuilder(router)
-		.setTo(to, { method: "POST" })
+		.setTo(to, { method: "POST", flags: [MessageFlags.Ephemeral] })
 		.setTitle(title)
 		.addLabelComponents(
 			new LabelBuilder()

@@ -6,10 +6,12 @@ import {
 	getFilter,
 	removeFilterEntry,
 	resetFilter,
+	setFilterType,
 } from "@db/filters";
 
 import { filterMembersPost } from "./[scope]/members/post";
 import { filterResetPost } from "./[scope]/reset/post";
+import { filterTypePost } from "./[scope]/type/post";
 
 vi.mock("@db/filters", async (importOriginal) => ({
 	...(await importOriginal<typeof import("@db/filters")>()),
@@ -38,6 +40,14 @@ const membersPost = (query: string, values?: string[]) =>
 		interaction,
 		membersState(query, values),
 	);
+
+const typePost = (query: string) =>
+	filterTypePost(undefined as never, interaction, {
+		params: { scope: "global" },
+		path: "/filter/global/type",
+		queryParams: new URLSearchParams(query),
+		timestamp: 0,
+	} as unknown as Parameters<typeof filterTypePost>[2]);
 
 const resetPost = (confirmation: string) =>
 	filterResetPost(undefined as never, interaction, {
@@ -111,6 +121,55 @@ test("a filter reset without matching confirmation text mutates nothing", async 
 	);
 	expect(flashParams.get("level")).toBe("warn");
 	expect(flashParams.get("flash")).toContain("did not match");
+});
+
+// entries carry over and reverse meaning on a type switch, so a filter that
+// has any warns instead of confirming
+test("switching a blacklist that has entries sets the type and warns", async () => {
+	vi.mocked(getFilter).mockResolvedValue({
+		isWhitelist: false,
+		entries: new Set(["1", "2"]),
+	});
+
+	const result = await typePost("to=whitelist");
+
+	expect(setFilterType).toHaveBeenCalledExactlyOnceWith("caller", null, true);
+	expect(
+		new URLSearchParams(result.queryParams as Record<string, string>).get(
+			"level",
+		),
+	).toBe("warn");
+});
+
+test("switching a whitelist that has entries sets the type and warns", async () => {
+	vi.mocked(getFilter).mockResolvedValue({
+		isWhitelist: true,
+		entries: new Set(["1"]),
+	});
+
+	const result = await typePost("to=blacklist");
+
+	expect(setFilterType).toHaveBeenCalledExactlyOnceWith("caller", null, false);
+	expect(
+		new URLSearchParams(result.queryParams as Record<string, string>).get(
+			"level",
+		),
+	).toBe("warn");
+});
+
+test("switching a filter with no entries confirms without warning", async () => {
+	vi.mocked(getFilter).mockResolvedValue({
+		isWhitelist: false,
+		entries: new Set(),
+	});
+
+	const result = await typePost("to=whitelist");
+
+	expect(
+		new URLSearchParams(result.queryParams as Record<string, string>).get(
+			"level",
+		),
+	).toBe("success");
 });
 
 test("blocking an already blocked user reports it without a duplicate write", async () => {

@@ -3,6 +3,7 @@ import { expect, test } from "vitest";
 import {
 	diffSelection,
 	PAGE_SIZE,
+	pagedCountLine,
 	paginate,
 	withPageLabel,
 } from "@routes/lib/paging";
@@ -42,6 +43,17 @@ test("a list that is an exact multiple of the page size adds no trailing page", 
 		page: 1,
 		pageCount: 2,
 	});
+});
+
+test("the count line counts only pages that hold entries", () => {
+	expect(pagedCountLine("Signups", 0)).toBe("**Signups** · None");
+	expect(pagedCountLine("Signups", PAGE_SIZE)).toBe(`**Signups** · ${PAGE_SIZE}`);
+	expect(pagedCountLine("Signups", PAGE_SIZE + 1)).toBe(
+		`**Signups** · ${PAGE_SIZE + 1} across 2 pages`,
+	);
+	expect(pagedCountLine("Signups", PAGE_SIZE * 2)).toBe(
+		`**Signups** · ${PAGE_SIZE * 2} across 2 pages`,
+	);
 });
 
 test("a stale page index clamps to the last page", () => {

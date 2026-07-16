@@ -13,13 +13,12 @@ export type Page = {
 
 // the "**Label** · 23 across 3 pages" line paged panels show instead of
 // repeating the entries the select below already displays as its selection;
-// the pager button carries which page is being viewed
-export const pagedCountLine = (
-	label: string,
-	total: number,
-	pageCount: number,
-): string =>
-	`**${label}** · ${total > 0 ? total : "None"}${pageCount > 1 ? ` across ${pageCount} pages` : ""}`;
+// the pager button carries which page is being viewed. Counts only pages
+// that hold entries, so pageCountOf's trailing add page never inflates it
+export const pagedCountLine = (label: string, total: number): string => {
+	const contentPages = Math.ceil(total / PAGE_SIZE);
+	return `**${label}** · ${total > 0 ? total : "None"}${contentPages > 1 ? ` across ${contentPages} pages` : ""}`;
+};
 
 // setPattern options for a paged edit select's POST. The per-render key
 // gives every render a fresh customId: the Discord client keeps a select's

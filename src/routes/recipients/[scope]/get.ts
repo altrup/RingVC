@@ -76,7 +76,7 @@ export const recipientsGet: Handler<"GET"> = async (
 		state.queryParams,
 		`These people get rung when you use ${commandMention(state.globals, "ring_defaults")}${channelId ? ` in <#${channelId}>` : ""}, or on every voice channel join if auto-ring is on.\n\n` +
 			`**Auto-ring** · ${autoRingValue}\n` +
-			pagedCountLine("Ringees", sorted.length, pageCount),
+			pagedCountLine("Ringees", sorted.length),
 	);
 
 	const scopeSelect = new ActionRowBuilder<RouteChannelSelectMenuBuilder>()

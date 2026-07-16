@@ -43,7 +43,7 @@ export const filterGet: Handler<"GET"> = async (router, interaction, state) => {
 			(type === "whitelist"
 				? "Only the people listed below can ring you, and you only ring them."
 				: "The people listed below can't ring you, and you won't ring them.") +
-			`\n\n${pagedCountLine("Members", entries.length, pageCount)}`,
+			`\n\n${pagedCountLine("Members", entries.length)}`,
 	);
 
 	const scopeSelect = new ActionRowBuilder<RouteChannelSelectMenuBuilder>()

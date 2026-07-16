@@ -50,7 +50,7 @@ export const signupsGet: Handler<"GET"> = async (
 	const description = withFlash(
 		state.queryParams,
 		"You get rung when someone starts a call in one of your signed-up channels. Edit them below.\n\n" +
-			pagedCountLine("Signups", signups.length, pageCount),
+			pagedCountLine("Signups", signups.length),
 	);
 
 	return {

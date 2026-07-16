@@ -80,7 +80,7 @@ export const rolesByChannelGet: Handler<"GET"> = async (
 		queryParams: state.queryParams,
 		body:
 			`${LEAD}\n\n**Viewing** ${mentionChannel(scope)}\n` +
-			pagedCountLine("Roles pinged here", roleIds.length, pageCount),
+			pagedCountLine("Roles pinged here", roleIds.length),
 		// the scope select leads as the page's context, then its edit list and
 		// pager; the switch and section bar follow in the frame
 		rows: [

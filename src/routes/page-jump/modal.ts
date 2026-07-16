@@ -1,6 +1,7 @@
-import { Handler } from "@routes/types";
 import { RouteModalBuilder } from "discord-embed-router";
 import { LabelBuilder, TextInputBuilder, TextInputStyle } from "discord.js";
+
+import { Handler } from "@routes/types";
 
 import { PAGE_JUMP } from "./_shared";
 

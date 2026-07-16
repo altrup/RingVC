@@ -1,5 +1,6 @@
-import { flashLine, flashRedirect } from "@routes/lib/flash";
 import { expect, test } from "vitest";
+
+import { flashLine, flashRedirect } from "@routes/lib/flash";
 
 test("flashRedirect carries the flash text and level as redirect query params", () => {
 	expect(

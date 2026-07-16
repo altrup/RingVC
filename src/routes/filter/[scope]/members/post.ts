@@ -1,3 +1,10 @@
+import {
+	addFilterEntry,
+	filterType,
+	getFilter,
+	removeFilterEntry,
+} from "@db/filters";
+import { joinWithAnd, mentionUser } from "@main/ring";
 import { flashRedirect } from "@routes/lib/flash";
 import {
 	paginate,
@@ -6,14 +13,6 @@ import {
 } from "@routes/lib/paging";
 import { channelIdOf, scopeName, scopeOf } from "@routes/lib/scope";
 import { Handler } from "@routes/types";
-
-import {
-	addFilterEntry,
-	filterType,
-	getFilter,
-	removeFilterEntry,
-} from "@db/filters";
-import { joinWithAnd, mentionUser } from "@main/ring";
 
 import { panelPath } from "../../_shared";
 

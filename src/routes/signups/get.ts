@@ -1,4 +1,15 @@
 import {
+	RouteButtonBuilder,
+	RouteChannelSelectMenuBuilder,
+} from "discord-embed-router";
+import {
+	ActionRowBuilder,
+	ButtonStyle,
+	ChannelType,
+	EmbedBuilder,
+} from "discord.js";
+
+import {
 	navBar,
 	pagedControls,
 	showOptionsOf,
@@ -12,16 +23,6 @@ import {
 	SELECT_MAX_VALUES,
 } from "@routes/lib/paging";
 import { Handler } from "@routes/types";
-import {
-	RouteButtonBuilder,
-	RouteChannelSelectMenuBuilder,
-} from "discord-embed-router";
-import {
-	ActionRowBuilder,
-	ButtonStyle,
-	ChannelType,
-	EmbedBuilder,
-} from "discord.js";
 
 import {
 	canManageRoleSignups,

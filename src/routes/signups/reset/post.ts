@@ -1,8 +1,7 @@
+import { removeVoiceChatUser } from "@db/voice-chats";
 import { confirmed } from "@routes/lib/confirm";
 import { flashRedirect } from "@routes/lib/flash";
 import { Handler } from "@routes/types";
-
-import { removeVoiceChatUser } from "@db/voice-chats";
 
 import { guildSignups, PANEL } from "../_shared";
 

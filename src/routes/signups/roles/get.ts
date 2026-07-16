@@ -1,9 +1,10 @@
-import { Handler } from "@routes/types";
 import {
 	RouteChannelSelectMenuBuilder,
 	RouteRoleSelectMenuBuilder,
 } from "discord-embed-router";
 import { ActionRowBuilder, ChannelType } from "discord.js";
+
+import { Handler } from "@routes/types";
 
 import {
 	canManageRoleSignups,

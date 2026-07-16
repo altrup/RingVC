@@ -1,8 +1,7 @@
+import { filterType, getFilter, setFilterType } from "@db/filters";
 import { flashRedirect } from "@routes/lib/flash";
 import { channelIdOf, scopeName, scopeOf } from "@routes/lib/scope";
 import { Handler } from "@routes/types";
-
-import { filterType, getFilter, setFilterType } from "@db/filters";
 
 import { panelPath } from "../../_shared";
 

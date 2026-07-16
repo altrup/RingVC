@@ -1,11 +1,3 @@
-import { buttonEmoji, VC_EMOJI_ID } from "@routes/lib/emoji";
-import {
-	Page,
-	pagedEditPattern,
-	SELECT_MAX_VALUES,
-} from "@routes/lib/paging";
-import { PAGE_JUMP } from "@routes/page-jump/_shared";
-import { RingButton, RingRouter } from "@routes/types";
 import {
 	RouteButtonBuilder,
 	RouteChannelSelectMenuBuilder,
@@ -22,6 +14,11 @@ import {
 	ButtonStyle,
 	Interaction,
 } from "discord.js";
+
+import { buttonEmoji, VC_EMOJI_ID } from "@routes/lib/emoji";
+import { Page, pagedEditPattern, SELECT_MAX_VALUES } from "@routes/lib/paging";
+import { PAGE_JUMP } from "@routes/page-jump/_shared";
+import { RingButton, RingRouter } from "@routes/types";
 
 export const row = (
 	...components: ButtonBuilder[]

@@ -1,10 +1,11 @@
+import { expect, test } from "vitest";
+
 import {
 	diffSelection,
 	PAGE_SIZE,
 	paginate,
 	withPageLabel,
 } from "@routes/lib/paging";
-import { expect, test } from "vitest";
 
 const ids = (count: number, offset = 0) =>
 	Array.from({ length: count }, (_, i) => `${i + offset + 1}`);

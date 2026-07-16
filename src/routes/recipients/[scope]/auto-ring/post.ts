@@ -1,8 +1,7 @@
+import { setAutoRing } from "@db/auto-ring";
 import { flashRedirect } from "@routes/lib/flash";
 import { channelIdOf, scopeOf } from "@routes/lib/scope";
 import { Handler } from "@routes/types";
-
-import { setAutoRing } from "@db/auto-ring";
 
 import { panelPath, scopeSuffix } from "../../_shared";
 

@@ -1,10 +1,10 @@
+import { EmbedBuilder } from "discord.js";
+
+import { CommandName } from "@commands/commandNames";
 import { navBar } from "@routes/lib/components";
 import { withFlash } from "@routes/lib/flash";
 import { commandMention } from "@routes/lib/mentions";
 import { Handler } from "@routes/types";
-import { EmbedBuilder } from "discord.js";
-
-import { CommandName } from "@commands/commandNames";
 
 import { COLOR, helpSubNav } from "../_shared";
 import { canManageRoleSignups } from "../../signups/_shared";

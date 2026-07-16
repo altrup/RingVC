@@ -1,12 +1,11 @@
-import { resolveSelectionEdit } from "@routes/lib/paging";
-import { Handler } from "@routes/types";
-
 import {
 	addVoiceChatRole,
 	getVoiceChatRoleSignups,
 	removeVoiceChatRole,
 } from "@db/voice-chats";
 import { mentionChannel } from "@main/ring";
+import { resolveSelectionEdit } from "@routes/lib/paging";
+import { Handler } from "@routes/types";
 
 import {
 	BY_ROLE,

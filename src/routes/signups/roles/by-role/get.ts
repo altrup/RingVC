@@ -1,11 +1,4 @@
 import {
-	editSelectRow,
-	pagedControls,
-	showOptionsOf,
-} from "@routes/lib/components";
-import { pagedCountLine, paginate } from "@routes/lib/paging";
-import { Handler } from "@routes/types";
-import {
 	RouteButtonBuilder,
 	RouteChannelSelectMenuBuilder,
 	RouteRoleSelectMenuBuilder,
@@ -14,6 +7,13 @@ import { ActionRowBuilder, ButtonStyle, ChannelType } from "discord.js";
 
 import { getVoiceChatRoleSignups } from "@db/voice-chats";
 import { mentionRole } from "@main/ring";
+import {
+	editSelectRow,
+	pagedControls,
+	showOptionsOf,
+} from "@routes/lib/components";
+import { pagedCountLine, paginate } from "@routes/lib/paging";
+import { Handler } from "@routes/types";
 
 import {
 	BY_ROLE,

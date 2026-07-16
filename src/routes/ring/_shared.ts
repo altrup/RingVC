@@ -1,4 +1,3 @@
-import { flashRedirect } from "@routes/lib/flash";
 import { Interaction, VoiceBasedChannel } from "discord.js";
 
 import {
@@ -8,6 +7,7 @@ import {
 	ring,
 	UserRingResult,
 } from "@main/ring";
+import { flashRedirect } from "@routes/lib/flash";
 
 export const PANEL = "/ring";
 export const NOT_IN_VC =

@@ -1,12 +1,11 @@
-import { resolveSelectionEdit } from "@routes/lib/paging";
-import { Handler } from "@routes/types";
-
 import {
 	addVoiceChatRole,
 	getVoiceChatSignups,
 	removeVoiceChatRole,
 } from "@db/voice-chats";
 import { mentionRole } from "@main/ring";
+import { resolveSelectionEdit } from "@routes/lib/paging";
+import { Handler } from "@routes/types";
 
 import {
 	BY_CHANNEL,
@@ -31,7 +30,10 @@ export const rolesByChannelEditPost: Handler<"POST"> = async (
 	const { guild, scope } = guard;
 
 	const query = state.queryParams;
-	const current = sortRoleIds(guild, (await getVoiceChatSignups(scope)).roleIds);
+	const current = sortRoleIds(
+		guild,
+		(await getVoiceChatSignups(scope)).roleIds,
+	);
 
 	const { addsRequested, removesRequested, alreadyPresent } =
 		resolveSelectionEdit({

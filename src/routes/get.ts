@@ -1,8 +1,9 @@
+import { EmbedBuilder } from "discord.js";
+
 import { navBar } from "@routes/lib/components";
 import { emojiIconURL, RINGVC_EMOJI_ID } from "@routes/lib/emoji";
 import { withFlash } from "@routes/lib/flash";
 import { Handler } from "@routes/types";
-import { EmbedBuilder } from "discord.js";
 
 import { COLOR } from "./_shared";
 

@@ -1,4 +1,3 @@
-import { RingRouter } from "@routes/types";
 import { ChatInputCommandInteraction, SharedSlashCommand } from "discord.js";
 
 import { catalog } from "@commands/catalog";
@@ -19,6 +18,7 @@ import { signup } from "@commands/signup";
 import { signuprole } from "@commands/signuprole";
 import { unsignup } from "@commands/unsignup";
 import { unsignuprole } from "@commands/unsignuprole";
+import { RingRouter } from "@routes/types";
 
 // commands are thin adapters: they parse their options and dispatch into
 // the router, where all business rules live

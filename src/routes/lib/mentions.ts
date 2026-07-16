@@ -1,6 +1,5 @@
-import { Globals } from "@routes/types";
-
 import { CommandName } from "@commands/commandNames";
+import { Globals } from "@routes/types";
 
 // a clickable command mention when the deployed id is known, plain text
 // otherwise (ids are fetched after the client is ready, so early

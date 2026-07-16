@@ -1,8 +1,7 @@
+import { deleteAllUserData } from "@db/users";
 import { confirmed } from "@routes/lib/confirm";
 import { flashRedirect } from "@routes/lib/flash";
 import { Handler } from "@routes/types";
-
-import { deleteAllUserData } from "@db/users";
 
 import { CONFIRMATION, PANEL } from "./_shared";
 

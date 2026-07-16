@@ -1,3 +1,5 @@
+import { addVoiceChatUser, removeVoiceChatUser } from "@db/voice-chats";
+import { joinWithAnd, mentionChannel } from "@main/ring";
 import { flashRedirect } from "@routes/lib/flash";
 import {
 	paginate,
@@ -5,9 +7,6 @@ import {
 	withPageLabel,
 } from "@routes/lib/paging";
 import { Handler } from "@routes/types";
-
-import { addVoiceChatUser, removeVoiceChatUser } from "@db/voice-chats";
-import { joinWithAnd, mentionChannel } from "@main/ring";
 
 import { guildSignups, PANEL } from "../_shared";
 

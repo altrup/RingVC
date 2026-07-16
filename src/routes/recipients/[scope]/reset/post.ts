@@ -1,9 +1,8 @@
+import { resetDefaultRingees } from "@db/default-ringees";
 import { confirmed } from "@routes/lib/confirm";
 import { flashRedirect } from "@routes/lib/flash";
 import { channelIdOf, scopeOf } from "@routes/lib/scope";
 import { Handler } from "@routes/types";
-
-import { resetDefaultRingees } from "@db/default-ringees";
 
 import { panelPath, scopeSuffix } from "../../_shared";
 

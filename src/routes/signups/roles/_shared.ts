@@ -1,7 +1,3 @@
-import { navBar, subNav } from "@routes/lib/components";
-import { flashRedirect, withFlash } from "@routes/lib/flash";
-import { paginate, withPageLabel } from "@routes/lib/paging";
-import { RingRouter } from "@routes/types";
 import { RouteRedirect } from "discord-embed-router";
 import {
 	APIActionRowComponent,
@@ -12,6 +8,10 @@ import {
 } from "discord.js";
 
 import { joinWithAnd } from "@main/ring";
+import { navBar, subNav } from "@routes/lib/components";
+import { flashRedirect, withFlash } from "@routes/lib/flash";
+import { paginate, withPageLabel } from "@routes/lib/paging";
+import { RingRouter } from "@routes/types";
 
 import { canManageRoleSignups, COLOR, PANEL, ROLES } from "../_shared";
 

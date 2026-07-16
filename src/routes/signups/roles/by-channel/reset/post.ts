@@ -1,9 +1,8 @@
+import { getVoiceChatSignups, removeVoiceChatRole } from "@db/voice-chats";
+import { mentionChannel } from "@main/ring";
 import { confirmed } from "@routes/lib/confirm";
 import { flashRedirect } from "@routes/lib/flash";
 import { Handler } from "@routes/types";
-
-import { getVoiceChatSignups, removeVoiceChatRole } from "@db/voice-chats";
-import { mentionChannel } from "@main/ring";
 
 import { BY_CHANNEL, roleEditGuard } from "../../_shared";
 

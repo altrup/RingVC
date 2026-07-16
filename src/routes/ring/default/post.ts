@@ -1,8 +1,7 @@
+import { getErrorMessage, ringDefaultUsers } from "@main/ring";
 import { flashRedirect } from "@routes/lib/flash";
 import { commandMention } from "@routes/lib/mentions";
 import { Handler } from "@routes/types";
-
-import { getErrorMessage, ringDefaultUsers } from "@main/ring";
 
 import {
 	noVoiceChannelFlash,

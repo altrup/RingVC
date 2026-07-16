@@ -1,14 +1,4 @@
 import {
-	editSelectRow,
-	navBar,
-	pagedControls,
-	showOptionsOf,
-} from "@routes/lib/components";
-import { withFlash } from "@routes/lib/flash";
-import { pagedCountLine, paginate } from "@routes/lib/paging";
-import { channelIdOf, scopeName, scopeOf } from "@routes/lib/scope";
-import { Handler } from "@routes/types";
-import {
 	RouteButtonBuilder,
 	RouteChannelSelectMenuBuilder,
 	RouteUserSelectMenuBuilder,
@@ -21,6 +11,16 @@ import {
 } from "discord.js";
 
 import { filterType, getFilter } from "@db/filters";
+import {
+	editSelectRow,
+	navBar,
+	pagedControls,
+	showOptionsOf,
+} from "@routes/lib/components";
+import { withFlash } from "@routes/lib/flash";
+import { pagedCountLine, paginate } from "@routes/lib/paging";
+import { channelIdOf, scopeName, scopeOf } from "@routes/lib/scope";
+import { Handler } from "@routes/types";
 
 import { panelPath } from "../_shared";
 

@@ -1,7 +1,8 @@
+import { ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
+
 import { navBar, row } from "@routes/lib/components";
 import { withFlash } from "@routes/lib/flash";
 import { Handler } from "@routes/types";
-import { ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 
 const COLOR = "#5865f2";
 

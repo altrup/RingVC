@@ -1,5 +1,3 @@
-import { backButton, homeButton, row } from "@routes/lib/components";
-import { Handler } from "@routes/types";
 import {
 	EmbedBuilder,
 	Guild,
@@ -11,6 +9,8 @@ import {
 	getUserVoiceChatSignups,
 	getVoiceChatRoleSignups,
 } from "@db/voice-chats";
+import { backButton, homeButton, row } from "@routes/lib/components";
+import { Handler } from "@routes/types";
 
 export const COLOR = "#31a5a5";
 export const PANEL = "/signups";

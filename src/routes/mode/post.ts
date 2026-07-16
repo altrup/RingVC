@@ -1,7 +1,6 @@
+import { getUserMode, setUserMode } from "@db/users";
 import { flashRedirect } from "@routes/lib/flash";
 import { Handler } from "@routes/types";
-
-import { getUserMode, setUserMode } from "@db/users";
 
 import { isMode, MODES, PATH } from "./_shared";
 

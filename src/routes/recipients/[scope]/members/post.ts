@@ -1,3 +1,9 @@
+import {
+	addDefaultRingee,
+	getDefaultRingees,
+	removeDefaultRingee,
+} from "@db/default-ringees";
+import { joinWithAnd, mentionUser } from "@main/ring";
 import { flashRedirect } from "@routes/lib/flash";
 import {
 	paginate,
@@ -6,13 +12,6 @@ import {
 } from "@routes/lib/paging";
 import { channelIdOf, scopeOf } from "@routes/lib/scope";
 import { Handler } from "@routes/types";
-
-import {
-	addDefaultRingee,
-	getDefaultRingees,
-	removeDefaultRingee,
-} from "@db/default-ringees";
-import { joinWithAnd, mentionUser } from "@main/ring";
 
 import { panelPath, scopeSuffix } from "../../_shared";
 

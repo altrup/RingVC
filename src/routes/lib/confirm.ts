@@ -1,6 +1,7 @@
-import { RingModal, RingRouter } from "@routes/types";
 import { RouteModalBuilder } from "discord-embed-router";
 import { LabelBuilder, TextInputBuilder, TextInputStyle } from "discord.js";
+
+import { RingModal, RingRouter } from "@routes/types";
 
 // typed-word confirmation for destructive actions: a button opens this modal
 // with method MODAL, and the POST it targets verifies the input via confirmed()

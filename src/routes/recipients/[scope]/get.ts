@@ -72,11 +72,16 @@ export const recipientsGet: Handler<"GET"> = async (
 				? `${autoRing.override ? "On" : "Off"} for <#${channelId}> (global: ${autoRing.global ? "on" : "off"})`
 				: `${autoRing.effective ? "On" : "Off"} (from your global setting)`;
 
+	// channel ringees ring on top of the global defaults, so the channel scope
+	// says so; global scope's "these people" already is everyone
+	const ringsClause = channelId
+		? `These people get rung — along with your global default ringees — when you use ${commandMention(state.globals, "ring_defaults")} in <#${channelId}>`
+		: `These people get rung when you use ${commandMention(state.globals, "ring_defaults")}`;
 	const description = withFlash(
 		state.queryParams,
-		`These people get rung when you use ${commandMention(state.globals, "ring_defaults")}${channelId ? ` in <#${channelId}>` : ""}, or on every voice channel join if auto-ring is on.\n\n` +
+		`${ringsClause}, or on every voice channel join if auto-ring is on.\n\n` +
 			`**Auto-ring** · ${autoRingValue}\n` +
-			pagedCountLine("Ringees", sorted.length),
+			pagedCountLine(channelId ? "Channel ringees" : "Ringees", sorted.length),
 	);
 
 	const scopeSelect = new ActionRowBuilder<RouteChannelSelectMenuBuilder>()

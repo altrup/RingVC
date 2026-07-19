@@ -40,7 +40,7 @@ export const ringGet: Handler<"GET"> = async (router, interaction, state) => {
 	const description = withFlash(
 		state.queryParams,
 		`Ringing people in <#${channel.id}>.\n\n` +
-			`**Your defaults** · ${defaults.length > 0 ? defaults.length : "None"}`,
+			`**Default ringees** · ${defaults.length > 0 ? defaults.length : "None"}`,
 	);
 
 	return {

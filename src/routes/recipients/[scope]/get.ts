@@ -113,9 +113,7 @@ export const recipientsGet: Handler<"GET"> = async (
 	const ringOptions = [
 		new RouteButtonBuilder(router)
 			.setLabel(autoRing.effective ? "Disable auto-ring" : "Enable auto-ring")
-			.setStyle(
-				autoRing.effective ? ButtonStyle.Secondary : ButtonStyle.Success,
-			)
+			.setStyle(ButtonStyle.Primary)
 			.setTo(`${panelPath(scope)}/auto-ring`, {
 				method: "POST",
 				queryParams: { enable: autoRing.effective ? "0" : "1" },

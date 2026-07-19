@@ -143,7 +143,7 @@ export const navBar = (
 
 // the sub-view switch a section shows just above the bar when it has sibling
 // views (e.g. My signups / Role signups, Quick ring / Default ringees). The
-// current view is an inert Primary prefixed "View:" to name where you are,
+// current view is an inert Primary prefixed "Viewing:" to name where you are,
 // mirroring the section bar's "Section:" placeholder; the others are Secondary
 // links
 export const subNav = (
@@ -153,7 +153,7 @@ export const subNav = (
 	row(
 		...items.map((item) =>
 			new RouteButtonBuilder(router)
-				.setLabel(item.active ? `View: ${item.label}` : item.label)
+				.setLabel(item.active ? `Viewing: ${item.label}` : item.label)
 				.setStyle(item.active ? ButtonStyle.Primary : ButtonStyle.Secondary)
 				.setDisabled(item.active ?? false)
 				// a sub-nav item can point at the same path as the bar's active tab

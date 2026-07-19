@@ -40,9 +40,6 @@ export const helpGet: Handler<"GET"> = (router, interaction, state) => {
 				.setTitle("📖 Getting started")
 				.setDescription(description),
 		],
-		components: [
-			helpSubNav(router, "help"),
-			navBar(router, interaction, { active: "help" }),
-		],
+		components: [helpSubNav(router, "help"), navBar(router, interaction)],
 	};
 };

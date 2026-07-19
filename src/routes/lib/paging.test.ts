@@ -47,7 +47,9 @@ test("a list that is an exact multiple of the page size adds no trailing page", 
 
 test("the count line counts only pages that hold entries", () => {
 	expect(pagedCountLine("Signups", 0)).toBe("**Signups** · None");
-	expect(pagedCountLine("Signups", PAGE_SIZE)).toBe(`**Signups** · ${PAGE_SIZE}`);
+	expect(pagedCountLine("Signups", PAGE_SIZE)).toBe(
+		`**Signups** · ${PAGE_SIZE}`,
+	);
 	expect(pagedCountLine("Signups", PAGE_SIZE + 1)).toBe(
 		`**Signups** · ${PAGE_SIZE + 1} across 2 pages`,
 	);

@@ -22,6 +22,6 @@ export const homeGet: Handler<"GET"> = (router, interaction, state) => {
 
 	return {
 		embeds: [embed],
-		components: [navBar(router, interaction, { active: "home" })],
+		components: [navBar(router, interaction)],
 	};
 };

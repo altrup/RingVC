@@ -69,9 +69,7 @@ export const backButton = (
 		.setStyle(ButtonStyle.Secondary)
 		.setTo(path);
 
-// the top-level section a panel belongs to, so the section bar can mark it as
-// the current selection. Panels with no section (Ring quick-panel, error
-// states) pass nothing, and the menu shows its placeholder instead
+// the top-level sections, one per entry in the section bar (SECTIONS below)
 export type Section =
 	| "home"
 	| "signups"
@@ -98,15 +96,14 @@ const SECTIONS: readonly Tab[] = [
 ];
 
 // the persistent section bar every panel ends on, as a string select so all
-// sections fit one row. The active section names the placeholder ("Section: …")
-// rather than being a selected option, so the bar reads as a location label
-// instead of a value picker; selecting any section routes there. The Signups
-// option carries the branded voice-chat emoji when the bot can use it, else a
-// unicode bell
+// sections fit one row. Its placeholder is an action prompt ("Switch sections")
+// rather than the current section: the panel title already names where you are,
+// and a prompt reads as navigation instead of a stored value; selecting any
+// section routes there. The Signups option carries the branded voice-chat emoji
+// when the bot can use it, else a unicode bell
 export const navBar = (
 	router: RingRouter,
 	interaction: Interaction,
-	{ active }: { active?: Section },
 ): APIActionRowComponent<APIComponentInMessageActionRow> => {
 	const vc = buttonEmoji(interaction, VC_EMOJI_ID);
 	// the Ring section lands on the immediate ring action when the user is in a
@@ -120,20 +117,18 @@ export const navBar = (
 
 	const option = ({ section, label, path }: Tab) => {
 		const target = section === "ringees" && inVoice ? "/ring" : path;
-		const builder = new RouteStringSelectMenuOptionBuilder(router).setTo(target);
+		const builder = new RouteStringSelectMenuOptionBuilder(router).setTo(
+			target,
+		);
 		if (section === "signups" && vc) builder.setLabel("Signups").setEmoji(vc);
 		else builder.setLabel(label);
 		return builder;
 	};
 
-	const activeLabel = active
-		? SECTIONS.find((tab) => tab.section === active)?.label
-		: undefined;
-
 	// each option carries its own encoded target, and the builder's default
 	// pattern routes the submission to the selected one
 	const select = new RouteStringSelectMenuBuilder(router)
-		.setPlaceholder(activeLabel ? `Section: ${activeLabel}` : "Jump to a section")
+		.setPlaceholder("Switch sections")
 		.setTos(SECTIONS.map(option));
 
 	return new ActionRowBuilder<RouteStringSelectMenuBuilder>()
@@ -143,9 +138,8 @@ export const navBar = (
 
 // the sub-view switch a section shows just above the bar when it has sibling
 // views (e.g. My signups / Role signups, Quick ring / Default ringees). The
-// current view is an inert Primary prefixed "Viewing:" to name where you are,
-// mirroring the section bar's "Section:" placeholder; the others are Secondary
-// links
+// current view is an inert Primary prefixed "Viewing:" to name where you are;
+// the others are Secondary links
 export const subNav = (
 	router: RingRouter,
 	items: { label: string; path: string; active?: boolean }[],

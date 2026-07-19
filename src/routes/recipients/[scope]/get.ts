@@ -151,7 +151,7 @@ export const recipientsGet: Handler<"GET"> = async (
 				{ label: "Quick ring", path: "/ring" },
 				{ label: "Default ringees", path: panelPath(scope), active: true },
 			]),
-			navBar(router, interaction, { active: "ringees" }),
+			navBar(router, interaction),
 		],
 	};
 };

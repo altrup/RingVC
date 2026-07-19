@@ -92,9 +92,7 @@ export const filterGet: Handler<"GET"> = async (router, interaction, state) => {
 		embeds: [
 			new EmbedBuilder()
 				.setColor(COLOR)
-				.setTitle(
-					scope === "global" ? "🛡️ Global filter" : "🛡️ Channel filter",
-				)
+				.setTitle(scope === "global" ? "🛡️ Global filter" : "🛡️ Channel filter")
 				.setDescription(description),
 		],
 		// top to bottom within the page: the scope select leads as context, then
@@ -109,7 +107,7 @@ export const filterGet: Handler<"GET"> = async (router, interaction, state) => {
 				showOptions: showOptionsOf(state.queryParams),
 				options: filterOptions,
 			}),
-			navBar(router, interaction, { active: "filters" }),
+			navBar(router, interaction),
 		],
 	};
 };

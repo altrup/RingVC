@@ -96,7 +96,7 @@ export const signupsGet: Handler<"GET"> = async (
 						]),
 					]
 				: []),
-			navBar(router, interaction, { active: "signups" }),
+			navBar(router, interaction),
 		],
 	};
 };

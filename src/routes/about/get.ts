@@ -33,7 +33,7 @@ export const aboutGet: Handler<"GET"> = (router, interaction, state) => {
 					.setStyle(ButtonStyle.Link)
 					.setURL(SUPPORT_URL),
 			),
-			navBar(router, interaction, { active: "about" }),
+			navBar(router, interaction),
 		],
 	};
 };

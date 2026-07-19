@@ -44,7 +44,7 @@ export const modeGet: Handler<"GET"> = async (router, interaction, state) => {
 						.setTo(PATH, { method: "POST", queryParams: { set: mode } }),
 				),
 			),
-			navBar(router, interaction, { active: "mode" }),
+			navBar(router, interaction),
 		],
 	};
 };

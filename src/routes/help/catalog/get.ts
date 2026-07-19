@@ -87,9 +87,6 @@ export const catalogGet: Handler<"GET"> = (router, interaction, state) => {
 				.setTitle("📖 Catalog")
 				.setDescription(description),
 		],
-		components: [
-			helpSubNav(router, "catalog"),
-			navBar(router, interaction, { active: "help" }),
-		],
+		components: [helpSubNav(router, "catalog"), navBar(router, interaction)],
 	};
 };

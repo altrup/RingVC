@@ -168,6 +168,6 @@ export const roleFrame = ({
 			{ label: "My signups", path: PANEL },
 			{ label: "Role signups", path: ROLES, active: true },
 		]),
-		navBar(router, interaction, { active: "signups" }),
+		navBar(router, interaction),
 	],
 });

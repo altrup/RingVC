@@ -30,10 +30,7 @@ export const ringGet: Handler<"GET"> = async (router, interaction, state) => {
 					.setTitle("📣 Quick ring")
 					.setDescription(`⚠️ ${noVoiceChannelFlash(interaction)}`),
 			],
-			components: [
-				ringViews,
-				navBar(router, interaction, { active: "ringees" }),
-			],
+			components: [ringViews, navBar(router, interaction)],
 		};
 
 	const defaults = await getAllDefaultRingees(interaction.user.id, channel.id);
@@ -67,7 +64,7 @@ export const ringGet: Handler<"GET"> = async (router, interaction, state) => {
 					.setTo(`${PANEL}/default`, { method: "POST" }),
 			),
 			ringViews,
-			navBar(router, interaction, { active: "ringees" }),
+			navBar(router, interaction),
 		],
 	};
 };

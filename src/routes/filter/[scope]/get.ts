@@ -77,7 +77,7 @@ export const filterGet: Handler<"GET"> = async (router, interaction, state) => {
 			.setLabel(
 				type === "blacklist" ? "Switch to Whitelist" : "Switch to Blacklist",
 			)
-			.setStyle(ButtonStyle.Primary)
+			.setStyle(ButtonStyle.Secondary)
 			.setTo(`${panelPath(scope)}/type`, {
 				method: "POST",
 				queryParams: { to: type === "blacklist" ? "whitelist" : "blacklist" },

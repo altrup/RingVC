@@ -17,9 +17,8 @@ import { Handler } from "@routes/types";
 import { panelPath } from "../../_shared";
 
 // one members editor serves the panel select and the /block, /unblock,
-// /whitelist and /unwhitelist adapters; `intent` keys the guard that stops
-// blocklist-style edits on a whitelist (and vice versa) so the rule exists
-// exactly once
+// /whitelist, /unwhitelist adapters; `intent` keys the guard that stops
+// blocklist edits on a whitelist (and vice versa), keeping the rule in one place
 export const filterMembersPost: Handler<"POST"> = async (
 	router,
 	interaction,

@@ -15,9 +15,8 @@ import {
 } from "../../_shared";
 import { guildVoiceChannelIds } from "../../../_shared";
 
-// edits the channels one role is signed up to. Serves the panel's channel
-// multi-select (diffed against the shown page) and the /unsignuprole adapter
-// (a `remove` query param); the scope is the role id in the path
+// edits the channels one role is signed up to: the panel's channel select
+// (diffed against the page) and the /unsignuprole adapter's `remove` query param
 export const rolesByRoleEditPost: Handler<"POST"> = async (
 	router,
 	interaction,

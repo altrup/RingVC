@@ -14,9 +14,8 @@ import {
 	sortRoleIds,
 } from "../../_shared";
 
-// edits the roles signed up to one voice channel. Serves the panel's role
-// multi-select (diffed against the shown page) and the /signuprole adapter
-// (an `add` query param); the scope is the channel id in the path
+// edits the roles signed up to one voice channel: the panel's role select
+// (diffed against the page) and the /signuprole adapter's `add` query param
 export const rolesByChannelEditPost: Handler<"POST"> = async (
 	router,
 	interaction,

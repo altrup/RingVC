@@ -73,10 +73,9 @@ export const sortChannelIds = (guild: Guild, ids: string[]): string[] =>
 		),
 	);
 
-// applies an add/remove edit against a scope's current links and reports the
-// outcome as a flash. Adds/removes are filtered against the current set so
-// the notice reflects real changes; both edit orientations mutate the same
-// (channel, role) table through the passed callbacks
+// applies an add/remove edit against a scope's current links and reports it as
+// a flash. Adds/removes are filtered against the current set so the notice
+// reflects real changes; both orientations mutate the same table via callbacks
 export const commitRoleEdit = async ({
 	redirect,
 	page,
@@ -140,9 +139,8 @@ export const commitRoleEdit = async ({
 	});
 };
 
-// the frame every role-signups view ends in. Rows read low-to-high level top to
-// bottom: the caller's content rows, then the My signups / Role signups switch,
-// then the section bar
+// the frame every role-signups view ends in: the caller's content rows, then
+// the My signups / Role signups switch, then the section bar
 export const roleFrame = ({
 	router,
 	interaction,

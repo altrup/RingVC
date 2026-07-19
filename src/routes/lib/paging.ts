@@ -11,20 +11,16 @@ export type Page = {
 	pageCount: number;
 };
 
-// the "**Label** · 23 across 3 pages" line paged panels show instead of
-// repeating the entries the select below already displays as its selection;
-// the pager button carries which page is being viewed. Counts only pages
-// that hold entries, so pageCountOf's trailing add page never inflates it
+// the "**Label** · 23 across 3 pages" summary line, counting only pages that
+// hold entries so pageCountOf's trailing add page never inflates the count
 export const pagedCountLine = (label: string, total: number): string => {
 	const contentPages = Math.ceil(total / PAGE_SIZE);
 	return `**${label}** · ${total > 0 ? total : "None"}${contentPages > 1 ? ` across ${contentPages} pages` : ""}`;
 };
 
-// setPattern options for a paged edit select's POST. The per-render key
-// gives every render a fresh customId: the Discord client keeps a select's
-// in-flight selection when a message edit leaves the component unchanged,
-// so without it a submission's picks would stay visibly selected instead
-// of resetting to the page's default values
+// setPattern options for a paged edit select's POST. The per-render key gives
+// every render a fresh customId: Discord keeps a select's in-flight selection
+// when a message edit leaves the component unchanged, so a fresh id resets it
 export const pagedEditPattern = (
 	page: number,
 	timestamp: number,
@@ -35,10 +31,9 @@ export const pagedEditPattern = (
 	key: timestamp.toString(36),
 });
 
-// how many pages a list of this size spans. A full last page only gets a
-// trailing empty page when a page fills the whole edit select (PAGE_SIZE >=
-// SELECT_MAX_VALUES), since otherwise the select still has room to add
-// entries on the last page; an empty list still shows one page
+// how many pages a list spans. A full last page gets a trailing empty page
+// only when a page fills the whole edit select (PAGE_SIZE >= SELECT_MAX_VALUES);
+// otherwise the last page still has room to add entries. Empty list: one page
 export const pageCountOf = (total: number): number => {
 	const fullPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 	const needsAddPage =
@@ -59,11 +54,10 @@ export const paginate = (items: string[], rawPage: string | null): Page => {
 	};
 };
 
-// diffs a select submission against the visible page: entries missing from
-// the submission are removals, submitted values not in the whole list are
-// additions. Submitted values that live in the list but on another page are
-// no-ops (pages stay independent) and are reported as `alreadyPresent` so
-// flashes can point at the existing entry instead of claiming "no changes"
+// diffs a select submission against the visible page: values missing from the
+// submission are removals, values not in the whole list are additions. Values
+// on another page are no-ops, reported as `alreadyPresent` so the flash can
+// point at the existing entry instead of claiming "no changes"
 export const diffSelection = ({
 	allItems,
 	pageItems,
@@ -85,9 +79,8 @@ export const diffSelection = ({
 	};
 };
 
-// labels a value with the page that displays it, e.g. "#general (page 2)",
-// so a flash can point at where an entry lives — except on the page in
-// view, where the entry is already visible and the label is noise
+// labels a value with the page that displays it, e.g. "#general (page 2)", so a
+// flash points at where an entry lives; skipped on the page already in view
 export const withPageLabel =
 	(allItems: string[], mention: (id: string) => string, viewedPage: number) =>
 	(value: string): string => {
@@ -97,10 +90,9 @@ export const withPageLabel =
 			: `${mention(value)} (page ${page + 1})`;
 	};
 
-// resolves an add/remove edit for a paged member select from either input a
-// handler can receive: a select submission (diffed against the visible page)
-// or `add`/`remove` query params from a command adapter. Callers still filter
-// the result against their current set before mutating
+// resolves an add/remove edit from either input a handler gets: a select
+// submission (diffed against the page) or `add`/`remove` query params from a
+// command adapter. Callers still filter against their current set before mutating
 export const resolveSelectionEdit = ({
 	current,
 	values,

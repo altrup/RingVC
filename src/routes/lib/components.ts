@@ -27,10 +27,8 @@ export const row = (
 
 // the add/remove select every paged member panel shares: the page's entries
 // ride in as the caller-set defaults, and selecting or deselecting them posts
-// the diff. The caller supplies the entity-specific builder (with its default
-// entries and any channel-type filter already set) and the noun the shared
-// placeholder reads; the row-reset key keeps a stale client selection from
-// surviving the next render
+// the diff. The caller supplies the builder (defaults and channel-type filter
+// already set) and the noun the shared placeholder reads
 export const editSelectRow = <
 	B extends
 		| RouteUserSelectMenuBuilder
@@ -78,8 +76,7 @@ export type Section =
 
 type Tab = { section: Section; label: string; path: string };
 
-// every section in one menu; a string select holds all of them, so there is
-// no five-button row cap to page around
+// every section the bar offers, in display order
 const SECTIONS: readonly Tab[] = [
 	{ section: "home", label: "🏠 Home", path: "/" },
 	{ section: "signups", label: "🔔 Signups", path: "/signups" },
@@ -91,20 +88,16 @@ const SECTIONS: readonly Tab[] = [
 	{ section: "delete", label: "🗑️ Delete data", path: "/delete-data" },
 ];
 
-// the persistent section bar every panel ends on, as a string select so all
-// sections fit one row. Its placeholder is an action prompt ("Switch sections")
-// rather than the current section: the panel title already names where you are,
-// and a prompt reads as navigation instead of a stored value; selecting any
-// section routes there. The Signups option carries the branded voice-chat emoji
-// when the bot can use it, else a unicode bell
+// the persistent section bar every panel ends on. A string select fits all
+// sections in one row (dodging the five-button cap); the placeholder is an
+// action prompt since the panel title already names where you are
 export const navBar = (
 	router: RingRouter,
 	interaction: Interaction,
 ): APIActionRowComponent<APIComponentInMessageActionRow> => {
 	const vc = buttonEmoji(interaction, VC_EMOJI_ID);
-	// the Ring section lands on the immediate ring action when the user is in a
-	// voice channel, and on the default-recipients settings otherwise, so it
-	// never opens the "not in a voice channel" notice by default
+	// the Ring option lands on the immediate ring action when in a voice channel,
+	// else the default-recipients settings, so it never opens the "not in VC" notice
 	const inVoice = !!(
 		interaction.member &&
 		"voice" in interaction.member &&
@@ -121,8 +114,7 @@ export const navBar = (
 		return builder;
 	};
 
-	// each option carries its own encoded target, and the builder's default
-	// pattern routes the submission to the selected one
+	// each option encodes its own target; the default pattern routes to the picked one
 	const select = new RouteStringSelectMenuBuilder(router)
 		.setPlaceholder("Switch sections")
 		.setTos(SECTIONS.map(option));
@@ -132,10 +124,8 @@ export const navBar = (
 		.toJSON();
 };
 
-// the sub-view switch a section shows just above the bar when it has sibling
-// views (e.g. My signups / Role signups, Quick ring / Default ringees). The
-// current view is an inert Primary prefixed "Viewing:" to name where you are;
-// the others are Secondary links
+// the sub-view switch a section shows above the bar when it has sibling views.
+// The active view is an inert Primary prefixed "Viewing:"; the others are links
 export const subNav = (
 	router: RingRouter,
 	items: { label: string; path: string; active?: boolean }[],
@@ -146,20 +136,15 @@ export const subNav = (
 				.setLabel(item.active ? `Viewing: ${item.label}` : item.label)
 				.setStyle(item.active ? ButtonStyle.Primary : ButtonStyle.Secondary)
 				.setDisabled(item.active ?? false)
-				// a sub-nav item can point at the same path as the bar's active tab
-				// (e.g. Default ringees / the Ring tab); the key keeps their
-				// customIds distinct, which Discord requires within one message
+				// a sub-nav item can share a path with the bar's active tab; the key
+				// keeps their customIds distinct, which Discord requires per message
 				.setTo(item.path, { key: "subnav" }),
 		),
 	);
 
-// a paged panel's control row. With one page (the common case) the option
-// buttons show directly — no toggle burying the panel's controls; destructive
-// ones (Reset) stay safe behind their own confirm modal. Only when a pager
-// needs the row too does a ⚙ toggle appear, swapping between the page controls
-// and the options, keyed by the `options` query param. A panel with no options
-// and one page contributes no row, so the result is spread into a components
-// array
+// a paged panel's control row. With one page the options show directly; only
+// when a pager also needs the row does a ⚙ toggle swap between page controls
+// and options, keyed by the `options` query param. No pager, no options: no row
 export const pagedControls = (
 	router: RingRouter,
 	basePath: string,
@@ -184,8 +169,7 @@ export const pagedControls = (
 			? []
 			: [
 					pageButton("◀ Prev", page - 1, page === 0),
-					// the middle button doubles as a page jump: it opens a modal asking
-					// which page to show, which redirects back to basePath
+					// the middle button opens a page-jump modal that redirects back to basePath
 					new RouteButtonBuilder(router)
 						.setLabel(`Page ${page + 1} of ${pageCount}`)
 						.setStyle(ButtonStyle.Secondary)
@@ -202,9 +186,8 @@ export const pagedControls = (
 	if (options.length === 0) return pager.length > 0 ? [row(...pager)] : [];
 	// no pager competing for the row: the options own it and show directly
 	if (pager.length === 0) return [row(...options)];
-	// a pager shares the row, so the ⚙ toggle swaps between the two; it leads
-	// the row (a fixed slot the variable-width pager can't shift), and the open
-	// options lead with the way back to the page controls
+	// pager and options share the row: the ⚙ toggle leads (a fixed slot the
+	// variable-width pager can't shift), and the open options lead with a way back
 	if (showOptions)
 		return [
 			row(

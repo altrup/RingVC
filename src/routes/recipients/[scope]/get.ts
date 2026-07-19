@@ -133,9 +133,8 @@ export const recipientsGet: Handler<"GET"> = async (
 				)
 				.setDescription(description),
 		],
-		// top to bottom within the page: the scope select leads as context, then
-		// the ringee list and its control row (pager or the panel options); the
-		// sub-nav and section bar are navigation pinned at the bottom
+		// top to bottom: the scope select leads as context, then the ringee list
+		// and its control row; the sub-nav and section bar are pinned at the bottom
 		components: [
 			scopeSelect,
 			editSelect,

@@ -47,9 +47,8 @@ export const registerRoutes = (router: RingRouter) => {
 	router.get("/help/catalog", catalogGet);
 	router.get("/about", aboutGet);
 
-	// scoped panels answer their bare path as the global scope, so their
-	// scope-switch channel select can target "{/:channelId}" and fall back to
-	// global when the selection is cleared
+	// scoped panels answer their bare path as the global scope, so the scope-switch
+	// select can target "{/:channelId}" and fall back to global when cleared
 	router.get(["/filter", "/filter/:scope"], filterGet);
 	router.post("/filter/:scope/members", filterMembersPost);
 	router.post("/filter/:scope/type", filterTypePost);
@@ -79,9 +78,8 @@ export const registerRoutes = (router: RingRouter) => {
 		post: signupsResetPost,
 	});
 
-	// role signups open on a neutral view offering a channel select and a role
-	// select; picking either sets the orientation and routes to its scoped view.
-	// Clearing a scope drops back to the bare orientation path, which is neutral
+	// role signups open on a neutral view with a channel select and a role select;
+	// picking either sets the orientation. Clearing a scope returns to the neutral path
 	router.get(
 		["/signups/roles", "/signups/roles/by-channel", "/signups/roles/by-role"],
 		rolesGet,

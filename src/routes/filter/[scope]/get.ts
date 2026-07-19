@@ -95,9 +95,8 @@ export const filterGet: Handler<"GET"> = async (router, interaction, state) => {
 				.setTitle(scope === "global" ? "🛡️ Global filter" : "🛡️ Channel filter")
 				.setDescription(description),
 		],
-		// top to bottom within the page: the scope select leads as context, then
-		// the member list and its control row (pager or the filter-wide options);
-		// the section bar is the global nav pinned at the bottom
+		// top to bottom: the scope select leads as context, then the member list
+		// and its control row; the section bar is the global nav pinned at the bottom
 		components: [
 			scopeSelect,
 			editSelect,

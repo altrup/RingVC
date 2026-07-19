@@ -26,9 +26,8 @@ export const filterTypePost: Handler<"POST"> = async (
 
 	await setFilterType(interaction.user.id, channelId, to === "whitelist");
 
-	// the entries carry over and the switch reverses what they mean, so the
-	// notice has to say so: a blacklist's blocked users become the only people
-	// a whitelist lets through, and vice versa
+	// entries carry over and the switch reverses their meaning, so the notice
+	// says so: a blacklist's blocked users become the only ones a whitelist admits
 	const lead = `${scopeName(scope, "filter", { capitalize: true })} is now a ${to}`;
 	if ((filter?.entries.size ?? 0) === 0)
 		return flashRedirect(panel, lead, "success");

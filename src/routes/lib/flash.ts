@@ -2,10 +2,9 @@ import { RouteRedirect } from "discord-embed-router";
 
 export type FlashLevel = "success" | "warn";
 
-// the redirect a mutation handler returns so its outcome shows as a notice
-// on the target panel. The flash lives only in the in-flight dispatch: the
-// target GET receives it through state.queryParams and the components it
-// builds don't carry it, so the notice clears on the next interaction
+// the redirect a mutation handler returns so its outcome shows as a notice on
+// the target panel. It rides the in-flight query params only — the components
+// the GET builds don't carry it — so the notice clears on the next interaction
 export const flashRedirect = (
 	redirect: string,
 	flash: string,
@@ -25,8 +24,7 @@ const boldLead = (text: string): string => {
 };
 
 // the notice a panel renders at the bottom of its embed, as a markdown
-// blockquote (Discord draws a grey left bar) so it separates from the body;
-// the level picks the icon and the opening clause is bolded
+// blockquote so it separates from the body; the level picks the icon
 export const flashLine = (queryParams: URLSearchParams): string | null => {
 	const flash = queryParams.get("flash");
 	if (!flash) return null;

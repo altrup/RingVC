@@ -3,6 +3,7 @@ import { beforeEach, expect, test, vi } from "vitest";
 
 import { deleteAllUserData } from "@db/users";
 
+import { CONFIRMATION } from "./_shared";
 import { deleteDataPost } from "./post";
 
 vi.mock("@db/users", () => ({
@@ -24,13 +25,13 @@ beforeEach(() => {
 	vi.clearAllMocks();
 });
 
-test("typing DELETE exactly deletes all user data", async () => {
+test("typing the confirmation word exactly deletes all user data", async () => {
 	vi.mocked(deleteAllUserData).mockResolvedValue(true);
 
 	const result = await deleteDataPost(
 		undefined as never,
 		interaction,
-		state("DELETE"),
+		state(CONFIRMATION),
 	);
 
 	expect(deleteAllUserData).toHaveBeenCalledExactlyOnceWith("caller");
@@ -46,7 +47,7 @@ test("a mismatched confirmation deletes nothing", async () => {
 	const result = await deleteDataPost(
 		undefined as never,
 		interaction,
-		state("delete"),
+		state(CONFIRMATION.toLowerCase()),
 	);
 
 	expect(deleteAllUserData).not.toHaveBeenCalled();

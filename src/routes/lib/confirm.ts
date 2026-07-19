@@ -16,10 +16,11 @@ export const confirmModal = (
 ): RingModal =>
 	new RouteModalBuilder(router)
 		.setTo(to, { method: "POST", flags: [MessageFlags.Ephemeral] })
-		.setTitle(title)
+		.setTitle(`⚠️ ${title}`)
 		.addLabelComponents(
 			new LabelBuilder()
 				.setLabel(`Type ${word} to confirm`)
+				.setDescription("This can't be undone.")
 				.setTextInputComponent(
 					new TextInputBuilder()
 						.setCustomId("confirm")

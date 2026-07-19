@@ -75,7 +75,7 @@ export const recipientsGet: Handler<"GET"> = async (
 	// channel ringees ring on top of the global defaults, so the channel scope
 	// says so; global scope's "these people" already is everyone
 	const ringsClause = channelId
-		? `These people get rung — along with your global default ringees — when you use ${commandMention(state.globals, "ring_defaults")} in <#${channelId}>`
+		? `These people (along with your global default ringees) get rung when you use ${commandMention(state.globals, "ring_defaults")} in <#${channelId}>`
 		: `These people get rung when you use ${commandMention(state.globals, "ring_defaults")}`;
 	const description = withFlash(
 		state.queryParams,

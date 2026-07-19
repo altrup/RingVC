@@ -23,7 +23,7 @@ export const modeGet: Handler<"GET"> = async (router, interaction, state) => {
 		embeds: [
 			new EmbedBuilder()
 				.setColor(COLOR)
-				.setTitle("💤 Your mode")
+				.setTitle("💤 Mode")
 				.setDescription(
 					withFlash(
 						state.queryParams,

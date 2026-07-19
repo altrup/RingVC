@@ -93,7 +93,7 @@ export const filterGet: Handler<"GET"> = async (router, interaction, state) => {
 			new EmbedBuilder()
 				.setColor(COLOR)
 				.setTitle(
-					scope === "global" ? "🛡️ Your global filter" : "🛡️ Channel filter",
+					scope === "global" ? "🛡️ Global filter" : "🛡️ Channel filter",
 				)
 				.setDescription(description),
 		],

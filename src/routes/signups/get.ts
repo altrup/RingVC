@@ -57,7 +57,7 @@ export const signupsGet: Handler<"GET"> = async (
 		embeds: [
 			new EmbedBuilder()
 				.setColor(COLOR)
-				.setTitle("🔔 Your signups")
+				.setTitle("🔔 Signups")
 				.setDescription(description),
 		],
 		components: [

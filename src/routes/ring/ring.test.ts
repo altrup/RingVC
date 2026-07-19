@@ -46,7 +46,7 @@ beforeEach(() => {
 	vi.clearAllMocks();
 });
 
-test("ringing defaults rings the saved list and returns to the default ringees panel", async () => {
+test("ringing defaults rings the saved list and returns to the Quick ring panel", async () => {
 	vi.mocked(ringDefaultUsers).mockResolvedValue([
 		{ userId: "9", status: "fulfilled" },
 	]);
@@ -62,7 +62,7 @@ test("ringing defaults rings the saved list and returns to the default ringees p
 		"caller",
 		"wants you to join",
 	);
-	expect(result.redirect).toBe("/recipients/global");
+	expect(result.redirect).toBe("/ring");
 });
 
 test("ringing defaults while not in a voice channel warns without ringing", async () => {
@@ -73,7 +73,7 @@ test("ringing defaults while not in a voice channel warns without ringing", asyn
 	);
 
 	expect(ringDefaultUsers).not.toHaveBeenCalled();
-	expect(result.redirect).toBe("/recipients/global");
+	expect(result.redirect).toBe("/ring");
 	const flashParams = new URLSearchParams(
 		result.queryParams as Record<string, string>,
 	);

@@ -142,8 +142,10 @@ export const navBar = (
 };
 
 // the sub-view switch a section shows just above the bar when it has sibling
-// views (e.g. My signups / Role signups, Ring now / Default ringees). The
-// current view is an inert Primary; the others are Secondary links
+// views (e.g. My signups / Role signups, Quick ring / Default ringees). The
+// current view is an inert Primary prefixed "View:" to name where you are,
+// mirroring the section bar's "Section:" placeholder; the others are Secondary
+// links
 export const subNav = (
 	router: RingRouter,
 	items: { label: string; path: string; active?: boolean }[],
@@ -151,7 +153,7 @@ export const subNav = (
 	row(
 		...items.map((item) =>
 			new RouteButtonBuilder(router)
-				.setLabel(item.label)
+				.setLabel(item.active ? `View: ${item.label}` : item.label)
 				.setStyle(item.active ? ButtonStyle.Primary : ButtonStyle.Secondary)
 				.setDisabled(item.active ?? false)
 				// a sub-nav item can point at the same path as the bar's active tab
@@ -176,13 +178,9 @@ export const pagedControls = (
 		pageCount,
 		showOptions,
 		options,
-		leading = [],
 	}: Pick<Page, "page" | "pageCount"> & {
 		showOptions: boolean;
 		options: RingButton[];
-		// actions that stay visible left of the ⚙ Options toggle in both modes,
-		// for a panel-level action that isn't a setting (e.g. Ring defaults)
-		leading?: RingButton[];
 	},
 ): APIActionRowComponent<APIComponentInMessageActionRow>[] => {
 	const pageButton = (label: string, target: number, disabled: boolean) =>
@@ -211,12 +209,10 @@ export const pagedControls = (
 						}),
 					pageButton("Next ▶", page + 1, page === pageCount - 1),
 				];
-	if (options.length === 0)
-		return leading.length > 0 || pager.length > 0
-			? [row(...leading, ...pager)]
-			: [];
-	// the ⚙ toggle / ◀ Back button anchors a fixed slot so variable-width pager
-	// neighbors can't shift it; any leading actions sit just inside it
+	if (options.length === 0) return pager.length > 0 ? [row(...pager)] : [];
+	// the toggle leads the row in both modes — the leading slot is the only
+	// position variable-width neighbors can't shift; open options lead with
+	// the way back to the page controls
 	if (showOptions)
 		return [
 			row(
@@ -224,13 +220,11 @@ export const pagedControls = (
 					.setLabel("◀ Back")
 					.setStyle(ButtonStyle.Secondary)
 					.setTo(basePath, { queryParams: { page: String(page) } }),
-				...leading,
 				...options,
 			),
 		];
 	return [
 		row(
-			...leading,
 			new RouteButtonBuilder(router)
 				.setLabel("⚙ Options")
 				.setStyle(ButtonStyle.Secondary)

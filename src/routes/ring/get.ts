@@ -1,8 +1,11 @@
-import { RouteUserSelectMenuBuilder } from "discord-embed-router";
-import { ActionRowBuilder, EmbedBuilder } from "discord.js";
+import {
+	RouteButtonBuilder,
+	RouteUserSelectMenuBuilder,
+} from "discord-embed-router";
+import { ActionRowBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 
 import { getAllDefaultRingees } from "@db/default-ringees";
-import { navBar, subNav } from "@routes/lib/components";
+import { navBar, row, subNav } from "@routes/lib/components";
 import { withFlash } from "@routes/lib/flash";
 import { SELECT_MAX_VALUES } from "@routes/lib/paging";
 import { Handler } from "@routes/types";
@@ -57,6 +60,12 @@ export const ringGet: Handler<"GET"> = async (router, interaction, state) => {
 						.setPattern(`${PANEL}/users`, { method: "POST" }),
 				)
 				.toJSON(),
+			row(
+				new RouteButtonBuilder(router)
+					.setLabel("Ring defaults")
+					.setStyle(ButtonStyle.Success)
+					.setTo(`${PANEL}/default`, { method: "POST" }),
+			),
 			ringViews,
 			navBar(router, interaction, { active: "ringees" }),
 		],

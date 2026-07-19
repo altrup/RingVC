@@ -105,18 +105,6 @@ export const recipientsGet: Handler<"GET"> = async (
 		},
 	);
 
-	// ringing the saved defaults belongs with the list it rings; only global
-	// scope has a "defaults" set to ring, and the POST redirects back here
-	const ringDefaultsAction =
-		scope === "global"
-			? [
-					new RouteButtonBuilder(router)
-						.setLabel("Ring defaults")
-						.setStyle(ButtonStyle.Success)
-						.setTo("/ring/default", { method: "POST" }),
-				]
-			: [];
-
 	const ringOptions = [
 		new RouteButtonBuilder(router)
 			.setLabel(autoRing.effective ? "Disable auto-ring" : "Enable auto-ring")
@@ -153,7 +141,6 @@ export const recipientsGet: Handler<"GET"> = async (
 				pageCount,
 				showOptions: showOptionsOf(state.queryParams),
 				options: ringOptions,
-				leading: ringDefaultsAction,
 			}),
 			subNav(router, [
 				{ label: "Quick ring", path: "/ring" },

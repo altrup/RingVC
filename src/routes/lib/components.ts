@@ -98,10 +98,11 @@ const SECTIONS: readonly Tab[] = [
 ];
 
 // the persistent section bar every panel ends on, as a string select so all
-// sections fit one row. The active section is the menu's default option, so it
-// shows as the current value; reselecting it just reloads that section. The
-// Signups option carries the branded voice-chat emoji when the bot can use it,
-// else a unicode bell
+// sections fit one row. The active section names the placeholder ("Section: …")
+// rather than being a selected option, so the bar reads as a location label
+// instead of a value picker; selecting any section routes there. The Signups
+// option carries the branded voice-chat emoji when the bot can use it, else a
+// unicode bell
 export const navBar = (
 	router: RingRouter,
 	interaction: Interaction,
@@ -119,18 +120,20 @@ export const navBar = (
 
 	const option = ({ section, label, path }: Tab) => {
 		const target = section === "ringees" && inVoice ? "/ring" : path;
-		const builder = new RouteStringSelectMenuOptionBuilder(router)
-			.setTo(target)
-			.setDefault(section === active);
+		const builder = new RouteStringSelectMenuOptionBuilder(router).setTo(target);
 		if (section === "signups" && vc) builder.setLabel("Signups").setEmoji(vc);
 		else builder.setLabel(label);
 		return builder;
 	};
 
+	const activeLabel = active
+		? SECTIONS.find((tab) => tab.section === active)?.label
+		: undefined;
+
 	// each option carries its own encoded target, and the builder's default
 	// pattern routes the submission to the selected one
 	const select = new RouteStringSelectMenuBuilder(router)
-		.setPlaceholder("Jump to a section")
+		.setPlaceholder(activeLabel ? `Section: ${activeLabel}` : "Jump to a section")
 		.setTos(SECTIONS.map(option));
 
 	return new ActionRowBuilder<RouteStringSelectMenuBuilder>()
@@ -173,9 +176,13 @@ export const pagedControls = (
 		pageCount,
 		showOptions,
 		options,
+		leading = [],
 	}: Pick<Page, "page" | "pageCount"> & {
 		showOptions: boolean;
 		options: RingButton[];
+		// actions that stay visible left of the ⚙ Options toggle in both modes,
+		// for a panel-level action that isn't a setting (e.g. Ring defaults)
+		leading?: RingButton[];
 	},
 ): APIActionRowComponent<APIComponentInMessageActionRow>[] => {
 	const pageButton = (label: string, target: number, disabled: boolean) =>
@@ -204,10 +211,12 @@ export const pagedControls = (
 						}),
 					pageButton("Next ▶", page + 1, page === pageCount - 1),
 				];
-	if (options.length === 0) return pager.length > 0 ? [row(...pager)] : [];
-	// the toggle leads the row in both modes — the leading slot is the only
-	// position variable-width neighbors can't shift; open options lead with
-	// the way back to the page controls
+	if (options.length === 0)
+		return leading.length > 0 || pager.length > 0
+			? [row(...leading, ...pager)]
+			: [];
+	// the ⚙ toggle / ◀ Back button anchors a fixed slot so variable-width pager
+	// neighbors can't shift it; any leading actions sit just inside it
 	if (showOptions)
 		return [
 			row(
@@ -215,11 +224,13 @@ export const pagedControls = (
 					.setLabel("◀ Back")
 					.setStyle(ButtonStyle.Secondary)
 					.setTo(basePath, { queryParams: { page: String(page) } }),
+				...leading,
 				...options,
 			),
 		];
 	return [
 		row(
+			...leading,
 			new RouteButtonBuilder(router)
 				.setLabel("⚙ Options")
 				.setStyle(ButtonStyle.Secondary)

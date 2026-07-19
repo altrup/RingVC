@@ -1,8 +1,9 @@
 import { Interaction } from "discord.js";
 import { beforeEach, expect, test, vi } from "vitest";
 
-import { ring } from "@main/ring";
+import { ring, ringDefaultUsers } from "@main/ring";
 
+import { ringDefaultPost } from "./default/post";
 import { ringUsersPost } from "./users/post";
 
 vi.mock("@main/ring", async (importOriginal) => ({
@@ -32,8 +33,51 @@ const state = (query: string, values?: string[]) =>
 		values,
 	}) as unknown as Parameters<typeof ringUsersPost>[2];
 
+const defaultState = () =>
+	({
+		params: {},
+		path: "/ring/default",
+		queryParams: new URLSearchParams(),
+		timestamp: 0,
+		globals: { commandIds: new Map() },
+	}) as unknown as Parameters<typeof ringDefaultPost>[2];
+
 beforeEach(() => {
 	vi.clearAllMocks();
+});
+
+test("ringing defaults rings the saved list and returns to the default ringees panel", async () => {
+	vi.mocked(ringDefaultUsers).mockResolvedValue([
+		{ userId: "9", status: "fulfilled" },
+	]);
+
+	const result = await ringDefaultPost(
+		undefined as never,
+		makeInteraction(true),
+		defaultState(),
+	);
+
+	expect(ringDefaultUsers).toHaveBeenCalledExactlyOnceWith(
+		voiceChannel,
+		"caller",
+		"wants you to join",
+	);
+	expect(result.redirect).toBe("/recipients/global");
+});
+
+test("ringing defaults while not in a voice channel warns without ringing", async () => {
+	const result = await ringDefaultPost(
+		undefined as never,
+		makeInteraction(false),
+		defaultState(),
+	);
+
+	expect(ringDefaultUsers).not.toHaveBeenCalled();
+	expect(result.redirect).toBe("/recipients/global");
+	const flashParams = new URLSearchParams(
+		result.queryParams as Record<string, string>,
+	);
+	expect(flashParams.get("level")).toBe("warn");
 });
 
 test("ringing while not in a voice channel flashes the join hint and rings nobody", async () => {

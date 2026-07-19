@@ -97,7 +97,7 @@ export const rolesByRoleGet: Handler<"GET"> = async (
 				options: [
 					new RouteButtonBuilder(router)
 						.setLabel("Reset")
-						.setStyle(ButtonStyle.Danger)
+						.setStyle(ButtonStyle.Secondary)
 						.setTo(`${BY_ROLE}/${scope}/reset`, { method: "MODAL" }),
 				],
 			}),

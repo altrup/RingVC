@@ -84,7 +84,7 @@ export const filterGet: Handler<"GET"> = async (router, interaction, state) => {
 			}),
 		new RouteButtonBuilder(router)
 			.setLabel("Reset")
-			.setStyle(ButtonStyle.Danger)
+			.setStyle(ButtonStyle.Secondary)
 			.setTo(`${panelPath(scope)}/reset`, { method: "MODAL" }),
 	];
 

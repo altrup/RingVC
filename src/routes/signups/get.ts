@@ -82,7 +82,7 @@ export const signupsGet: Handler<"GET"> = async (
 				options: [
 					new RouteButtonBuilder(router)
 						.setLabel("Reset")
-						.setStyle(ButtonStyle.Danger)
+						.setStyle(ButtonStyle.Secondary)
 						.setTo(`${PANEL}/reset`, { method: "MODAL" }),
 				],
 			}),

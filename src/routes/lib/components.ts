@@ -157,12 +157,12 @@ export const subNav = (
 		),
 	);
 
-// a paged panel's control row: the page controls with a switch into the
-// panel's option buttons (reset and friends), or the options with the way
-// back, keyed by the `options` query param. Options always hide behind the
-// toggle — destructive buttons like Reset stay one deliberate click away —
-// so a single-page list shows just the toggle; a panel with no options and
-// one page contributes no row, so the result is spread into a components
+// a paged panel's control row. With one page (the common case) the option
+// buttons show directly — no toggle burying the panel's controls; destructive
+// ones (Reset) stay safe behind their own confirm modal. Only when a pager
+// needs the row too does a ⚙ toggle appear, swapping between the page controls
+// and the options, keyed by the `options` query param. A panel with no options
+// and one page contributes no row, so the result is spread into a components
 // array
 export const pagedControls = (
 	router: RingRouter,
@@ -204,9 +204,11 @@ export const pagedControls = (
 					pageButton("Next ▶", page + 1, page === pageCount - 1),
 				];
 	if (options.length === 0) return pager.length > 0 ? [row(...pager)] : [];
-	// the toggle leads the row in both modes — the leading slot is the only
-	// position variable-width neighbors can't shift; open options lead with
-	// the way back to the page controls
+	// no pager competing for the row: the options own it and show directly
+	if (pager.length === 0) return [row(...options)];
+	// a pager shares the row, so the ⚙ toggle swaps between the two; it leads
+	// the row (a fixed slot the variable-width pager can't shift), and the open
+	// options lead with the way back to the page controls
 	if (showOptions)
 		return [
 			row(

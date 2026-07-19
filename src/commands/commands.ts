@@ -1,6 +1,6 @@
 import { ChatInputCommandInteraction, SharedSlashCommand } from "discord.js";
 
-import { CommandName } from "@commands/commandNames";
+import { catalog } from "@commands/catalog";
 import { defaultRingRecipients } from "@commands/defaultRingRecipient";
 import { deleteData } from "@commands/deleteData";
 import { block } from "@commands/filter/block";
@@ -12,30 +12,38 @@ import { help } from "@commands/help";
 import { mode } from "@commands/mode";
 import { quit } from "@commands/quit";
 import { ring } from "@commands/ring";
+import { ringDefaults } from "@commands/ringDefaults";
+import { ringvc } from "@commands/ringvc";
 import { signup } from "@commands/signup";
 import { signuprole } from "@commands/signuprole";
 import { unsignup } from "@commands/unsignup";
 import { unsignuprole } from "@commands/unsignuprole";
+import { RingRouter } from "@routes/types";
 
+// commands are thin adapters: they parse their options and dispatch into
+// the router, where all business rules live
 export type CommandImplementation = {
 	data: SharedSlashCommand;
 	execute: (
+		router: RingRouter,
 		interaction: ChatInputCommandInteraction,
-		commandIds: Map<CommandName, string>,
 	) => Promise<void>;
 };
 
 export const commands: CommandImplementation[] = [
+	ringvc,
 	help,
+	catalog,
 	deleteData,
 	ring,
+	ringDefaults,
 	signup,
 	unsignup,
 	signuprole,
 	unsignuprole,
 	quit,
 	mode,
-	// filter commamnds
+	// filter commands
 	block,
 	unblock,
 	whitelist,

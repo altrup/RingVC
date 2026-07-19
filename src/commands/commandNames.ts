@@ -1,7 +1,10 @@
 export const commandNamesList = [
+	"ringvc",
 	"help",
+	"catalog",
 	"delete_data",
 	"ring",
+	"ring_defaults",
 	"signup",
 	"unsignup",
 	"signuprole",

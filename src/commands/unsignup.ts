@@ -1,14 +1,11 @@
 import {
-	ActionRowBuilder,
-	ButtonBuilder,
-	ButtonStyle,
 	ChannelType,
 	ChatInputCommandInteraction,
 	MessageFlags,
 	SlashCommandBuilder,
 } from "discord.js";
 
-import { removeVoiceChatUser } from "@db/voice-chats";
+import { RingRouter } from "@routes/types";
 
 export const unsignup = {
 	data: new SlashCommandBuilder()
@@ -21,42 +18,22 @@ export const unsignup = {
 				.addChannelTypes(ChannelType.GuildVoice)
 				.setRequired(false),
 		),
-	async execute(interaction: ChatInputCommandInteraction) {
+	async execute(router: RingRouter, interaction: ChatInputCommandInteraction) {
 		const channel =
-			interaction.options.getChannel("channel") ?? interaction.channel;
-		const user = interaction.user;
-		if (!channel || channel.type !== ChannelType.GuildVoice) {
-			const moreInfo = new ButtonBuilder()
-				.setLabel("Text Channels in Voice Channels")
-				.setStyle(ButtonStyle.Link)
-				.setURL(
-					"https://support.discord.com/hc/en-us/articles/4412085582359-Text-Channels-Text-Chat-In-Voice-Channels",
-				);
-			interaction
-				.reply({
-					content: `Please select a channel, or run this command in the Voice Channel you want to un-sign up for`,
-					flags: [MessageFlags.Ephemeral],
-					components: [new ActionRowBuilder().addComponents(moreInfo).toJSON()],
-				})
-				.catch(console.error);
-			return; // stop the rest of function
-		}
-
-		const removed = await removeVoiceChatUser(channel.id, user.id);
-		if (removed) {
-			interaction
-				.reply({
-					content: `You will no longer be "rung" for <#${channel.id}>`,
-					flags: [MessageFlags.Ephemeral],
-				})
-				.catch(console.error);
+			interaction.options.getChannel("channel") ??
+			(interaction.channel?.type === ChannelType.GuildVoice
+				? interaction.channel
+				: null);
+		if (channel) {
+			await router.dispatch(interaction, "/signups/members", {
+				method: "POST",
+				queryParams: { remove: channel.id },
+				flags: [MessageFlags.Ephemeral],
+			});
 			return;
 		}
-		interaction
-			.reply({
-				content: `You aren't signed up for <#${channel.id}>`,
-				flags: [MessageFlags.Ephemeral],
-			})
-			.catch(console.error);
+		await router.dispatch(interaction, "/signups", {
+			flags: [MessageFlags.Ephemeral],
+		});
 	},
 };

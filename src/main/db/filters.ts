@@ -177,7 +177,8 @@ export const removeFilterEntry = async (
 	return deleted.length > 0;
 };
 
-// sets the filter type and clears its entries
+// sets the filter type, keeping its entries (the same list is reinterpreted:
+// a blacklist's blocked users become a whitelist's allowed users)
 export const setFilterType = async (
 	userId: string,
 	channelId: string | null,
@@ -191,12 +192,6 @@ export const setFilterType = async (
 				{ user_id: userId, channel_id: channelId, is_whitelist: isWhitelist },
 				{ onConflict: "user_id,channel_id" },
 			),
-	);
-	throwOnError(
-		await scopeFilter(
-			db.from("filter_entries").delete().eq("user_id", userId),
-			channelId,
-		),
 	);
 };
 

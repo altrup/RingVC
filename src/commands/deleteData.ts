@@ -1,100 +1,18 @@
 import {
-	ActionRowBuilder,
-	ButtonBuilder,
-	ButtonStyle,
 	ChatInputCommandInteraction,
-	EmbedBuilder,
 	MessageFlags,
 	SlashCommandBuilder,
 } from "discord.js";
 
-import { deleteAllUserData } from "@db/users";
+import { RingRouter } from "@routes/types";
 
 export const deleteData = {
 	data: new SlashCommandBuilder()
 		.setName("delete_data")
 		.setDescription("Delete all your data stored for this bot"),
-	async execute(interaction: ChatInputCommandInteraction) {
-		const response = await interaction.reply({
-			embeds: [
-				new EmbedBuilder()
-					.setColor("#ca2b2b")
-					.setTitle("Delete all Data")
-					.setDescription(
-						"Are you sure you want to delete all your data? This will remove all your filters, signups, and other account settings. This is irreversible",
-					),
-			],
-			components: [
-				new ActionRowBuilder()
-					.addComponents(
-						new ButtonBuilder()
-							.setLabel("Delete")
-							.setStyle(ButtonStyle.Danger)
-							.setCustomId("confirm-delete-data"),
-					)
-					.addComponents(
-						new ButtonBuilder()
-							.setLabel("Cancel")
-							.setStyle(ButtonStyle.Secondary)
-							.setCustomId("cancel-delete-data"),
-					)
-					.toJSON(),
-			],
+	async execute(router: RingRouter, interaction: ChatInputCommandInteraction) {
+		await router.dispatch(interaction, "/delete-data", {
 			flags: [MessageFlags.Ephemeral],
-		});
-
-		const confirmation = await response
-			.awaitMessageComponent({
-				filter: (i) => i.user.id === interaction.user.id,
-				time: 60_000,
-			})
-			.catch(() => ({
-				customId: "cancel-delete-data",
-				update: interaction.editReply.bind(interaction),
-			}));
-
-		let hadUserData = false; // check if there even was any user data to begin with
-		if (confirmation.customId === "confirm-delete-data") {
-			hadUserData = await deleteAllUserData(interaction.user.id);
-		}
-
-		await confirmation.update({
-			embeds: [
-				new EmbedBuilder()
-					.setColor("#ca2b2b")
-					.setTitle("Delete all Data")
-					.setDescription(
-						"Are you sure you want to delete all your data? This will remove all your filters, signups, and other account settings. This is irreversible.",
-					),
-			],
-			components: [
-				new ActionRowBuilder()
-					.addComponents(
-						new ButtonBuilder()
-							.setLabel(
-								confirmation.customId === "confirm-delete-data"
-									? hadUserData
-										? "Deleted Data"
-										: "No Data to Delete"
-									: "Delete",
-							)
-							.setDisabled(true)
-							.setStyle(ButtonStyle.Danger)
-							.setCustomId("confirm-delete-data"),
-					)
-					.addComponents(
-						new ButtonBuilder()
-							.setLabel(
-								confirmation.customId === "confirm-delete-data"
-									? "Cancel"
-									: "Cancelled",
-							)
-							.setDisabled(true)
-							.setStyle(ButtonStyle.Secondary)
-							.setCustomId("cancel-delete-data"),
-					)
-					.toJSON(),
-			],
 		});
 	},
 };

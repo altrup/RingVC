@@ -11,13 +11,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        check: [lint, typecheck, format:check, build]
+        check: [lint, typecheck, format:check, build, test]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
+      # the lockfile is maintained with npm 11, which resolves vite's
+      # optional esbuild peer differently than node 22's bundled npm 10
+      - run: npm install -g npm@11
       - run: npm ci
       - run: npm run ${{ matrix.check }}
 

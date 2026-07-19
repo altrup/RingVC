@@ -1,0 +1,59 @@
+import { Interaction } from "discord.js";
+import { beforeEach, expect, test, vi } from "vitest";
+
+import { deleteAllUserData } from "@db/users";
+
+import { CONFIRMATION } from "./_shared";
+import { deleteDataPost } from "./post";
+
+vi.mock("@db/users", () => ({
+	deleteAllUserData: vi.fn(),
+}));
+
+const interaction = { user: { id: "caller" } } as unknown as Interaction;
+
+const state = (confirmation: string) =>
+	({
+		params: {},
+		path: "/delete-data",
+		queryParams: new URLSearchParams(),
+		timestamp: 0,
+		fields: { getTextInputValue: () => confirmation },
+	}) as unknown as Parameters<typeof deleteDataPost>[2];
+
+beforeEach(() => {
+	vi.clearAllMocks();
+});
+
+test("typing the confirmation word exactly deletes all user data", async () => {
+	vi.mocked(deleteAllUserData).mockResolvedValue(true);
+
+	const result = await deleteDataPost(
+		undefined as never,
+		interaction,
+		state(CONFIRMATION),
+	);
+
+	expect(deleteAllUserData).toHaveBeenCalledExactlyOnceWith("caller");
+	expect(result.redirect).toBe("/delete-data");
+	const flashParams = new URLSearchParams(
+		result.queryParams as Record<string, string>,
+	);
+	expect(flashParams.get("level")).toBe("success");
+	expect(flashParams.get("done")).toBe("1");
+});
+
+test("a mismatched confirmation deletes nothing", async () => {
+	const result = await deleteDataPost(
+		undefined as never,
+		interaction,
+		state(CONFIRMATION.toLowerCase()),
+	);
+
+	expect(deleteAllUserData).not.toHaveBeenCalled();
+	const flashParams = new URLSearchParams(
+		result.queryParams as Record<string, string>,
+	);
+	expect(flashParams.get("level")).toBe("warn");
+	expect(flashParams.get("flash")).toContain("did not match");
+});

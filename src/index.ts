@@ -1,3 +1,4 @@
+import { EmbedRouter } from "discord-embed-router";
 import {
 	ChatInputCommandInteraction,
 	Client,
@@ -14,6 +15,8 @@ import {
 } from "@commands/commands";
 import { DISCORD_TOKEN } from "@config";
 import { onVoiceChannelJoin } from "@main/ring";
+import { registerRoutes } from "@routes/index";
+import { Globals } from "@routes/types";
 
 const client = new Client({
 	intents: [
@@ -24,12 +27,35 @@ const client = new Client({
 	partials: [Partials.Channel],
 });
 
+// the router handles every component/modal interaction its builders created;
+// commands dispatch into it explicitly below
+const router = new EmbedRouter<Globals>(client, { name: "ringvc" });
+router.onError((err, interaction) => {
+	console.error(err);
+	if (
+		interaction &&
+		"reply" in interaction &&
+		!interaction.replied &&
+		!interaction.deferred
+	) {
+		interaction
+			.reply({
+				content: "Something went wrong handling that interaction",
+				flags: [MessageFlags.Ephemeral],
+			})
+			.catch(console.error);
+	}
+});
+
+const commandIds = new Map<CommandName, string>();
+router.setGlobals({ commandIds });
+registerRoutes(router);
+
 // load commands
 const commands = new Collection<string, CommandImplementation>();
 for (const command of commandsArray) {
 	commands.set(command.data.name, command);
 }
-const commandIds = new Map<CommandName, string>();
 
 // When the client is ready, set status
 client.once("clientReady", async () => {
@@ -46,6 +72,10 @@ client.once("clientReady", async () => {
 			console.error("Unknown command was registered: ", command.name);
 		}
 	});
+
+	// populate client.application.emojis.cache so branded emoji on buttons
+	// resolve; the cache is empty until fetched
+	await client.application?.emojis.fetch();
 });
 client.on("shardError", async () => {
 	// console.log('disconnected');
@@ -70,7 +100,7 @@ client.on("interactionCreate", async (interaction) => {
 
 	try {
 		if (interaction instanceof ChatInputCommandInteraction) {
-			await command.execute(interaction, commandIds);
+			await command.execute(router, interaction);
 		}
 	} catch (error) {
 		console.error(error);

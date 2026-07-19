@@ -1,16 +1,11 @@
 import {
-	ActionRowBuilder,
-	ButtonBuilder,
-	ButtonStyle,
 	ChannelType,
 	ChatInputCommandInteraction,
-	GuildMember,
 	MessageFlags,
-	PermissionsBitField,
 	SlashCommandBuilder,
 } from "discord.js";
 
-import { removeVoiceChatRole } from "@db/voice-chats";
+import { RingRouter } from "@routes/types";
 
 export const unsignuprole = {
 	data: new SlashCommandBuilder()
@@ -29,58 +24,29 @@ export const unsignuprole = {
 				.addChannelTypes(ChannelType.GuildVoice)
 				.setRequired(false),
 		),
-	async execute(interaction: ChatInputCommandInteraction) {
-		const channel =
-			interaction.options.getChannel("channel") ?? interaction.channel;
+	async execute(router: RingRouter, interaction: ChatInputCommandInteraction) {
 		const role = interaction.options.getRole("role", true);
-		const member = interaction.member as GuildMember;
-
-		// Check permissions - user must have Manage Roles or be an admin
-		if (
-			!member.permissions.has(PermissionsBitField.Flags.ManageRoles) &&
-			!member.permissions.has(PermissionsBitField.Flags.Administrator)
-		) {
-			interaction
-				.reply({
-					content: `You need the "Manage Roles" permission to remove roles from voice channels`,
-					flags: [MessageFlags.Ephemeral],
-				})
-				.catch(console.error);
-			return;
-		}
-
-		if (!channel || channel.type !== ChannelType.GuildVoice) {
-			const moreInfo = new ButtonBuilder()
-				.setLabel("Text Channels in Voice Channels")
-				.setStyle(ButtonStyle.Link)
-				.setURL(
-					"https://support.discord.com/hc/en-us/articles/4412085582359-Text-Channels-Text-Chat-In-Voice-Channels",
-				);
-			interaction
-				.reply({
-					content: `Please select a channel, or run this command in the Voice Channel you want to remove the role from`,
-					flags: [MessageFlags.Ephemeral],
-					components: [new ActionRowBuilder().addComponents(moreInfo).toJSON()],
-				})
-				.catch(console.error);
-			return;
-		}
-
-		const removed = await removeVoiceChatRole(channel.id, role.id);
-		if (removed) {
-			interaction
-				.reply({
-					content: `<@&${role.id}> will no longer be pinged for <#${channel.id}>`,
-					flags: [MessageFlags.Ephemeral],
-				})
-				.catch(console.error);
-			return;
-		}
-		interaction
-			.reply({
-				content: `<@&${role.id}> isn't signed up for <#${channel.id}>`,
+		const channel =
+			interaction.options.getChannel("channel") ??
+			(interaction.channel?.type === ChannelType.GuildVoice
+				? interaction.channel
+				: null);
+		// without a channel, open the role's panel to pick which to remove; the
+		// panel's Reset button covers clearing every channel behind its confirm
+		if (!channel) {
+			await router.dispatch(interaction, `/signups/roles/by-role/${role.id}`, {
 				flags: [MessageFlags.Ephemeral],
-			})
-			.catch(console.error);
+			});
+			return;
+		}
+		await router.dispatch(
+			interaction,
+			`/signups/roles/by-role/${role.id}/channels`,
+			{
+				method: "POST",
+				queryParams: { remove: channel.id },
+				flags: [MessageFlags.Ephemeral],
+			},
+		);
 	},
 };

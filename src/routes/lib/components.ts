@@ -59,13 +59,9 @@ export const homeButton = (router: RingRouter): RingButton =>
 		.setStyle(ButtonStyle.Secondary)
 		.setTo("/");
 
-export const backButton = (
-	router: RingRouter,
-	path: string,
-	label = "Back",
-): RingButton =>
+export const backButton = (router: RingRouter, path: string): RingButton =>
 	new RouteButtonBuilder(router)
-		.setLabel(label)
+		.setLabel("Back")
 		.setStyle(ButtonStyle.Secondary)
 		.setTo(path);
 

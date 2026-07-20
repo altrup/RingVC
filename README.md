@@ -43,7 +43,7 @@ Guide on hosting the bot yourself
 
 ### Self-hosting Supabase
 
-The bot stores its data in a [Supabase](https://supabase.com) Postgres database, which you can self-host with Supabase's official Docker setup ([guide](https://supabase.com/docs/guides/self-hosting/docker)). A convenient place for it is a `supabase-project/` folder in this repository (it is gitignored), matching the default directory the setup script creates
+The bot stores its data in a [Supabase](https://supabase.com) Postgres database, which you can self-host with Supabase's official Docker setup ([guide](https://supabase.com/docs/guides/self-hosting/docker)). Keep it outside this repository — it serves the whole machine, not just this project
 
 - Apply this repository's database migrations to your instance
 

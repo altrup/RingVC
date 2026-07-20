@@ -12,7 +12,6 @@ dist
 Dockerfile
 compose.yaml
 supabase
-supabase-project
 scripts
 *.log
 coverage

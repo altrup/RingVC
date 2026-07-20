@@ -1,12 +1,21 @@
 .env
 .env.example
 data.txt
+data
 
+.git
+.github
+.claude
 .gitignore
 node_modules
 dist
 Dockerfile
 compose.yaml
+supabase
+supabase-docker
+scripts
+*.log
+coverage
 
 icon.png
 icon.svg

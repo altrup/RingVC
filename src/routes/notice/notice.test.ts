@@ -76,6 +76,12 @@ test("the notice names the panel for each command-reachable target", async () =>
 	).toBe("Open Role signups panel");
 });
 
+test("the notice embed color tracks the outcome level", async () => {
+	const success = await render({ flash: "x", level: "success", to: "/ring" });
+	const warn = await render({ flash: "x", level: "warn", to: "/ring" });
+	expect(success.embed.color).not.toBe(warn.embed.color);
+});
+
 test("the notice names the default ringees panel", async () => {
 	const { button } = await render({
 		flash: "x",

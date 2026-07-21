@@ -5,7 +5,8 @@ import { row } from "@routes/lib/components";
 import { flashText } from "@routes/lib/flash";
 import { Handler } from "@routes/types";
 
-const COLOR = "#95a5a6";
+// Discord's green/yellow, matching the flash line's ✅/⚠️ icon
+const COLORS = { success: "#57f287", warn: "#fee75c" } as const;
 
 // panels a slash-command mutation can land on, longest prefix first
 const PANEL_NAMES: readonly (readonly [string, string])[] = [
@@ -31,7 +32,9 @@ export const noticeGet: Handler<"GET"> = (router, interaction, state) => {
 	return {
 		embeds: [
 			new EmbedBuilder()
-				.setColor(COLOR)
+				.setColor(
+					COLORS[state.queryParams.get("level") === "warn" ? "warn" : "success"],
+				)
 				.setDescription(flashText(state.queryParams) ?? "Done"),
 		],
 		components: [row(open)],

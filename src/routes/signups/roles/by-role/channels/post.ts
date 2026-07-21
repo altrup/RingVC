@@ -45,6 +45,7 @@ export const rolesByRoleEditPost: Handler<"POST"> = async (
 		});
 
 	return commitRoleEdit({
+		interaction,
 		redirect: `${BY_ROLE}/${scope}`,
 		page: parseInt(query.get("page") ?? "0") || 0,
 		current,

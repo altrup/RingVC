@@ -3,7 +3,10 @@ import { expect, test } from "vitest";
 
 import { pageJumpPost } from "./post";
 
-const interaction = { user: { id: "caller" } } as unknown as Interaction;
+const interaction = {
+	user: { id: "caller" },
+	isChatInputCommand: () => false,
+} as unknown as Interaction;
 
 const jump = async (query: string, input: string) =>
 	pageJumpPost(undefined as never, interaction, {

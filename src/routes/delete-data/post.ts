@@ -12,6 +12,7 @@ export const deleteDataPost: Handler<"POST"> = async (
 ) => {
 	if (!confirmed(state.fields, CONFIRMATION))
 		return flashRedirect(
+			interaction,
 			PANEL,
 			"Confirmation text did not match, nothing was deleted",
 			"warn",
@@ -19,6 +20,7 @@ export const deleteDataPost: Handler<"POST"> = async (
 
 	const hadData = await deleteAllUserData(interaction.user.id);
 	return flashRedirect(
+		interaction,
 		PANEL,
 		hadData
 			? "All your data has been deleted"

@@ -19,6 +19,7 @@ export const filterTypePost: Handler<"POST"> = async (
 	const filter = await getFilter(interaction.user.id, channelId);
 	if (filterType(filter) === to)
 		return flashRedirect(
+			interaction,
 			panel,
 			`${scopeName(scope, "filter", { capitalize: true })} is already a ${to}`,
 			"warn",
@@ -30,9 +31,10 @@ export const filterTypePost: Handler<"POST"> = async (
 	// says so: a blacklist's blocked users become the only ones a whitelist admits
 	const lead = `${scopeName(scope, "filter", { capitalize: true })} is now a ${to}`;
 	if ((filter?.entries.size ?? 0) === 0)
-		return flashRedirect(panel, lead, "success");
+		return flashRedirect(interaction, panel, lead, "success");
 
 	return flashRedirect(
+		interaction,
 		panel,
 		to === "whitelist"
 			? `${lead}. The people on it were blocked, and are now the only people who can ring you`

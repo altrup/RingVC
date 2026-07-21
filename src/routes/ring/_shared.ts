@@ -54,9 +54,19 @@ export const ringUserIds = async (
 ) => {
 	const channel = voiceChannelOf(interaction);
 	if (!channel)
-		return flashRedirect(PANEL, noVoiceChannelFlash(interaction), "warn");
+		return flashRedirect(
+			interaction,
+			PANEL,
+			noVoiceChannelFlash(interaction),
+			"warn",
+		);
 	if (userIds.length === 0)
-		return flashRedirect(PANEL, "Nobody was selected to ring", "warn");
+		return flashRedirect(
+			interaction,
+			PANEL,
+			"Nobody was selected to ring",
+			"warn",
+		);
 
 	try {
 		const results = await ring(
@@ -66,9 +76,10 @@ export const ringUserIds = async (
 			userIds,
 		);
 		const { flash, level } = ringResultsFlash(results);
-		return flashRedirect(PANEL, flash, level);
+		return flashRedirect(interaction, PANEL, flash, level);
 	} catch (err) {
 		return flashRedirect(
+			interaction,
 			PANEL,
 			`Can't ring because ${getErrorMessage(err)}`,
 			"warn",

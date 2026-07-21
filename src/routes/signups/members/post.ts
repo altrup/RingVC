@@ -20,6 +20,7 @@ export const signupsMembersPost: Handler<"POST"> = async (
 	const guild = interaction.guild;
 	if (!guild)
 		return flashRedirect(
+			interaction,
 			PANEL,
 			"Signups only work inside a Discord server",
 			"warn",
@@ -87,6 +88,7 @@ export const signupsMembersPost: Handler<"POST"> = async (
 	];
 	const changed = added.length > 0 || removed.length > 0;
 	return flashRedirect(
+		interaction,
 		PANEL,
 		parts.length > 0 ? parts.join(". ") : "No changes to your signups",
 		changed ? "success" : "warn",

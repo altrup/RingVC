@@ -14,6 +14,7 @@ export const recipientsResetPost: Handler<"POST"> = async (
 	const scope = scopeOf(state.params);
 	if (!confirmed(state.fields, "RESET"))
 		return flashRedirect(
+			interaction,
 			panelPath(scope),
 			"Confirmation text did not match, your recipients were not cleared",
 			"warn",
@@ -24,11 +25,13 @@ export const recipientsResetPost: Handler<"POST"> = async (
 	);
 	return hadRingees
 		? flashRedirect(
+				interaction,
 				panelPath(scope),
 				`Cleared your default ring recipients ${scopeSuffix(scope)}`,
 				"success",
 			)
 		: flashRedirect(
+				interaction,
 				panelPath(scope),
 				`You already have no default ring recipients ${scopeSuffix(scope)}`,
 				"warn",

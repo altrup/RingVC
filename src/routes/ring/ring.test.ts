@@ -21,6 +21,7 @@ const makeInteraction = (inVoice: boolean) =>
 		user: { id: "caller" },
 		member: { voice: { channel: inVoice ? voiceChannel : null } },
 		inGuild: () => true,
+		isChatInputCommand: () => false,
 	}) as unknown as Interaction;
 
 const state = (query: string, values?: string[]) =>
@@ -100,6 +101,7 @@ test("ringing from a DM flashes the server-only hint and rings nobody", async ()
 		user: { id: "caller" },
 		member: null,
 		inGuild: () => false,
+		isChatInputCommand: () => false,
 	} as unknown as Interaction;
 	const result = await ringUsersPost(
 		undefined as never,

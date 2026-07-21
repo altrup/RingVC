@@ -1,19 +1,37 @@
 import { RouteRedirect } from "discord-embed-router";
+import { Interaction } from "discord.js";
 
 export type FlashLevel = "success" | "warn";
 
-// the redirect a mutation handler returns so its outcome shows as a notice on
-// the target panel. It rides the in-flight query params only — the components
-// the GET builds don't carry it — so the notice clears on the next interaction
+// the compact outcome view slash-command mutations land on (routes/notice)
+export const NOTICE = "/notice";
+
+// the redirect a mutation handler returns so its outcome shows as a notice.
+// Component and modal interactions come from a panel, so the notice rides the
+// target panel's in-flight query params only — the components the GET builds
+// don't carry it, so it clears on the next interaction. Slash commands never
+// showed a panel, so they land on the compact notice view instead, with the
+// panel (and its extra params) folded into its `to` target
 export const flashRedirect = (
+	interaction: Interaction,
 	redirect: string,
 	flash: string,
 	level: FlashLevel,
 	extraParams: Record<string, string> = {},
-): RouteRedirect => ({
-	redirect,
-	queryParams: { flash, level, ...extraParams },
-});
+): RouteRedirect => {
+	if (interaction.isChatInputCommand()) {
+		const query = new URLSearchParams(extraParams).toString();
+		return {
+			redirect: NOTICE,
+			queryParams: {
+				flash,
+				level,
+				to: query ? `${redirect}?${query}` : redirect,
+			},
+		};
+	}
+	return { redirect, queryParams: { flash, level, ...extraParams } };
+};
 
 // bolds the flash's opening clause (through the first period, or the whole
 // text when it has none) so the outcome reads at a glance

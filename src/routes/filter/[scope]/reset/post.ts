@@ -15,6 +15,7 @@ export const filterResetPost: Handler<"POST"> = async (
 	const panel = panelPath(scope);
 	if (!confirmed(state.fields, "RESET"))
 		return flashRedirect(
+			interaction,
 			panel,
 			"Confirmation text did not match, the filter was not reset",
 			"warn",
@@ -25,11 +26,13 @@ export const filterResetPost: Handler<"POST"> = async (
 	);
 	return wasNotDefault
 		? flashRedirect(
+				interaction,
 				panel,
 				`${scopeName(scope, "filter", { capitalize: true })} has been reset and is an empty blacklist`,
 				"success",
 			)
 		: flashRedirect(
+				interaction,
 				panel,
 				`${scopeName(scope, "filter", { capitalize: true })} is already the default (an empty blacklist)`,
 				"warn",

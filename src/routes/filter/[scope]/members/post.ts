@@ -36,12 +36,14 @@ export const filterMembersPost: Handler<"POST"> = async (
 
 	if (intent === "block" && type === "whitelist")
 		return flashRedirect(
+			interaction,
 			panel,
 			"Your global filter is a whitelist. Switch it to a blacklist below, or use /whitelist and /unwhitelist instead.",
 			"warn",
 		);
 	if (intent === "whitelist" && type === "blacklist")
 		return flashRedirect(
+			interaction,
 			panel,
 			"Your global filter is a blacklist. Switch it to a whitelist below, or use /block and /unblock instead.",
 			"warn",
@@ -116,7 +118,13 @@ export const filterMembersPost: Handler<"POST"> = async (
 				: `No changes to ${scopeName(scope, type)}`;
 	}
 
-	return flashRedirect(panel, flash, changed ? "success" : "warn", {
-		page: query.get("page") ?? "0",
-	});
+	return flashRedirect(
+		interaction,
+		panel,
+		flash,
+		changed ? "success" : "warn",
+		{
+			page: query.get("page") ?? "0",
+		},
+	);
 };

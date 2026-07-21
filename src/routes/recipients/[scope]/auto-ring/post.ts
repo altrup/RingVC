@@ -18,17 +18,20 @@ export const recipientsAutoRingPost: Handler<"POST"> = async (
 	const changed = await setAutoRing(interaction.user.id, channelId, enable);
 	if (!changed)
 		return flashRedirect(
+			interaction,
 			panel,
 			`Auto-ring is already ${enable ? "enabled" : "disabled"} ${scopeSuffix(scope)}`,
 			"warn",
 		);
 	return enable
 		? flashRedirect(
+				interaction,
 				panel,
 				`Auto-ring is now enabled ${scopeSuffix(scope)}. WARNING: joining ${channelId ? `<#${channelId}>` : "a voice channel"} now rings all of your default ring recipients, even in stealth mode`,
 				"warn",
 			)
 		: flashRedirect(
+				interaction,
 				panel,
 				`Auto-ring is now disabled ${scopeSuffix(scope)}`,
 				"success",

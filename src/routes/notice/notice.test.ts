@@ -76,6 +76,15 @@ test("the notice names the panel for each command-reachable target", async () =>
 	).toBe("Open Role signups panel");
 });
 
+test("the notice names the default ringees panel", async () => {
+	const { button } = await render({
+		flash: "x",
+		level: "warn",
+		to: "/recipients/global",
+	});
+	expect(button.label).toBe("Open Default ringees panel");
+});
+
 test("an unmapped target still gets a working generic button", async () => {
 	const { button } = await render({ flash: "x", level: "warn", to: "/filter" });
 	expect(button.label).toBe("Open panel");

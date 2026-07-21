@@ -35,9 +35,11 @@ export const ringDefaultPost: Handler<"POST"> = async (
 	} catch (err) {
 		const message = getErrorMessage(err);
 		return message === "no default users to ring"
-			? flashRedirect(
+			? // from a slash command the notice's button leads to the default-ringees
+				// panel, where the missing recipients get added
+				flashRedirect(
 					interaction,
-					PANEL,
+					interaction.isChatInputCommand() ? "/recipients/global" : PANEL,
 					`You have no default ring recipients. Use the Ring recipients panel on the home page or ${commandMention(state.globals, "default_ring_recipients")} to add some`,
 					"warn",
 				)

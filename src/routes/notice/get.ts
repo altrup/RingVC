@@ -11,6 +11,7 @@ const COLOR = "#95a5a6";
 const PANEL_NAMES: readonly (readonly [string, string])[] = [
 	["/signups/roles", "Role signups"],
 	["/signups", "Signups"],
+	["/recipients", "Default ringees"],
 	["/ring", "Quick ring"],
 	["/mode", "Mode"],
 ];

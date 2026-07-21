@@ -66,6 +66,29 @@ test("ringing defaults rings the saved list and returns to the Quick ring panel"
 	expect(result.redirect).toBe("/ring");
 });
 
+test("ringing defaults with none saved points the notice at the default ringees panel", async () => {
+	vi.mocked(ringDefaultUsers).mockRejectedValue(
+		new Error("no default users to ring"),
+	);
+
+	const command = {
+		...(makeInteraction(true) as object),
+		isChatInputCommand: () => true,
+	} as unknown as Interaction;
+	const result = await ringDefaultPost(
+		undefined as never,
+		command,
+		defaultState(),
+	);
+
+	const flashParams = new URLSearchParams(
+		result.queryParams as Record<string, string>,
+	);
+	expect(result.redirect).toBe("/notice");
+	expect(flashParams.get("to")).toBe("/recipients/global");
+	expect(flashParams.get("level")).toBe("warn");
+});
+
 test("ringing defaults while not in a voice channel warns without ringing", async () => {
 	const result = await ringDefaultPost(
 		undefined as never,

@@ -25,7 +25,7 @@ export const noticeGet: Handler<"GET"> = (router, interaction, state) => {
 	const [path = "/", query = ""] = to.split("?");
 	const open = new RouteButtonBuilder(router)
 		.setLabel(openLabel(path))
-		.setStyle(ButtonStyle.Primary)
+		.setStyle(ButtonStyle.Secondary)
 		.setTo(path, { method: "GET", queryParams: query });
 	return {
 		embeds: [

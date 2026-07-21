@@ -86,6 +86,27 @@ export type Database = {
 					},
 				];
 			};
+			error_reports: {
+				Row: {
+					created_at: string;
+					error: string;
+					id: number;
+					interaction: string;
+				};
+				Insert: {
+					created_at?: string;
+					error: string;
+					id?: never;
+					interaction: string;
+				};
+				Update: {
+					created_at?: string;
+					error?: string;
+					id?: never;
+					interaction?: string;
+				};
+				Relationships: [];
+			};
 			filter_entries: {
 				Row: {
 					channel_id: string | null;
@@ -138,6 +159,24 @@ export type Database = {
 					},
 				];
 			};
+			usage_counts: {
+				Row: {
+					count: number;
+					day: string;
+					interaction: string;
+				};
+				Insert: {
+					count?: number;
+					day?: string;
+					interaction: string;
+				};
+				Update: {
+					count?: number;
+					day?: string;
+					interaction?: string;
+				};
+				Relationships: [];
+			};
 			users: {
 				Row: {
 					mode: Database["public"]["Enums"]["discord_user_mode"];
@@ -188,7 +227,12 @@ export type Database = {
 			[_ in never]: never;
 		};
 		Functions: {
-			[_ in never]: never;
+			record_usage: {
+				Args: {
+					p_interaction: string;
+				};
+				Returns: undefined;
+			};
 		};
 		Enums: {
 			discord_user_mode: "normal" | "stealth" | "auto";

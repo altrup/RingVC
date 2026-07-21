@@ -3,7 +3,7 @@ import {
 	getVoiceChatSignups,
 	removeVoiceChatRole,
 } from "@db/voice-chats";
-import { mentionRole } from "@main/ring";
+import { joinWithAnd, mentionChannel, mentionRole } from "@main/ring";
 import { resolveSelectionEdit } from "@routes/lib/paging";
 import { Handler } from "@routes/types";
 
@@ -52,5 +52,9 @@ export const rolesByChannelEditPost: Handler<"POST"> = async (
 		mutateRemove: (roleId) => removeVoiceChatRole(scope, roleId),
 		itemMention: mentionRole,
 		sortItems: (roleIds) => sortRoleIds(guild, roleIds),
+		alreadySignedUp: (roleIds) =>
+			`${joinWithAnd(roleIds.map(mentionRole))} ${roleIds.length > 1 ? "are" : "is"} already signed up for ${mentionChannel(scope)}`,
+		notSignedUp: (roleIds) =>
+			`${joinWithAnd(roleIds.map(mentionRole))} ${roleIds.length > 1 ? "aren't" : "isn't"} signed up for ${mentionChannel(scope)}`,
 	});
 };

@@ -87,6 +87,8 @@ export const commitRoleEdit = async ({
 	mutateRemove,
 	itemMention,
 	sortItems,
+	alreadySignedUp,
+	notSignedUp,
 }: {
 	redirect: string;
 	page: number;
@@ -98,6 +100,9 @@ export const commitRoleEdit = async ({
 	mutateRemove: (item: string) => Promise<boolean>;
 	itemMention: (id: string) => string;
 	sortItems: (items: string[]) => string[];
+	// the no-op sentences, oriented by the caller so both name role and channel
+	alreadySignedUp: (items: string[]) => string;
+	notSignedUp: (items: string[]) => string;
 }): Promise<RouteRedirect> => {
 	const currentSet = new Set(current);
 	const toAdd = addsRequested.filter((item) => !currentSet.has(item));
@@ -130,9 +135,9 @@ export const commitRoleEdit = async ({
 		parts.length > 0
 			? parts.join(". ")
 			: addsRequested.length > 0
-				? `${joinWithAnd(addsRequested.map(itemMention))} ${addsRequested.length > 1 ? "are" : "is"} already signed up`
+				? alreadySignedUp(addsRequested)
 				: removesRequested.length > 0
-					? `${joinWithAnd(removesRequested.map(itemMention))} ${removesRequested.length > 1 ? "aren't" : "isn't"} signed up`
+					? notSignedUp(removesRequested)
 					: "No changes to role signups.";
 	return flashRedirect(redirect, flash, changed ? "success" : "warn", {
 		page: String(page),

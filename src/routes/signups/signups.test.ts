@@ -13,6 +13,7 @@ import {
 import { signupsResetPost } from "./reset/post";
 import { rolesByChannelResetPost } from "./roles/by-channel/reset/post";
 import { rolesByChannelEditPost } from "./roles/by-channel/roles/post";
+import { rolesByRoleEditPost } from "./roles/by-role/channels/post";
 import { rolesByRoleResetPost } from "./roles/by-role/reset/post";
 
 vi.mock("@db/voice-chats", () => ({
@@ -108,6 +109,36 @@ test("the signuprole add param signs a role up for the channel", async () => {
 
 	expect(addVoiceChatRole).toHaveBeenCalledExactlyOnceWith("vc1", "r5");
 	expect(result.redirect).toBe("/signups/roles/by-channel/vc1");
+});
+
+test("unsignuprole for a channel the role isn't in names both", async () => {
+	vi.mocked(getVoiceChatRoleSignups).mockResolvedValue([]);
+
+	const result = await rolesByRoleEditPost(
+		undefined as never,
+		makeInteraction(true),
+		editState({ scope: "role1", query: "remove=vc1" }),
+	);
+
+	expect(removeVoiceChatRole).not.toHaveBeenCalled();
+	expect(flashOf(result).get("level")).toBe("warn");
+	expect(flashOf(result).get("flash")).toContain("isn't signed up for");
+});
+
+test("signuprole for a channel the role is already in names both", async () => {
+	vi.mocked(getVoiceChatSignups).mockResolvedValue({
+		userIds: [],
+		roleIds: ["r1"],
+	});
+
+	const result = await rolesByChannelEditPost(
+		undefined as never,
+		makeInteraction(true),
+		editState({ scope: "vc1", query: "add=r1" }),
+	);
+
+	expect(addVoiceChatRole).not.toHaveBeenCalled();
+	expect(flashOf(result).get("flash")).toContain("already signed up for");
 });
 
 test("a role edit without Manage Roles mutates nothing", async () => {

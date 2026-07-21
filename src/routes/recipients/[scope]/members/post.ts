@@ -35,6 +35,10 @@ export const recipientsMembersPost: Handler<"POST"> = async (
 	const ringeeSet = new Set(ringees);
 	const added = addsRequested.filter((id) => !ringeeSet.has(id));
 	const removed = removesRequested.filter((id) => ringeeSet.has(id));
+	// no-op requests from the command adapters; the select path's equivalents
+	// arrive as alreadyPresent from the page diff
+	const alreadyAdded = addsRequested.filter((id) => ringeeSet.has(id));
+	const notListed = removesRequested.filter((id) => !ringeeSet.has(id));
 
 	await Promise.all([
 		...added.map((id) => addDefaultRingee(userId, channelId, id)),
@@ -56,9 +60,14 @@ export const recipientsMembersPost: Handler<"POST"> = async (
 		...(removed.length > 0
 			? [`Removed ${joinWithAnd(removed.map(mentionUser))}`]
 			: []),
-		...(alreadyPresent.length > 0
+		...(alreadyAdded.length > 0 || alreadyPresent.length > 0
 			? [
-					`${joinWithAnd(alreadyPresent.map(label))} ${alreadyPresent.length > 1 ? "are" : "is"} already added`,
+					`${joinWithAnd([...alreadyAdded, ...alreadyPresent].map(label))} ${alreadyAdded.length + alreadyPresent.length > 1 ? "are" : "is"} already added`,
+				]
+			: []),
+		...(notListed.length > 0
+			? [
+					`${joinWithAnd(notListed.map(mentionUser))} ${notListed.length > 1 ? "aren't" : "isn't"} added`,
 				]
 			: []),
 	];

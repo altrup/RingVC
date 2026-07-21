@@ -130,9 +130,9 @@ export const commitRoleEdit = async ({
 		parts.length > 0
 			? parts.join(". ")
 			: addsRequested.length > 0
-				? "Already signed up."
+				? `${joinWithAnd(addsRequested.map(itemMention))} ${addsRequested.length > 1 ? "are" : "is"} already signed up`
 				: removesRequested.length > 0
-					? "Those weren't signed up."
+					? `${joinWithAnd(removesRequested.map(itemMention))} ${removesRequested.length > 1 ? "aren't" : "isn't"} signed up`
 					: "No changes to role signups.";
 	return flashRedirect(redirect, flash, changed ? "success" : "warn", {
 		page: String(page),

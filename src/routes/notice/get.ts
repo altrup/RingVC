@@ -9,13 +9,14 @@ import { Handler } from "@routes/types";
 const COLORS = { success: "#57f287", warn: "#fee75c" } as const;
 
 // panels a slash-command mutation can land on, longest prefix first
-const PANEL_NAMES: readonly (readonly [string, string])[] = [
+const PANEL_NAMES = [
 	["/signups/roles", "Role signups"],
 	["/signups", "Signups"],
 	["/recipients", "Default ringees"],
 	["/ring", "Quick ring"],
 	["/mode", "Mode"],
-];
+	["/filter/global", "Global filter"],
+] as const;
 
 const openLabel = (path: string): string => {
 	const match = PANEL_NAMES.find(([prefix]) => path.startsWith(prefix));

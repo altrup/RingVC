@@ -91,7 +91,20 @@ test("the notice names the default ringees panel", async () => {
 	expect(button.label).toBe("Open Default ringees panel");
 });
 
+test("the notice names the global filter panel", async () => {
+	const { button } = await render({
+		flash: "x",
+		level: "warn",
+		to: "/filter/global",
+	});
+	expect(button.label).toBe("Open Global filter panel");
+});
+
 test("an unmapped target still gets a working generic button", async () => {
-	const { button } = await render({ flash: "x", level: "warn", to: "/filter" });
+	const { button } = await render({
+		flash: "x",
+		level: "warn",
+		to: "/delete-data",
+	});
 	expect(button.label).toBe("Open panel");
 });

@@ -13,6 +13,12 @@
 
 - Status (online, offline) of users who are using `/mode set auto`
 
+## Diagnostic Data
+
+- Error reports (the command or interaction that failed, the type of error and where in the code it occurred, and a timestamp) are collected to fix bugs
+- Anonymous aggregate usage counts of commands and embed interactions are collected
+- Diagnostic data never includes User IDs, server or channel names, command arguments, or error message text
+
 ## Deleting Data
 
 - Stored Data will never be deleted automatically

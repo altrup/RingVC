@@ -2,6 +2,7 @@ import {
 	ChannelType,
 	ChatInputCommandInteraction,
 	MessageFlags,
+	PermissionFlagsBits,
 	SlashCommandBuilder,
 } from "discord.js";
 
@@ -11,6 +12,7 @@ export const unsignuprole = {
 	data: new SlashCommandBuilder()
 		.setName("unsignuprole")
 		.setDescription("Stop a role from being pinged for a voice chat")
+		.setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
 		.addRoleOption((option) =>
 			option
 				.setName("role")

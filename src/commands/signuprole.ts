@@ -2,6 +2,7 @@ import {
 	ChannelType,
 	ChatInputCommandInteraction,
 	MessageFlags,
+	PermissionFlagsBits,
 	SlashCommandBuilder,
 } from "discord.js";
 
@@ -11,6 +12,7 @@ export const signuprole = {
 	data: new SlashCommandBuilder()
 		.setName("signuprole")
 		.setDescription("Sign up a role to get pinged when someone starts a call")
+		.setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
 		.addRoleOption((option) =>
 			option
 				.setName("role")

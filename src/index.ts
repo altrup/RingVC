@@ -14,11 +14,8 @@ import {
 	commands as commandsArray,
 } from "@commands/commands";
 import { DISCORD_TOKEN } from "@config";
-import {
-	instrumentRouter,
-	recordErrorOnce,
-	recordInteractionUsage,
-} from "@main/diagnostics";
+import { recordError, recordUsage } from "@db/diagnostics";
+import { observeRouter } from "@main/diagnostics";
 import { onVoiceChannelJoin } from "@main/ring";
 import { registerRoutes } from "@routes/index";
 import { Globals } from "@routes/types";
@@ -36,9 +33,6 @@ const client = new Client({
 // commands dispatch into it explicitly below
 const router = new EmbedRouter<Globals>(client, { name: "ringvc" });
 router.onError((err, interaction) => {
-	// handler errors are already reported under their route key; this catches
-	// router-internal ones
-	recordErrorOnce("ROUTER", err);
 	console.error(err);
 	if (
 		interaction &&
@@ -57,7 +51,7 @@ router.onError((err, interaction) => {
 
 const commandIds = new Map<CommandName, string>();
 router.setGlobals({ commandIds });
-instrumentRouter(router);
+observeRouter(router);
 registerRoutes(router);
 
 // load commands
@@ -105,14 +99,11 @@ client.on("interactionCreate", async (interaction) => {
 
 	try {
 		if (interaction instanceof ChatInputCommandInteraction) {
-			recordInteractionUsage(
-				`COMMAND /${interaction.commandName}`,
-				interaction,
-			);
+			recordUsage(`COMMAND /${interaction.commandName}`);
 			await command.execute(router, interaction);
 		}
 	} catch (error) {
-		recordErrorOnce(`COMMAND /${interaction.commandName}`, error);
+		recordError(`COMMAND /${interaction.commandName}`, error);
 		console.error(error);
 		await interaction
 			.reply({

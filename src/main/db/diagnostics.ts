@@ -13,8 +13,14 @@ export const recordUsage = (interaction: string): void => {
 // its stack frames (code locations). The free-text message is deliberately
 // dropped: it can embed IDs, server names, and channel names, and the privacy
 // policy forbids storing those
-const describeError = (error: unknown): string => {
-	if (!(error instanceof Error)) return typeof error;
+const describeError = (raw: unknown): string => {
+	if (!(raw instanceof Error)) return typeof raw;
+	// the router wraps handler errors ("Error while handling POST /x"); the
+	// root cause has the specific type, code, and frames. Bounded in case of
+	// a cause cycle
+	let error: Error = raw;
+	for (let depth = 0; error.cause instanceof Error && depth < 5; depth++)
+		error = error.cause;
 	const code = (error as { code?: unknown }).code;
 	const label =
 		typeof code === "number" || typeof code === "string"

@@ -14,6 +14,8 @@ import {
 	commands as commandsArray,
 } from "@commands/commands";
 import { DISCORD_TOKEN } from "@config";
+import { recordError, recordUsage } from "@db/diagnostics";
+import { observeRouter } from "@main/diagnostics";
 import { onVoiceChannelJoin } from "@main/ring";
 import { registerRoutes } from "@routes/index";
 import { Globals } from "@routes/types";
@@ -49,6 +51,7 @@ router.onError((err, interaction) => {
 
 const commandIds = new Map<CommandName, string>();
 router.setGlobals({ commandIds });
+observeRouter(router);
 registerRoutes(router);
 
 // load commands
@@ -96,9 +99,11 @@ client.on("interactionCreate", async (interaction) => {
 
 	try {
 		if (interaction instanceof ChatInputCommandInteraction) {
+			recordUsage(`COMMAND /${interaction.commandName}`);
 			await command.execute(router, interaction);
 		}
 	} catch (error) {
+		recordError(`COMMAND /${interaction.commandName}`, error);
 		console.error(error);
 		await interaction
 			.reply({

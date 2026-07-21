@@ -36,7 +36,8 @@ export const rolesByChannelGet: Handler<"GET"> = async (
 ) => {
 	const guild = interaction.guild;
 	if (!guild) return guildOnlyRender(router, interaction);
-	if (!canManageRoleSignups(interaction)) return noPermissionRender(router, interaction);
+	if (!canManageRoleSignups(interaction))
+		return noPermissionRender(router, interaction);
 
 	const scope = roleScopeOf(state.params);
 	if (!scope) return rolesGet(router, interaction, state);

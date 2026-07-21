@@ -15,7 +15,6 @@ import {
 	Interaction,
 } from "discord.js";
 
-import { buttonEmoji, VC_EMOJI_ID } from "@routes/lib/emoji";
 import { Page, pagedEditPattern, SELECT_MAX_VALUES } from "@routes/lib/paging";
 import { PAGE_JUMP } from "@routes/page-jump/_shared";
 import { RingButton, RingRouter } from "@routes/types";
@@ -95,7 +94,6 @@ export const navBar = (
 	router: RingRouter,
 	interaction: Interaction,
 ): APIActionRowComponent<APIComponentInMessageActionRow> => {
-	const vc = buttonEmoji(interaction, VC_EMOJI_ID);
 	// the Ring option lands on the immediate ring action when in a voice channel,
 	// else the default-recipients settings, so it never opens the "not in VC" notice
 	const inVoice = !!(
@@ -106,12 +104,9 @@ export const navBar = (
 
 	const option = ({ section, label, path }: Tab) => {
 		const target = section === "ringees" && inVoice ? "/ring" : path;
-		const builder = new RouteStringSelectMenuOptionBuilder(router).setTo(
-			target,
-		);
-		if (section === "signups" && vc) builder.setLabel("Signups").setEmoji(vc);
-		else builder.setLabel(label);
-		return builder;
+		return new RouteStringSelectMenuOptionBuilder(router)
+			.setTo(target)
+			.setLabel(label);
 	};
 
 	// each option encodes its own target; the default pattern routes to the picked one

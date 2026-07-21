@@ -36,8 +36,8 @@ export const rolesByRoleGet: Handler<"GET"> = async (
 	state,
 ) => {
 	const guild = interaction.guild;
-	if (!guild) return guildOnlyRender(router);
-	if (!canManageRoleSignups(interaction)) return noPermissionRender(router);
+	if (!guild) return guildOnlyRender(router, interaction);
+	if (!canManageRoleSignups(interaction)) return noPermissionRender(router, interaction);
 
 	const scope = roleScopeOf(state.params);
 	if (!scope) return rolesGet(router, interaction, state);

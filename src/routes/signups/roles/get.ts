@@ -15,8 +15,8 @@ import { BY_CHANNEL, BY_ROLE, LEAD, roleFrame } from "./_shared";
 
 export const rolesGet: Handler<"GET"> = async (router, interaction, state) => {
 	const guild = interaction.guild;
-	if (!guild) return guildOnlyRender(router);
-	if (!canManageRoleSignups(interaction)) return noPermissionRender(router);
+	if (!guild) return guildOnlyRender(router, interaction);
+	if (!canManageRoleSignups(interaction)) return noPermissionRender(router, interaction);
 
 	const channelSelectRow = new ActionRowBuilder<RouteChannelSelectMenuBuilder>()
 		.addComponents(

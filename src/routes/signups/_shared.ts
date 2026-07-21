@@ -9,7 +9,7 @@ import {
 	getUserVoiceChatSignups,
 	getVoiceChatRoleSignups,
 } from "@db/voice-chats";
-import { backButton, homeButton, row } from "@routes/lib/components";
+import { navBar } from "@routes/lib/components";
 import { Handler } from "@routes/types";
 
 export const COLOR = "#31a5a5";
@@ -30,14 +30,17 @@ export const guildVoiceChannelIds = (guild: Guild): string[] =>
 
 // panels are ephemeral and per-guild; anything reached outside a guild
 // (e.g. a DM) has nothing to show
-export const guildOnlyRender = (router: Parameters<Handler<"GET">>[0]) => ({
+export const guildOnlyRender = (
+	router: Parameters<Handler<"GET">>[0],
+	interaction: Interaction,
+) => ({
 	embeds: [
 		new EmbedBuilder()
 			.setColor(COLOR)
 			.setTitle("Signups")
 			.setDescription("⚠️ Signups only work inside a Discord server"),
 	],
-	components: [row(homeButton(router))],
+	components: [navBar(router, interaction)],
 });
 
 // the user's signups, restricted to this guild's voice channels and sorted
@@ -68,7 +71,10 @@ export const sortedRoleSignups = async (guild: Guild) => {
 	);
 };
 
-export const noPermissionRender = (router: Parameters<Handler<"GET">>[0]) => ({
+export const noPermissionRender = (
+	router: Parameters<Handler<"GET">>[0],
+	interaction: Interaction,
+) => ({
 	embeds: [
 		new EmbedBuilder()
 			.setColor(COLOR)
@@ -77,5 +83,5 @@ export const noPermissionRender = (router: Parameters<Handler<"GET">>[0]) => ({
 				"⚠️ You need the Manage Roles permission to manage role signups",
 			),
 	],
-	components: [row(backButton(router, PANEL), homeButton(router))],
+	components: [navBar(router, interaction)],
 });

@@ -39,7 +39,7 @@ export const signupsGet: Handler<"GET"> = async (
 	state,
 ) => {
 	const guild = interaction.guild;
-	if (!guild) return guildOnlyRender(router);
+	if (!guild) return guildOnlyRender(router, interaction);
 
 	const signups = await guildSignups(interaction.user.id, guild);
 	const { pageItems, page, pageCount } = paginate(

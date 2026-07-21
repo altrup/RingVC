@@ -5,17 +5,14 @@ import { row } from "@routes/lib/components";
 import { flashText } from "@routes/lib/flash";
 import { Handler } from "@routes/types";
 
-// Discord's green/yellow, matching the flash line's ✅/⚠️ icon
-const COLORS = { success: "#57f287", warn: "#fee75c" } as const;
-
 // panels a slash-command mutation can land on, longest prefix first
 const PANEL_NAMES = [
+	["/filter/global", "Global filter"],
 	["/signups/roles", "Role signups"],
 	["/signups", "Signups"],
 	["/recipients", "Default ringees"],
 	["/ring", "Quick ring"],
 	["/mode", "Mode"],
-	["/filter/global", "Global filter"],
 ] as const;
 
 const openLabel = (path: string): string => {
@@ -33,8 +30,9 @@ export const noticeGet: Handler<"GET"> = (router, interaction, state) => {
 	return {
 		embeds: [
 			new EmbedBuilder()
+				// Discord's yellow/green, matching the flash line's ⚠️/✅ icon
 				.setColor(
-					COLORS[state.queryParams.get("level") === "warn" ? "warn" : "success"],
+					state.queryParams.get("level") === "warn" ? "#fee75c" : "#57f287",
 				)
 				.setDescription(flashText(state.queryParams) ?? "Done"),
 		],

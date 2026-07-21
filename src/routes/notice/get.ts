@@ -2,7 +2,7 @@ import { RouteButtonBuilder } from "discord-embed-router";
 import { ButtonStyle, EmbedBuilder } from "discord.js";
 
 import { row } from "@routes/lib/components";
-import { flashLine } from "@routes/lib/flash";
+import { flashText } from "@routes/lib/flash";
 import { Handler } from "@routes/types";
 
 const COLOR = "#95a5a6";
@@ -31,7 +31,7 @@ export const noticeGet: Handler<"GET"> = (router, interaction, state) => {
 		embeds: [
 			new EmbedBuilder()
 				.setColor(COLOR)
-				.setDescription(flashLine(state.queryParams) ?? "Done"),
+				.setDescription(flashText(state.queryParams) ?? "Done"),
 		],
 		components: [row(open)],
 	};

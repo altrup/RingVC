@@ -51,6 +51,9 @@ test("the notice shows the flash line and a button to the target panel", async (
 	});
 	expect(embed.description).toContain("Ringed <@1>");
 	expect(embed.description).toContain("✅");
+	// the flash is the whole message here, not a footnote on a panel, so it
+	// renders unquoted
+	expect(embed.description).not.toMatch(/^> /m);
 	expect(button.label).toBe("Open Quick ring panel");
 });
 

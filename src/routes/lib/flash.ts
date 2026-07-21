@@ -41,16 +41,25 @@ const boldLead = (text: string): string => {
 	return `**${text.slice(0, periodIndex + 1)}**${text.slice(periodIndex + 1)}`;
 };
 
-// the notice a panel renders at the bottom of its embed, as a markdown
-// blockquote so it separates from the body; the level picks the icon
-export const flashLine = (queryParams: URLSearchParams): string | null => {
+// the flash as plain lines with the level icon and a bold lead — what the
+// notice view shows as its whole body
+export const flashText = (queryParams: URLSearchParams): string | null => {
 	const flash = queryParams.get("flash");
 	if (!flash) return null;
 	const icon = queryParams.get("level") === "warn" ? "⚠️" : "✅";
-	// bold only the first line's lead: Discord bold can't span the newline
-	// between blockquote lines, so the markers must open and close on one line
+	// bold only the first line's lead: Discord bold can't span newlines, so
+	// the markers must open and close on one line
 	const [first = "", ...rest] = flash.split("\n");
-	return [`${icon} ${boldLead(first)}`, ...rest]
+	return [`${icon} ${boldLead(first)}`, ...rest].join("\n");
+};
+
+// the notice a panel renders at the bottom of its embed, as a markdown
+// blockquote so it separates from the body
+export const flashLine = (queryParams: URLSearchParams): string | null => {
+	const text = flashText(queryParams);
+	if (text === null) return null;
+	return text
+		.split("\n")
 		.map((line) => `> ${line}`)
 		.join("\n");
 };

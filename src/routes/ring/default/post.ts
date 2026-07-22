@@ -20,7 +20,7 @@ export const ringDefaultPost: Handler<"POST"> = async (
 		return flashRedirect(
 			interaction,
 			PANEL,
-			noVoiceChannelFlash(interaction),
+			noVoiceChannelFlash(interaction, state.globals),
 			"warn",
 		);
 

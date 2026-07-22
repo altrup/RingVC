@@ -28,7 +28,9 @@ export const ringGet: Handler<"GET"> = async (router, interaction, state) => {
 				new EmbedBuilder()
 					.setColor(COLOR)
 					.setTitle("📣 Quick ring")
-					.setDescription(`⚠️ ${noVoiceChannelFlash(interaction)}`),
+					.setDescription(
+						`⚠️ ${noVoiceChannelFlash(interaction, state.globals)}`,
+					),
 			],
 			components: [ringViews, navBar(router, interaction)],
 		};

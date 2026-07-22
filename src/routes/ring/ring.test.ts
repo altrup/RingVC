@@ -89,6 +89,24 @@ test("ringing defaults with none saved points the notice at the default ringees 
 	expect(flashParams.get("level")).toBe("warn");
 });
 
+test("the join-a-voice-channel hint mentions the ring command clickably", async () => {
+	const withCommandIds = {
+		...(state("", ["9"]) as object),
+		globals: { commandIds: new Map([["ring", "123"]]) },
+	} as unknown as Parameters<typeof ringUsersPost>[2];
+
+	const result = await ringUsersPost(
+		undefined as never,
+		makeInteraction(false),
+		withCommandIds,
+	);
+
+	const flashParams = new URLSearchParams(
+		result.queryParams as Record<string, string>,
+	);
+	expect(flashParams.get("flash")).toContain("</ring:123>");
+});
+
 test("ringing defaults while not in a voice channel warns without ringing", async () => {
 	const result = await ringDefaultPost(
 		undefined as never,

@@ -21,6 +21,7 @@ const makeInteraction = (inVoice: boolean) =>
 		user: { id: "caller" },
 		member: { voice: { channel: inVoice ? voiceChannel : null } },
 		inGuild: () => true,
+		isChatInputCommand: () => false,
 	}) as unknown as Interaction;
 
 const state = (query: string, values?: string[]) =>
@@ -65,6 +66,47 @@ test("ringing defaults rings the saved list and returns to the Quick ring panel"
 	expect(result.redirect).toBe("/ring");
 });
 
+test("ringing defaults with none saved points the notice at the default ringees panel", async () => {
+	vi.mocked(ringDefaultUsers).mockRejectedValue(
+		new Error("no default users to ring"),
+	);
+
+	const command = {
+		...(makeInteraction(true) as object),
+		isChatInputCommand: () => true,
+	} as unknown as Interaction;
+	const result = await ringDefaultPost(
+		undefined as never,
+		command,
+		defaultState(),
+	);
+
+	const flashParams = new URLSearchParams(
+		result.queryParams as Record<string, string>,
+	);
+	expect(result.redirect).toBe("/notice");
+	expect(flashParams.get("to")).toBe("/recipients/global");
+	expect(flashParams.get("level")).toBe("warn");
+});
+
+test("the join-a-voice-channel hint mentions the ring command clickably", async () => {
+	const withCommandIds = {
+		...(state("", ["9"]) as object),
+		globals: { commandIds: new Map([["ring", "123"]]) },
+	} as unknown as Parameters<typeof ringUsersPost>[2];
+
+	const result = await ringUsersPost(
+		undefined as never,
+		makeInteraction(false),
+		withCommandIds,
+	);
+
+	const flashParams = new URLSearchParams(
+		result.queryParams as Record<string, string>,
+	);
+	expect(flashParams.get("flash")).toContain("</ring:123>");
+});
+
 test("ringing defaults while not in a voice channel warns without ringing", async () => {
 	const result = await ringDefaultPost(
 		undefined as never,
@@ -100,6 +142,7 @@ test("ringing from a DM flashes the server-only hint and rings nobody", async ()
 		user: { id: "caller" },
 		member: null,
 		inGuild: () => false,
+		isChatInputCommand: () => false,
 	} as unknown as Interaction;
 	const result = await ringUsersPost(
 		undefined as never,

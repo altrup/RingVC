@@ -28,7 +28,9 @@ export const ringGet: Handler<"GET"> = async (router, interaction, state) => {
 				new EmbedBuilder()
 					.setColor(COLOR)
 					.setTitle("📣 Quick ring")
-					.setDescription(`⚠️ ${noVoiceChannelFlash(interaction)}`),
+					.setDescription(
+						`⚠️ ${noVoiceChannelFlash(interaction, state.globals)}`,
+					),
 			],
 			components: [ringViews, navBar(router, interaction)],
 		};
@@ -54,7 +56,11 @@ export const ringGet: Handler<"GET"> = async (router, interaction, state) => {
 						.setMinValues(1)
 						.setMaxValues(SELECT_MAX_VALUES)
 						.setPlaceholder("Select up to 25 people to ring")
-						.setPattern(`${PANEL}/users`, { method: "POST" }),
+						// the per-render key resets Discord's kept selection after a ring
+						.setPattern(`${PANEL}/users`, {
+							method: "POST",
+							key: state.timestamp.toString(36),
+						}),
 				)
 				.toJSON(),
 			row(

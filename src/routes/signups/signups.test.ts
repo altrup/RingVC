@@ -29,6 +29,7 @@ vi.mock("@db/voice-chats", () => ({
 const makeInteraction = (managesRoles: boolean) =>
 	({
 		user: { id: "caller" },
+		isChatInputCommand: () => false,
 		memberPermissions: new PermissionsBitField(
 			managesRoles ? PermissionsBitField.Flags.ManageRoles : 0n,
 		),

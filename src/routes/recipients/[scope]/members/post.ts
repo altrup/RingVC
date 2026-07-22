@@ -73,6 +73,7 @@ export const recipientsMembersPost: Handler<"POST"> = async (
 	];
 	const changed = added.length > 0 || removed.length > 0;
 	return flashRedirect(
+		interaction,
 		panel,
 		parts.length > 0
 			? `${parts.join(". ")} (default ring recipients ${scopeSuffix(scope)})`

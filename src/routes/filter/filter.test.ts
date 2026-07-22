@@ -22,7 +22,10 @@ vi.mock("@db/filters", async (importOriginal) => ({
 	resetFilter: vi.fn(),
 }));
 
-const interaction = { user: { id: "caller" } } as unknown as Interaction;
+const interaction = {
+	user: { id: "caller" },
+	isChatInputCommand: () => false,
+} as unknown as Interaction;
 
 const membersState = (query: string, values?: string[]) =>
 	({

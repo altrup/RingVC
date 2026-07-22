@@ -42,18 +42,21 @@ export const roleEditGuard = (
 	const guild = interaction.guild;
 	if (!guild)
 		return flashRedirect(
+			interaction,
 			base,
 			"Signups only work inside a Discord server",
 			"warn",
 		);
 	if (!canManageRoleSignups(interaction))
 		return flashRedirect(
+			interaction,
 			base,
 			"You need the Manage Roles permission to manage role signups",
 			"warn",
 		);
 	const scope = roleScopeOf(params);
-	if (!scope) return flashRedirect(base, `Pick a ${noun} first`, "warn");
+	if (!scope)
+		return flashRedirect(interaction, base, `Pick a ${noun} first`, "warn");
 	return { guild, scope };
 };
 
@@ -77,6 +80,7 @@ export const sortChannelIds = (guild: Guild, ids: string[]): string[] =>
 // a flash. Adds/removes are filtered against the current set so the notice
 // reflects real changes; both orientations mutate the same table via callbacks
 export const commitRoleEdit = async ({
+	interaction,
 	redirect,
 	page,
 	current,
@@ -90,6 +94,7 @@ export const commitRoleEdit = async ({
 	alreadySignedUp,
 	notSignedUp,
 }: {
+	interaction: Interaction;
 	redirect: string;
 	page: number;
 	current: string[];
@@ -139,9 +144,15 @@ export const commitRoleEdit = async ({
 				: removesRequested.length > 0
 					? notSignedUp(removesRequested)
 					: "No changes to role signups.";
-	return flashRedirect(redirect, flash, changed ? "success" : "warn", {
-		page: String(page),
-	});
+	return flashRedirect(
+		interaction,
+		redirect,
+		flash,
+		changed ? "success" : "warn",
+		{
+			page: String(page),
+		},
+	);
 };
 
 // the frame every role-signups view ends in: the caller's content rows, then

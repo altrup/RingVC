@@ -22,6 +22,7 @@ export const rolesByChannelResetPost: Handler<"POST"> = async (
 	const panel = `${BY_CHANNEL}/${scope}`;
 	if (!confirmed(state.fields, "RESET"))
 		return flashRedirect(
+			interaction,
 			panel,
 			"Confirmation text did not match, the roles were not cleared",
 			"warn",
@@ -30,6 +31,7 @@ export const rolesByChannelResetPost: Handler<"POST"> = async (
 	const { roleIds } = await getVoiceChatSignups(scope);
 	if (roleIds.length === 0)
 		return flashRedirect(
+			interaction,
 			panel,
 			`${mentionChannel(scope)} has no roles signed up`,
 			"warn",
@@ -39,6 +41,7 @@ export const rolesByChannelResetPost: Handler<"POST"> = async (
 		roleIds.map((roleId) => removeVoiceChatRole(scope, roleId)),
 	);
 	return flashRedirect(
+		interaction,
 		panel,
 		`Cleared the ${roleIds.length} role${roleIds.length > 1 ? "s" : ""} pinged in ${mentionChannel(scope)}`,
 		"success",

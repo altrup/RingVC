@@ -42,6 +42,7 @@ export const rolesByChannelEditPost: Handler<"POST"> = async (
 		});
 
 	return commitRoleEdit({
+		interaction,
 		redirect: `${BY_CHANNEL}/${scope}`,
 		page: parseInt(query.get("page") ?? "0") || 0,
 		current,

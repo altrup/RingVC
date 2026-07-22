@@ -23,6 +23,7 @@ export const rolesByRoleResetPost: Handler<"POST"> = async (
 	const panel = `${BY_ROLE}/${scope}`;
 	if (!confirmed(state.fields, "RESET"))
 		return flashRedirect(
+			interaction,
 			panel,
 			"Confirmation text did not match, the signups were not cleared",
 			"warn",
@@ -35,6 +36,7 @@ export const rolesByRoleResetPost: Handler<"POST"> = async (
 		.map((mapping) => mapping.channelId);
 	if (channelIds.length === 0)
 		return flashRedirect(
+			interaction,
 			panel,
 			`${mentionRole(scope)} is not signed up for any voice channels`,
 			"warn",
@@ -44,6 +46,7 @@ export const rolesByRoleResetPost: Handler<"POST"> = async (
 		channelIds.map((channelId) => removeVoiceChatRole(channelId, scope)),
 	);
 	return flashRedirect(
+		interaction,
 		panel,
 		`Cleared the ${channelIds.length} voice channel${channelIds.length > 1 ? "s" : ""} ${mentionRole(scope)} was signed up for`,
 		"success",

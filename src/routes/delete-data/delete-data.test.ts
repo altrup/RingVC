@@ -10,7 +10,10 @@ vi.mock("@db/users", () => ({
 	deleteAllUserData: vi.fn(),
 }));
 
-const interaction = { user: { id: "caller" } } as unknown as Interaction;
+const interaction = {
+	user: { id: "caller" },
+	isChatInputCommand: () => false,
+} as unknown as Interaction;
 
 const state = (confirmation: string) =>
 	({

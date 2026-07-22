@@ -9,5 +9,5 @@ export const ringUserPost: Handler<"POST"> = async (
 	state,
 ) => {
 	const userId = state.queryParams.get("id");
-	return ringUserIds(interaction, userId ? [userId] : []);
+	return ringUserIds(interaction, state.globals, userId ? [userId] : []);
 };

@@ -14,6 +14,7 @@ import { catalogGet } from "./help/catalog/get";
 import { helpGet } from "./help/get";
 import { modeGet } from "./mode/get";
 import { modePost } from "./mode/post";
+import { noticeGet } from "./notice/get";
 import { pageJumpModal } from "./page-jump/modal";
 import { pageJumpPost } from "./page-jump/post";
 import { recipientsAutoRingPost } from "./recipients/[scope]/auto-ring/post";
@@ -96,6 +97,8 @@ export const registerRoutes = (router: RingRouter) => {
 		modal: rolesByRoleResetModal,
 		post: rolesByRoleResetPost,
 	});
+
+	router.get("/notice", noticeGet);
 
 	router.get("/ring", ringGet);
 	router.post("/ring/users", ringUsersPost);

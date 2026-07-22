@@ -6,4 +6,4 @@ export const ringUsersPost: Handler<"POST"> = async (
 	router,
 	interaction,
 	state,
-) => ringUserIds(interaction, state.values ?? []);
+) => ringUserIds(interaction, state.globals, state.values ?? []);

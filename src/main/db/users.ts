@@ -3,8 +3,8 @@ import { Database } from "./database.types";
 
 export type DiscordUserMode = Database["public"]["Enums"]["discord_user_mode"];
 
-// creates the users row if missing; required before writing any settings
-// table that references users (FK with on delete cascade)
+// creates the users row if missing; required before writing any table
+// that references users (FK with on delete cascade)
 export const ensureUser = async (userId: string): Promise<void> => {
 	throwOnError(
 		await db
@@ -45,18 +45,11 @@ export const setUserMode = async (
 	);
 };
 
-// deletes every trace of a user; settings tables cascade from users.
+// deletes every trace of a user; all per-user tables cascade from users.
 // returns whether any data existed
 export const deleteAllUserData = async (userId: string): Promise<boolean> => {
 	const deletedUsers = rowsOf(
 		await db.from("users").delete().eq("user_id", userId).select("user_id"),
 	);
-	const deletedSignups = rowsOf(
-		await db
-			.from("voice_chat_users")
-			.delete()
-			.eq("user_id", userId)
-			.select("user_id"),
-	);
-	return deletedUsers.length > 0 || deletedSignups.length > 0;
+	return deletedUsers.length > 0;
 };

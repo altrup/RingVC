@@ -1,4 +1,5 @@
 import { db, rowsOf } from "./client";
+import { ensureUser } from "./users";
 
 // the users and roles signed up to be pinged for a channel
 export type VoiceChatSignups = {
@@ -63,6 +64,7 @@ export const addVoiceChatUser = async (
 	channelId: string,
 	userId: string,
 ): Promise<boolean> => {
+	await ensureUser(userId);
 	const inserted = rowsOf(
 		await db
 			.from("voice_chat_users")

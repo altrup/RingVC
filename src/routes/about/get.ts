@@ -52,7 +52,7 @@ export const aboutGet: Handler<"GET"> = (router, interaction, state) => {
 			row(
 				new RouteButtonBuilder(router)
 					.setLabel("Give feedback")
-					.setStyle(ButtonStyle.Secondary)
+					.setStyle(ButtonStyle.Primary)
 					.setTo(FEEDBACK, { method: "MODAL" }),
 			),
 			navBar(router, interaction),

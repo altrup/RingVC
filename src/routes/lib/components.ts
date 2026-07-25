@@ -66,14 +66,14 @@ type Tab = { section: Section; emoji: string; label: string; path: string };
 // dedicated option field, not the label: labels render in the OS emoji font
 // while the emoji field gets Discord's own artwork, matching embed titles
 const SECTIONS: readonly Tab[] = [
-	{ section: "signups", emoji: "🔔", label: "Signups", path: "/signups" },
-	{ section: "filters", emoji: "🛡️", label: "Filters", path: "/filter/global" },
 	{
 		section: "ringees",
 		emoji: "📣",
 		label: "Ring",
 		path: "/recipients/global",
 	},
+	{ section: "signups", emoji: "🔔", label: "Signups", path: "/signups" },
+	{ section: "filters", emoji: "🛡️", label: "Filters", path: "/filter/global" },
 	{ section: "mode", emoji: "💤", label: "Mode", path: "/mode" },
 	{ section: "help", emoji: "📖", label: "Help", path: "/help" },
 	{ section: "about", emoji: "ℹ️", label: "About", path: "/about" },

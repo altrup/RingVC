@@ -24,7 +24,7 @@ export const aboutGet: Handler<"GET"> = (router, interaction, state) => {
 				.setDescription(
 					withFlash(
 						state.queryParams,
-						"RingVC is free and open source. Star it on GitHub, or join the support server for help and updates.\n\nHave a bug report or feature idea? Give anonymous feedback below.",
+						"RingVC replicates group-chat voice calls in Discord servers: sign up for a voice channel and get pinged when someone starts a call there.\n\nIt's free and open source. Star it on GitHub, or join the support server for help and updates.\n\nHave a bug report or feature idea? Give anonymous feedback below.",
 					),
 				),
 		],

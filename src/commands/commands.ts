@@ -1,5 +1,6 @@
 import { ChatInputCommandInteraction, SharedSlashCommand } from "discord.js";
 
+import { about } from "@commands/about";
 import { catalog } from "@commands/catalog";
 import { defaultRingRecipients } from "@commands/defaultRingRecipient";
 import { deleteData } from "@commands/deleteData";
@@ -34,6 +35,7 @@ export const commands: CommandImplementation[] = [
 	ringvc,
 	help,
 	catalog,
+	about,
 	deleteData,
 	ring,
 	ringDefaults,

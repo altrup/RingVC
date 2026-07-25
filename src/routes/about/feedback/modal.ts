@@ -12,9 +12,7 @@ export const aboutFeedbackModal: Handler<"MODAL"> = (router) =>
 		.addLabelComponents(
 			new LabelBuilder()
 				.setLabel("Your feedback")
-				.setDescription(
-					"Submissions are anonymous. Nothing about who you are is stored.",
-				)
+				.setDescription("Submissions are anonymous.")
 				.setTextInputComponent(
 					new TextInputBuilder()
 						.setCustomId("content")

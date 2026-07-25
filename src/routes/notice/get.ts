@@ -21,8 +21,8 @@ const openLabel = (path: string): string => {
 };
 
 export const noticeGet: Handler<"GET"> = (router, interaction, state) => {
-	const to = state.queryParams.get("to") ?? "/";
-	const [path = "/", query = ""] = to.split("?");
+	const to = state.queryParams.get("to") ?? "/help";
+	const [path = "/help", query = ""] = to.split("?");
 	const open = new RouteButtonBuilder(router)
 		.setLabel(openLabel(path))
 		.setStyle(ButtonStyle.Secondary)

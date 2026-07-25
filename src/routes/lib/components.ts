@@ -56,33 +56,19 @@ export const backButton = (router: RingRouter, path: string): RingButton =>
 		.setStyle(ButtonStyle.Secondary)
 		.setTo(path);
 
-// the top-level sections, one per entry in the section bar (SECTIONS below)
-export type Section =
-	"signups" | "filters" | "ringees" | "mode" | "help" | "about" | "delete";
-
-type Tab = { section: Section; emoji: string; label: string; path: string };
+type Tab = { emoji: string; label: string; path: string };
 
 // every section the bar offers, in display order. The emoji rides the
 // dedicated option field, not the label: labels render in the OS emoji font
 // while the emoji field gets Discord's own artwork, matching embed titles
 const SECTIONS: readonly Tab[] = [
-	{
-		section: "ringees",
-		emoji: "📣",
-		label: "Ring",
-		path: "/recipients/global",
-	},
-	{ section: "signups", emoji: "🔔", label: "Signups", path: "/signups" },
-	{ section: "filters", emoji: "🛡️", label: "Filters", path: "/filter/global" },
-	{ section: "mode", emoji: "💤", label: "Mode", path: "/mode" },
-	{ section: "help", emoji: "📖", label: "Help", path: "/help" },
-	{ section: "about", emoji: "ℹ️", label: "About", path: "/about" },
-	{
-		section: "delete",
-		emoji: "🗑️",
-		label: "Delete data",
-		path: "/delete-data",
-	},
+	{ emoji: "📣", label: "Ring", path: "/recipients/global" },
+	{ emoji: "🔔", label: "Signups", path: "/signups" },
+	{ emoji: "🛡️", label: "Filters", path: "/filter/global" },
+	{ emoji: "💤", label: "Mode", path: "/mode" },
+	{ emoji: "📖", label: "Help", path: "/help" },
+	{ emoji: "ℹ️", label: "About", path: "/about" },
+	{ emoji: "🗑️", label: "Delete data", path: "/delete-data" },
 ];
 
 // the persistent section bar every panel ends on. A string select fits all
@@ -100,8 +86,8 @@ export const navBar = (
 		interaction.member.voice.channel
 	);
 
-	const option = ({ section, emoji, label, path }: Tab) => {
-		const target = section === "ringees" && inVoice ? "/ring" : path;
+	const option = ({ emoji, label, path }: Tab) => {
+		const target = path === "/recipients/global" && inVoice ? "/ring" : path;
 		return new RouteStringSelectMenuOptionBuilder(router)
 			.setTo(target)
 			.setEmoji(emoji)

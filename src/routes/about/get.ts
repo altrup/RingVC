@@ -1,8 +1,11 @@
+import { RouteButtonBuilder } from "discord-embed-router";
 import { ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 
 import { navBar, row } from "@routes/lib/components";
 import { withFlash } from "@routes/lib/flash";
 import { Handler } from "@routes/types";
+
+import { FEEDBACK } from "./_shared";
 
 const COLOR = "#5865f2";
 
@@ -21,7 +24,7 @@ export const aboutGet: Handler<"GET"> = (router, interaction, state) => {
 				.setDescription(
 					withFlash(
 						state.queryParams,
-						"RingVC is free and open source. Star it on GitHub, or join the support server for help and updates.",
+						"RingVC is free and open source. Star it on GitHub, or join the support server for help and updates.\n\nHave a bug report or feature idea? Give anonymous feedback below.",
 					),
 				),
 		],
@@ -43,6 +46,12 @@ export const aboutGet: Handler<"GET"> = (router, interaction, state) => {
 					.setLabel("Terms & Conditions")
 					.setStyle(ButtonStyle.Link)
 					.setURL(TERMS_URL),
+			),
+			row(
+				new RouteButtonBuilder(router)
+					.setLabel("Give feedback")
+					.setStyle(ButtonStyle.Secondary)
+					.setTo(FEEDBACK, { method: "MODAL" }),
 			),
 			navBar(router, interaction),
 		],

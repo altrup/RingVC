@@ -1,5 +1,7 @@
 import { RingRouter } from "@routes/types";
 
+import { aboutFeedbackModal } from "./about/feedback/modal";
+import { aboutFeedbackPost } from "./about/feedback/post";
 import { aboutGet } from "./about/get";
 import { deleteDataGet } from "./delete-data/get";
 import { deleteDataModal } from "./delete-data/modal";
@@ -47,6 +49,10 @@ export const registerRoutes = (router: RingRouter) => {
 	router.get("/help", helpGet);
 	router.get("/help/catalog", catalogGet);
 	router.get("/about", aboutGet);
+	router.route("/about/feedback", {
+		modal: aboutFeedbackModal,
+		post: aboutFeedbackPost,
+	});
 
 	// scoped panels answer their bare path as the global scope, so the scope-switch
 	// select can target "{/:channelId}" and fall back to global when cleared

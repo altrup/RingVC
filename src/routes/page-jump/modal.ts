@@ -14,7 +14,7 @@ export const pageJumpModal: Handler<"MODAL"> = (router, interaction, state) => {
 		.setTo(PAGE_JUMP, {
 			method: "POST",
 			queryParams: {
-				to: query.get("to") ?? "/",
+				to: query.get("to") ?? "/help",
 				page: query.get("page") ?? "0",
 				pageCount,
 			},

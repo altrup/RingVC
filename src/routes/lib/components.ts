@@ -58,14 +58,7 @@ export const backButton = (router: RingRouter, path: string): RingButton =>
 
 // the top-level sections, one per entry in the section bar (SECTIONS below)
 export type Section =
-	| "home"
-	| "signups"
-	| "filters"
-	| "ringees"
-	| "mode"
-	| "help"
-	| "about"
-	| "delete";
+	"signups" | "filters" | "ringees" | "mode" | "help" | "about" | "delete";
 
 type Tab = { section: Section; emoji: string; label: string; path: string };
 
@@ -73,7 +66,6 @@ type Tab = { section: Section; emoji: string; label: string; path: string };
 // dedicated option field, not the label: labels render in the OS emoji font
 // while the emoji field gets Discord's own artwork, matching embed titles
 const SECTIONS: readonly Tab[] = [
-	{ section: "home", emoji: "🏠", label: "Home", path: "/" },
 	{ section: "signups", emoji: "🔔", label: "Signups", path: "/signups" },
 	{ section: "filters", emoji: "🛡️", label: "Filters", path: "/filter/global" },
 	{

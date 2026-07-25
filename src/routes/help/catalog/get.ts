@@ -52,7 +52,6 @@ export const catalogGet: Handler<"GET"> = (router, interaction, state) => {
 		{
 			title: "Panels",
 			entries: [
-				["ringvc", "the home panel"],
 				["help", "getting started"],
 				["catalog", "this command catalog"],
 				["about", "project links, policies, and feedback"],

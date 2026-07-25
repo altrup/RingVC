@@ -14,7 +14,6 @@ import { mode } from "@commands/mode";
 import { quit } from "@commands/quit";
 import { ring } from "@commands/ring";
 import { ringDefaults } from "@commands/ringDefaults";
-import { ringvc } from "@commands/ringvc";
 import { signup } from "@commands/signup";
 import { signuprole } from "@commands/signuprole";
 import { unsignup } from "@commands/unsignup";
@@ -32,7 +31,6 @@ export type CommandImplementation = {
 };
 
 export const commands: CommandImplementation[] = [
-	ringvc,
 	help,
 	catalog,
 	about,

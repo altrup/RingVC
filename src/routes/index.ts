@@ -11,7 +11,6 @@ import { filterMembersPost } from "./filter/[scope]/members/post";
 import { filterResetModal } from "./filter/[scope]/reset/modal";
 import { filterResetPost } from "./filter/[scope]/reset/post";
 import { filterTypePost } from "./filter/[scope]/type/post";
-import { homeGet } from "./get";
 import { catalogGet } from "./help/catalog/get";
 import { helpGet } from "./help/get";
 import { modeGet } from "./mode/get";
@@ -45,8 +44,9 @@ import { rolesGet } from "./signups/roles/get";
 // handlers live in files mirroring their route: the folder is the path (with
 // [param] segments) and the file is the method
 export const registerRoutes = (router: RingRouter) => {
-	router.get("/", homeGet);
-	router.get("/help", helpGet);
+	// "/" answers with the getting-started view: it stays the fallback target
+	// of older messages' components even though no panel links to it anymore
+	router.get(["/", "/help"], helpGet);
 	router.get("/help/catalog", catalogGet);
 	router.get("/about", aboutGet);
 	router.route("/about/feedback", {

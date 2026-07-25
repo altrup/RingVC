@@ -38,6 +38,10 @@ export const aboutGet: Handler<"GET"> = (router, interaction, state) => {
 					.setLabel("Support Server")
 					.setStyle(ButtonStyle.Link)
 					.setURL(SUPPORT_URL),
+				new RouteButtonBuilder(router)
+					.setLabel("Give feedback")
+					.setStyle(ButtonStyle.Primary)
+					.setTo(FEEDBACK, { method: "MODAL" }),
 			),
 			row(
 				new ButtonBuilder()
@@ -48,12 +52,6 @@ export const aboutGet: Handler<"GET"> = (router, interaction, state) => {
 					.setLabel("Terms & Conditions")
 					.setStyle(ButtonStyle.Link)
 					.setURL(TERMS_URL),
-			),
-			row(
-				new RouteButtonBuilder(router)
-					.setLabel("Give feedback")
-					.setStyle(ButtonStyle.Primary)
-					.setTo(FEEDBACK, { method: "MODAL" }),
 			),
 			navBar(router, interaction),
 		],

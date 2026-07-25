@@ -38,6 +38,8 @@ export const aboutGet: Handler<"GET"> = (router, interaction, state) => {
 					.setLabel("Support Server")
 					.setStyle(ButtonStyle.Link)
 					.setURL(SUPPORT_URL),
+			),
+			row(
 				new ButtonBuilder()
 					.setLabel("Privacy Policy")
 					.setStyle(ButtonStyle.Link)

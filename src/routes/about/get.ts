@@ -8,6 +8,9 @@ const COLOR = "#5865f2";
 
 const GITHUB_URL = "https://github.com/altrup/RingVC";
 const SUPPORT_URL = "https://discord.gg/bxBePEnndq";
+const PRIVACY_URL = "https://github.com/altrup/RingVC/blob/main/Privacy.md";
+const TERMS_URL =
+	"https://github.com/altrup/RingVC/blob/main/TermsAndConditions.md";
 
 export const aboutGet: Handler<"GET"> = (router, interaction, state) => {
 	return {
@@ -32,6 +35,14 @@ export const aboutGet: Handler<"GET"> = (router, interaction, state) => {
 					.setLabel("Support Server")
 					.setStyle(ButtonStyle.Link)
 					.setURL(SUPPORT_URL),
+				new ButtonBuilder()
+					.setLabel("Privacy Policy")
+					.setStyle(ButtonStyle.Link)
+					.setURL(PRIVACY_URL),
+				new ButtonBuilder()
+					.setLabel("Terms & Conditions")
+					.setStyle(ButtonStyle.Link)
+					.setURL(TERMS_URL),
 			),
 			navBar(router, interaction),
 		],

@@ -1,5 +1,7 @@
 import { RingRouter } from "@routes/types";
 
+import { aboutFeedbackModal } from "./about/feedback/modal";
+import { aboutFeedbackPost } from "./about/feedback/post";
 import { aboutGet } from "./about/get";
 import { deleteDataGet } from "./delete-data/get";
 import { deleteDataModal } from "./delete-data/modal";
@@ -9,7 +11,6 @@ import { filterMembersPost } from "./filter/[scope]/members/post";
 import { filterResetModal } from "./filter/[scope]/reset/modal";
 import { filterResetPost } from "./filter/[scope]/reset/post";
 import { filterTypePost } from "./filter/[scope]/type/post";
-import { homeGet } from "./get";
 import { catalogGet } from "./help/catalog/get";
 import { helpGet } from "./help/get";
 import { modeGet } from "./mode/get";
@@ -43,10 +44,13 @@ import { rolesGet } from "./signups/roles/get";
 // handlers live in files mirroring their route: the folder is the path (with
 // [param] segments) and the file is the method
 export const registerRoutes = (router: RingRouter) => {
-	router.get("/", homeGet);
 	router.get("/help", helpGet);
 	router.get("/help/catalog", catalogGet);
 	router.get("/about", aboutGet);
+	router.route("/about/feedback", {
+		modal: aboutFeedbackModal,
+		post: aboutFeedbackPost,
+	});
 
 	// scoped panels answer their bare path as the global scope, so the scope-switch
 	// select can target "{/:channelId}" and fall back to global when cleared

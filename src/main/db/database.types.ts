@@ -107,6 +107,24 @@ export type Database = {
 				};
 				Relationships: [];
 			};
+			feedback: {
+				Row: {
+					content: string;
+					created_at: string;
+					id: number;
+				};
+				Insert: {
+					content: string;
+					created_at?: string;
+					id?: never;
+				};
+				Update: {
+					content?: string;
+					created_at?: string;
+					id?: never;
+				};
+				Relationships: [];
+			};
 			filter_entries: {
 				Row: {
 					channel_id: string | null;

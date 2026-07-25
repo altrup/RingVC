@@ -52,9 +52,9 @@ export const catalogGet: Handler<"GET"> = (router, interaction, state) => {
 		{
 			title: "Panels",
 			entries: [
-				["ringvc", "the home panel"],
 				["help", "getting started"],
 				["catalog", "this command catalog"],
+				["about", "project links, policies, and feedback"],
 				["signup", "your signups panel (bare, outside a voice channel)"],
 				["filter", "your filter panel"],
 				["default_ring_recipients", "ring recipients and auto-ring panel"],

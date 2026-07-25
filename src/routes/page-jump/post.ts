@@ -3,7 +3,7 @@ import { Handler } from "@routes/types";
 
 export const pageJumpPost: Handler<"POST"> = (router, interaction, state) => {
 	const query = state.queryParams;
-	const to = query.get("to") ?? "/";
+	const to = query.get("to") ?? "/help";
 	const input = state.fields?.getTextInputValue("page")?.trim() ?? "";
 	const parsed = /^\d+$/.test(input) ? Number(input) : NaN;
 	const pageCount = parseInt(query.get("pageCount") ?? "1", 10) || 1;

@@ -50,41 +50,25 @@ export const editSelectRow = <
 	return new ActionRowBuilder<B>().addComponents(builder).toJSON();
 };
 
-export const homeButton = (router: RingRouter): RingButton =>
-	new RouteButtonBuilder(router)
-		.setLabel("🏠 Home")
-		.setStyle(ButtonStyle.Secondary)
-		.setTo("/");
-
 export const backButton = (router: RingRouter, path: string): RingButton =>
 	new RouteButtonBuilder(router)
 		.setLabel("Back")
 		.setStyle(ButtonStyle.Secondary)
 		.setTo(path);
 
-// the top-level sections, one per entry in the section bar (SECTIONS below)
-export type Section =
-	| "home"
-	| "signups"
-	| "filters"
-	| "ringees"
-	| "mode"
-	| "help"
-	| "about"
-	| "delete";
+type Tab = { emoji: string; label: string; path: string };
 
-type Tab = { section: Section; label: string; path: string };
-
-// every section the bar offers, in display order
+// every section the bar offers, in display order. The emoji rides the
+// dedicated option field, not the label: labels render in the OS emoji font
+// while the emoji field gets Discord's own artwork, matching embed titles
 const SECTIONS: readonly Tab[] = [
-	{ section: "home", label: "🏠 Home", path: "/" },
-	{ section: "signups", label: "🔔 Signups", path: "/signups" },
-	{ section: "filters", label: "🛡️ Filters", path: "/filter/global" },
-	{ section: "ringees", label: "📣 Ring", path: "/recipients/global" },
-	{ section: "mode", label: "💤 Mode", path: "/mode" },
-	{ section: "help", label: "📖 Help", path: "/help" },
-	{ section: "about", label: "ℹ️ About", path: "/about" },
-	{ section: "delete", label: "🗑️ Delete data", path: "/delete-data" },
+	{ emoji: "📣", label: "Ring", path: "/recipients/global" },
+	{ emoji: "🔔", label: "Signups", path: "/signups" },
+	{ emoji: "🛡️", label: "Filters", path: "/filter/global" },
+	{ emoji: "💤", label: "Mode", path: "/mode" },
+	{ emoji: "📖", label: "Help", path: "/help" },
+	{ emoji: "ℹ️", label: "About", path: "/about" },
+	{ emoji: "🗑️", label: "Delete data", path: "/delete-data" },
 ];
 
 // the persistent section bar every panel ends on. A string select fits all
@@ -102,10 +86,11 @@ export const navBar = (
 		interaction.member.voice.channel
 	);
 
-	const option = ({ section, label, path }: Tab) => {
-		const target = section === "ringees" && inVoice ? "/ring" : path;
+	const option = ({ emoji, label, path }: Tab) => {
+		const target = path === "/recipients/global" && inVoice ? "/ring" : path;
 		return new RouteStringSelectMenuOptionBuilder(router)
 			.setTo(target)
+			.setEmoji(emoji)
 			.setLabel(label);
 	};
 

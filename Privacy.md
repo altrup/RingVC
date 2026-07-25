@@ -8,6 +8,7 @@
 
 - User IDs of users who use block or filter commands to set up a filter of who can ring them, and the User IDs of the people that they block
 - Voice Channel IDs and User IDs when a user is signed up for a Voice Channel
+- Feedback submitted through the feedback form (the text and a timestamp only, never who submitted it)
 
 ## Temporary Data
 

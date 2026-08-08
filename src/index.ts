@@ -16,7 +16,7 @@ import {
 import { DISCORD_TOKEN } from "@config";
 import { recordError, recordUsage } from "@db/diagnostics";
 import { observeRouter } from "@main/diagnostics";
-import { onVoiceChannelJoin } from "@main/ring";
+import { isMissingAccess, onVoiceChannelJoin } from "@main/ring";
 import { registerRoutes } from "@routes/index";
 import { Globals } from "@routes/types";
 
@@ -126,7 +126,10 @@ client.on("voiceStateUpdate", async (oldState, newState) => {
 			await onVoiceChannelJoin(newState.channel, newState.member.user);
 		}
 	} catch (error) {
-		// permission errors are expected here; log the rest
+		// a guild that hasn't granted the bot access raises this on every join;
+		// it's setup, not a fault, so it's dropped rather than reported
+		if (isMissingAccess(error)) return;
+		recordError("VOICE join", error);
 		console.error(error);
 	}
 });

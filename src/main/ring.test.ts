@@ -1,4 +1,9 @@
-import { User, VoiceBasedChannel } from "discord.js";
+import {
+	DiscordAPIError,
+	RESTJSONErrorCodes,
+	User,
+	VoiceBasedChannel,
+} from "discord.js";
 import { beforeEach, expect, test, vi } from "vitest";
 
 import { isAutoRingEnabled } from "@db/auto-ring";
@@ -6,7 +11,12 @@ import { getAllDefaultRingees } from "@db/default-ringees";
 import { getFiltersForUsers, UserFilters } from "@db/filters";
 import { DiscordUserMode, getUserModes } from "@db/users";
 import { getVoiceChatSignups } from "@db/voice-chats";
-import { onVoiceChannelJoin, ring, validateRing } from "@main/ring";
+import {
+	isMissingAccess,
+	onVoiceChannelJoin,
+	ring,
+	validateRing,
+} from "@main/ring";
 
 vi.mock("@db/filters", async (importOriginal) => ({
 	...(await importOriginal<typeof import("@db/filters")>()),
@@ -76,6 +86,9 @@ const makeChannel = ({
 };
 
 const asUser = (id: string) => ({ id }) as unknown as User;
+
+const discordError = (code: RESTJSONErrorCodes) =>
+	new DiscordAPIError({ code, message: "denied" }, code, 403, "POST", "", {});
 
 // filters where blockerId has targetId on their global blacklist
 const blockedBy = (
@@ -161,6 +174,45 @@ test("ring pings only the ringees who pass validation and reports each result", 
 	expect(channel.send).toHaveBeenCalledExactlyOnceWith(
 		expect.objectContaining({ allowedMentions: { users: ["good"] } }),
 	);
+});
+
+test("a ring whose message fails keeps the Discord error as the cause", async () => {
+	const channel = makeChannel();
+	const apiError = discordError(RESTJSONErrorCodes.MissingAccess);
+	channel.send.mockRejectedValue(apiError);
+
+	await expect(
+		ring(channel, "caller", "wants you to join", ["good"]),
+	).rejects.toMatchObject({ cause: apiError });
+});
+
+// isMissingAccess
+
+test("a missing-access send failure is recognised through the ring wrapper", async () => {
+	const channel = makeChannel();
+	channel.send.mockRejectedValue(
+		discordError(RESTJSONErrorCodes.MissingAccess),
+	);
+
+	const err = await ring(channel, "caller", "hi", ["good"]).catch((e) => e);
+
+	expect(isMissingAccess(err)).toBe(true);
+});
+
+test("missing permissions counts as missing access", () => {
+	expect(
+		isMissingAccess(discordError(RESTJSONErrorCodes.MissingPermissions)),
+	).toBe(true);
+});
+
+test("an unrelated Discord error is not missing access", () => {
+	expect(
+		isMissingAccess(discordError(RESTJSONErrorCodes.UnknownInteraction)),
+	).toBe(false);
+});
+
+test("a plain error is not missing access", () => {
+	expect(isMissingAccess(new Error("boom"))).toBe(false);
 });
 
 // signup pings on voice channel join

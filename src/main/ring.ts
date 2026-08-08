@@ -1,6 +1,7 @@
 import {
 	DiscordAPIError,
 	PermissionsBitField,
+	RESTJSONErrorCodes,
 	User,
 	VoiceBasedChannel,
 } from "discord.js";
@@ -34,6 +35,22 @@ export const getErrorMessage = (err: unknown) => {
 			return err.rawError.error;
 	}
 	return "";
+};
+
+// whether an error is Discord refusing the bot access to a channel or role.
+// walks causes because ring() wraps its send failures
+export const isMissingAccess = (err: unknown): boolean => {
+	let error = err;
+	for (let depth = 0; depth < 5; depth++) {
+		if (error instanceof DiscordAPIError)
+			return (
+				error.code === RESTJSONErrorCodes.MissingAccess ||
+				error.code === RESTJSONErrorCodes.MissingPermissions
+			);
+		if (!(error instanceof Error)) return false;
+		error = error.cause;
+	}
+	return false;
 };
 
 // resolves "auto" to stealth when the user appears offline
@@ -137,7 +154,8 @@ export const ring = async (
 		return results;
 	} catch (err) {
 		throw new Error(
-			`the ring message ${userIdsToRing.length === 1 ? `to ${userIdsToRing[0]} ` : ``}failed to send: \`${getErrorMessage(err)}\``,
+			`the ring message ${mentions.length === 1 ? `to ${mentions[0]} ` : ``}failed to send: \`${getErrorMessage(err)}\``,
+			{ cause: err },
 		);
 	}
 };

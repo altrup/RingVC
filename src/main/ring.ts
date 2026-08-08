@@ -43,10 +43,7 @@ export const isMissingAccess = (err: unknown): boolean => {
 	let error = err;
 	for (let depth = 0; depth < 5; depth++) {
 		if (error instanceof DiscordAPIError)
-			return (
-				error.code === RESTJSONErrorCodes.MissingAccess ||
-				error.code === RESTJSONErrorCodes.MissingPermissions
-			);
+			return error.code === RESTJSONErrorCodes.MissingAccess;
 		if (!(error instanceof Error)) return false;
 		error = error.cause;
 	}
@@ -290,5 +287,13 @@ export const onVoiceChannelJoin = async (
 		await ring(channel, ringerUser.id, "wants you to join", ringeeUserIds);
 	};
 
-	await Promise.all([ringSignups(channel, ringerUser), autoRing()]);
+	// each half swallows its own access error rather than the pair sharing one
+	// rejection, so a guild the bot can't post in can't hide the other's failure
+	await Promise.all(
+		[ringSignups(channel, ringerUser), autoRing()].map((half) =>
+			half.catch((err: unknown) => {
+				if (!isMissingAccess(err)) throw err;
+			}),
+		),
+	);
 };

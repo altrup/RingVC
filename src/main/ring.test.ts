@@ -199,10 +199,12 @@ test("a missing-access send failure is recognised through the ring wrapper", asy
 	expect(isMissingAccess(err)).toBe(true);
 });
 
-test("missing permissions counts as missing access", () => {
+// 50013 can mean the bot pinged a role it may not mention, which is a bug in
+// the signup logic rather than guild setup, so it stays visible
+test("missing permissions is not treated as missing access", () => {
 	expect(
 		isMissingAccess(discordError(RESTJSONErrorCodes.MissingPermissions)),
-	).toBe(true);
+	).toBe(false);
 });
 
 test("an unrelated Discord error is not missing access", () => {
@@ -314,6 +316,37 @@ test("auto-ring with no default recipients is a quiet no-op", async () => {
 	await onVoiceChannelJoin(channel, asUser("j"));
 
 	expect(channel.send).not.toHaveBeenCalled();
+});
+
+// a permission failure in one half of the join must not decide whether the
+// other half's failure gets reported, so it never surfaces as a rejection
+
+test("a join whose ping is refused for lack of access resolves quietly", async () => {
+	vi.mocked(getVoiceChatSignups).mockResolvedValue({
+		userIds: ["s"],
+		roleIds: [],
+	});
+	const channel = makeChannel({ memberIds: ["j"] });
+	channel.send.mockRejectedValue(
+		discordError(RESTJSONErrorCodes.MissingAccess),
+	);
+
+	await expect(
+		onVoiceChannelJoin(channel, asUser("j")),
+	).resolves.toBeUndefined();
+});
+
+test("a join that fails for any other reason still throws", async () => {
+	vi.mocked(getVoiceChatSignups).mockResolvedValue({
+		userIds: ["s"],
+		roleIds: [],
+	});
+	vi.mocked(getUserModes).mockRejectedValue(new TypeError("boom"));
+	const channel = makeChannel({ memberIds: ["j"] });
+
+	await expect(onVoiceChannelJoin(channel, asUser("j"))).rejects.toThrow(
+		TypeError,
+	);
 });
 
 test("default recipients are not auto-rung when auto-ring is disabled", async () => {

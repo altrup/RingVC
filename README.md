@@ -34,7 +34,7 @@ Guide on hosting the bot yourself
 ### Prerequisites
 
 - Docker Compose ([installation guide](https://docs.docker.com/compose/install/))
-- Node.js and npm, to run the Supabase CLI (it is a devDependency; run `npm install` first, then use it as `npx supabase ...`)
+- Node.js and [pnpm](https://pnpm.io/installation), to run the Supabase CLI (it is a devDependency; run `pnpm install` first, then use it as `pnpm exec supabase ...`)
 - Have a Discord bot created ([guide](https://discordjs.guide/legacy/preparations/app-setup))
 - Enable required permissions (for [auto mode](#mode))
   - Under settings, on the left side, select Bot
@@ -48,7 +48,7 @@ The bot stores its data in a [Supabase](https://supabase.com) Postgres database,
 - Apply this repository's database migrations to your instance
 
   ```bash
-  npx supabase db push --db-url <your_postgres_connection_string>
+  pnpm exec supabase db push --db-url <your_postgres_connection_string>
   ```
 
 - Use the instance's API URL and service role key (from your Supabase Docker `.env`) as `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` below
@@ -59,7 +59,7 @@ The bot stores its data in a [Supabase](https://supabase.com) Postgres database,
 Older versions of the bot stored data in `data/data.txt`. To import it into your Supabase database, run
 
 ```bash
-npx tsx scripts/import-data-txt.ts
+pnpm exec tsx scripts/import-data-txt.ts
 ```
 
 with `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` set (in the environment or `.env`). The script is idempotent, so it is safe to re-run
@@ -104,11 +104,11 @@ with `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` set (in the environment or `
 
 ### Development
 
-- For development, it may be easier to use `npm` directly instead of docker
+- For development, it may be easier to use `pnpm` directly instead of docker
 - Start a local Supabase stack (uses Docker; applies migrations and [`supabase/seed.sql`](supabase/seed.sql) automatically)
 
   ```bash
-  npx supabase start
+  pnpm exec supabase start
   ```
 
   and point `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` in `.env` at the values it prints
@@ -116,23 +116,23 @@ with `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` set (in the environment or `
 - To re-apply migrations and seed data from scratch, run
 
   ```bash
-  npx supabase db reset
+  pnpm exec supabase db reset
   ```
 
 - After changing the schema (adding a migration), regenerate the database types
 
   ```bash
-  npx supabase gen types typescript --local > src/main/db/database.types.ts
+  pnpm exec supabase gen types typescript --local > src/main/db/database.types.ts
   ```
 
 - To deploy commands, run
 
   ```bash
-  npm run deploy-commands
+  pnpm run deploy-commands
   ```
 
 - To start bot with hot reloading, run
 
   ```bash
-  npm run dev
+  pnpm run dev
   ```

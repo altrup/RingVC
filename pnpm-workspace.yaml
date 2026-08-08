@@ -1,3 +1,4 @@
 allowBuilds:
   esbuild: true
-  node: true
+minimumReleaseAgeExclude:
+  - discord-embed-router@1.4.2

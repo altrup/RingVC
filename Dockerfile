@@ -1,8 +1,10 @@
 FROM node:22-slim
 WORKDIR /app
 
-COPY . .
-RUN [ "npm", "install" ]
-RUN [ "npm", "run", "build" ]
+RUN corepack enable
 
-CMD [ "npm", "run", "deploy-and-start" ]
+COPY . .
+RUN [ "pnpm", "install", "--frozen-lockfile" ]
+RUN [ "pnpm", "run", "build" ]
+
+CMD [ "pnpm", "run", "deploy-and-start" ]

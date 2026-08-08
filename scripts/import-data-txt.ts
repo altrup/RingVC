@@ -1,7 +1,7 @@
 /*
  * One-off import of the legacy data/data.txt store into Supabase.
  *
- * Usage: SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... npx tsx scripts/import-data-txt.ts [path/to/data.txt]
+ * Usage: SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... pnpm exec tsx scripts/import-data-txt.ts [path/to/data.txt]
  * (the env vars can also come from .env)
  *
  * Idempotent: every write is an upsert, so re-running is safe.

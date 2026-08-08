@@ -1,6 +1,7 @@
 {
+	"packageManager": "pnpm@11.3.0",
 	"scripts": {
-		"lint": "npx eslint --config src/eslint.config.mts src",
+		"lint": "eslint --config src/eslint.config.mts src",
 		"test": "vitest run",
 		"typecheck": "tsc --noEmit",
 		"dev": "tsx watch src/index.ts",
@@ -8,7 +9,7 @@
 		"build": "tsup src/index.ts --minify && tsup src/deploy-commands.ts --minify",
 		"start": "node dist/index.js",
 		"deploy-commands:production": "node dist/deploy-commands.js",
-		"deploy-and-start": "npm run deploy-commands && npm run start",
+		"deploy-and-start": "pnpm run deploy-commands && pnpm run start",
 		"format": "prettier . --write",
 		"format:check": "prettier . --check"
 	},
@@ -17,8 +18,7 @@
 		"discord-embed-router": "^1.4.2",
 		"discord.js": "^14.22.1",
 		"dotenv": "^17.2.2",
-		"is-online": "^11.0.0",
-		"node": "^22.23.1"
+		"is-online": "^11.0.0"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.36.0",

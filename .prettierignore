@@ -4,4 +4,3 @@ coverage
 
 # Lockfiles are generated
 pnpm-lock.yaml
-package-lock.json

@@ -1,3 +1,4 @@
+import { ringUser } from "@commands/context/ringUser";
 import { about } from "@commands/slash/about";
 import { catalog } from "@commands/slash/catalog";
 import { defaultRingees } from "@commands/slash/defaultRingees";
@@ -17,7 +18,10 @@ import { signup } from "@commands/slash/signup";
 import { signuprole } from "@commands/slash/signuprole";
 import { unsignup } from "@commands/slash/unsignup";
 import { unsignuprole } from "@commands/slash/unsignuprole";
-import { CommandImplementation } from "@commands/types";
+import {
+	CommandImplementation,
+	ContextMenuImplementation,
+} from "@commands/types";
 
 export const commands: CommandImplementation[] = [
 	help,
@@ -42,3 +46,5 @@ export const commands: CommandImplementation[] = [
 	defaultRingees,
 	defaultRingRecipients,
 ];
+
+export const contextMenuCommands: ContextMenuImplementation[] = [ringUser];

@@ -1,4 +1,9 @@
-import { ChatInputCommandInteraction, SharedSlashCommand } from "discord.js";
+import {
+	ChatInputCommandInteraction,
+	ContextMenuCommandBuilder,
+	SharedSlashCommand,
+	UserContextMenuCommandInteraction,
+} from "discord.js";
 
 import { RingRouter } from "@routes/types";
 
@@ -9,5 +14,13 @@ export type CommandImplementation = {
 	execute: (
 		router: RingRouter,
 		interaction: ChatInputCommandInteraction,
+	) => Promise<void>;
+};
+
+export type ContextMenuImplementation = {
+	data: ContextMenuCommandBuilder;
+	execute: (
+		router: RingRouter,
+		interaction: UserContextMenuCommandInteraction,
 	) => Promise<void>;
 };

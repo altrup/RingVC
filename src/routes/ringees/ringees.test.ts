@@ -80,8 +80,15 @@ test("enabling auto-ring warns that joins ring default ringees even in stealth",
 	const flashParams = new URLSearchParams(
 		result.queryParams as Record<string, string>,
 	);
-	expect(flashParams.get("level")).toBe("warn");
-	expect(flashParams.get("flash")).toContain("stealth");
+	// the toggle succeeded, so the flash is a success carrying its caveat on a
+	// second line marked as the warning
+	expect(flashParams.get("level")).toBe("success");
+	const [enabled = "", caveat = ""] = (flashParams.get("flash") ?? "").split(
+		"\n",
+	);
+	expect(enabled).toContain("✅");
+	expect(caveat).toContain("ℹ️");
+	expect(caveat).toContain("stealth");
 });
 
 test("toggling auto-ring to its current value reports no change", async () => {

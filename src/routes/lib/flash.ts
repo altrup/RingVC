@@ -1,7 +1,7 @@
 import { RouteRedirect } from "discord-embed-router";
 import { Interaction } from "discord.js";
 
-export type FlashLevel = "success" | "warn";
+export type FlashLevel = "success" | "warn" | "info";
 
 // the compact outcome view slash-command mutations land on (routes/notice)
 export const NOTICE = "/notice";
@@ -33,11 +33,18 @@ export const flashRedirect = (
 	return { redirect, queryParams: { flash, level, ...extraParams } };
 };
 
-const ICONS: Record<FlashLevel, string> = { success: "✅", warn: "⚠️" };
+const ICONS: Record<FlashLevel, string> = {
+	success: "✅",
+	warn: "⚠️",
+	info: "ℹ️",
+};
 
 // panels that render a blocked state in their own embed lead with this too,
 // so the icon for a level is decided in one place
 export const flashIcon = (level: FlashLevel): string => ICONS[level];
+
+const levelOf = (raw: string | null): FlashLevel =>
+	raw === "warn" || raw === "info" ? raw : "success";
 
 // a producer whose outcome is mixed marks each of its lines, so the flash's
 // single level can't fly a success icon over a line that failed
@@ -49,7 +56,7 @@ const isMarked = (line: string): boolean =>
 export const flashText = (queryParams: URLSearchParams): string | null => {
 	const flash = queryParams.get("flash");
 	if (!flash) return null;
-	const level = queryParams.get("level") === "warn" ? "warn" : "success";
+	const level = levelOf(queryParams.get("level"));
 	return flash
 		.split("\n")
 		.map((line, index) =>

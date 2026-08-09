@@ -1,5 +1,5 @@
 import { setAutoRing } from "@db/auto-ring";
-import { flashRedirect } from "@routes/lib/flash";
+import { flashIcon, flashRedirect } from "@routes/lib/flash";
 import { channelIdOf, scopeOf } from "@routes/lib/scope";
 import { Handler } from "@routes/types";
 
@@ -27,8 +27,12 @@ export const ringeesAutoRingPost: Handler<"POST"> = async (
 		? flashRedirect(
 				interaction,
 				panel,
-				`Auto-ring is now enabled ${scopeSuffix(scope)}. WARNING: joining ${channelId ? `<#${channelId}>` : "a voice channel"} now rings all of your default ringees, even in stealth mode`,
-				"warn",
+				// the toggle worked; the consequence is a note about what was just
+				// asked for, so it gets its own marked line rather than shouting
+				// inside the success sentence
+				`${flashIcon("success")} Auto-ring is now enabled ${scopeSuffix(scope)}\n` +
+					`${flashIcon("info")} Joining ${channelId ? `<#${channelId}>` : "a voice channel"} now rings all of your default ringees, even in stealth mode`,
+				"success",
 			)
 		: flashRedirect(
 				interaction,

@@ -8,6 +8,7 @@ import {
 
 import { isAutoRingEnabled } from "@db/auto-ring";
 import { getAllDefaultRingees } from "@db/default-ringees";
+import { recordUsage } from "@db/diagnostics";
 import {
 	getFiltersForUsers,
 	passesUserFilters,
@@ -269,6 +270,7 @@ const ringSignups = async (channel: VoiceBasedChannel, ringerUser: User) => {
 			content: `\`@${channel.guild.members.resolve(ringerUser.id)?.displayName}\` just joined \`#${channel.name}\`, ${joinWithAnd(mentions)}`,
 			allowedMentions: { users: userIdsToRing, roles: roleIdsToRing },
 		});
+		recordUsage("VOICE signup ring");
 	}
 };
 
@@ -284,7 +286,16 @@ export const onVoiceChannelJoin = async (
 		if (!(await isAutoRingEnabled(ringerUser.id, channel.id))) return;
 		const ringeeUserIds = await getAllDefaultRingees(ringerUser.id, channel.id);
 		if (ringeeUserIds.length === 0) return;
-		await ring(channel, ringerUser.id, "wants you to join", ringeeUserIds);
+		const results = await ring(
+			channel,
+			ringerUser.id,
+			"wants you to join",
+			ringeeUserIds,
+		);
+		// counted per ring sent, not per user pinged, to stay comparable with
+		// the command and route counts
+		if (results.some((result) => result.status === "fulfilled"))
+			recordUsage("VOICE auto ring");
 	};
 
 	// each half swallows its own access error rather than the pair sharing one

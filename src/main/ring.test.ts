@@ -8,6 +8,7 @@ import { beforeEach, expect, test, vi } from "vitest";
 
 import { isAutoRingEnabled } from "@db/auto-ring";
 import { getAllDefaultRingees } from "@db/default-ringees";
+import { recordUsage } from "@db/diagnostics";
 import { getFiltersForUsers, UserFilters } from "@db/filters";
 import { DiscordUserMode, getUserModes } from "@db/users";
 import { getVoiceChatSignups } from "@db/voice-chats";
@@ -33,6 +34,9 @@ vi.mock("@db/auto-ring", () => ({
 }));
 vi.mock("@db/default-ringees", () => ({
 	getAllDefaultRingees: vi.fn(),
+}));
+vi.mock("@db/diagnostics", () => ({
+	recordUsage: vi.fn(),
 }));
 
 type MemberOverrides = {
@@ -356,4 +360,47 @@ test("default recipients are not auto-rung when auto-ring is disabled", async ()
 	await onVoiceChannelJoin(channel, asUser("j"));
 
 	expect(channel.send).not.toHaveBeenCalled();
+});
+
+// diagnostics: one count per ring sent, not per user pinged
+
+test("a signup ping counts once however many are pinged", async () => {
+	vi.mocked(getVoiceChatSignups).mockResolvedValue({
+		userIds: ["s1", "s2"],
+		roleIds: [],
+	});
+	const channel = makeChannel({ memberIds: ["j"] });
+
+	await onVoiceChannelJoin(channel, asUser("j"));
+
+	expect(recordUsage).toHaveBeenCalledExactlyOnceWith("VOICE signup ring");
+});
+
+test("an auto ring counts once however many are pinged", async () => {
+	vi.mocked(isAutoRingEnabled).mockResolvedValue(true);
+	vi.mocked(getAllDefaultRingees).mockResolvedValue(["d1", "d2"]);
+	const channel = makeChannel({ memberIds: ["j"] });
+
+	await onVoiceChannelJoin(channel, asUser("j"));
+
+	expect(recordUsage).toHaveBeenCalledExactlyOnceWith("VOICE auto ring");
+});
+
+test("a join that pings nobody counts nothing", async () => {
+	vi.mocked(isAutoRingEnabled).mockResolvedValue(true);
+	const channel = makeChannel({ memberIds: ["j"] });
+
+	await onVoiceChannelJoin(channel, asUser("j"));
+
+	expect(recordUsage).not.toHaveBeenCalled();
+});
+
+test("an auto ring whose recipients all fail validation counts nothing", async () => {
+	vi.mocked(isAutoRingEnabled).mockResolvedValue(true);
+	vi.mocked(getAllDefaultRingees).mockResolvedValue(["d"]);
+	const channel = makeChannel({ memberIds: ["j", "d"] });
+
+	await onVoiceChannelJoin(channel, asUser("j"));
+
+	expect(recordUsage).not.toHaveBeenCalled();
 });

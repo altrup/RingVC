@@ -2,3 +2,4 @@ allowBuilds:
   esbuild: true
 minimumReleaseAgeExclude:
   - discord-embed-router@1.4.2
+  - discord-embed-router@1.5.0

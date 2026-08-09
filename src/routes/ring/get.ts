@@ -6,7 +6,7 @@ import { ActionRowBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 
 import { getAllDefaultRingees } from "@db/default-ringees";
 import { navBar, row, subNav } from "@routes/lib/components";
-import { withFlash } from "@routes/lib/flash";
+import { flashIcon, withFlash } from "@routes/lib/flash";
 import { SELECT_MAX_VALUES } from "@routes/lib/paging";
 import { Handler } from "@routes/types";
 
@@ -29,7 +29,7 @@ export const ringGet: Handler<"GET"> = async (router, interaction, state) => {
 					.setColor(COLOR)
 					.setTitle("📣 Quick ring")
 					.setDescription(
-						`⚠️ ${noVoiceChannelFlash(interaction, state.globals)}`,
+						`${flashIcon("warn")} ${noVoiceChannelFlash(interaction, state.globals)}`,
 					),
 			],
 			components: [ringViews, navBar(router, interaction)],

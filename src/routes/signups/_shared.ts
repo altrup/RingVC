@@ -10,6 +10,7 @@ import {
 	getVoiceChatRoleSignups,
 } from "@db/voice-chats";
 import { navBar } from "@routes/lib/components";
+import { flashIcon } from "@routes/lib/flash";
 import { Handler } from "@routes/types";
 
 export const COLOR = "#31a5a5";
@@ -38,7 +39,9 @@ export const guildOnlyRender = (
 		new EmbedBuilder()
 			.setColor(COLOR)
 			.setTitle("Signups")
-			.setDescription("⚠️ Signups only work inside a Discord server"),
+			.setDescription(
+				`${flashIcon("warn")} Signups only work inside a Discord server`,
+			),
 	],
 	components: [navBar(router, interaction)],
 });
@@ -80,7 +83,7 @@ export const noPermissionRender = (
 			.setColor(COLOR)
 			.setTitle("Role signups")
 			.setDescription(
-				"⚠️ You need the Manage Roles permission to manage role signups",
+				`${flashIcon("warn")} You need the Manage Roles permission to manage role signups`,
 			),
 	],
 	components: [navBar(router, interaction)],

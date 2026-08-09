@@ -1,7 +1,7 @@
 import { Interaction } from "discord.js";
 import { expect, test } from "vitest";
 
-import { flashLine, flashRedirect, NOTICE } from "@routes/lib/flash";
+import { flashIcon, flashLine, flashRedirect, NOTICE } from "@routes/lib/flash";
 
 const component = {
 	isChatInputCommand: () => false,
@@ -50,27 +50,16 @@ test("a slash-command mutation folds extra params into the notice target", () =>
 	});
 });
 
-test("flashLine renders a blockquote with the level icon and a bold lead", () => {
+test("flashLine renders a blockquote led by the level icon", () => {
 	expect(
 		flashLine(new URLSearchParams({ flash: "Done", level: "success" })),
-	).toBe("> ✅ **Done**");
+	).toBe("> ✅ Done");
 	expect(
 		flashLine(new URLSearchParams({ flash: "Careful", level: "warn" })),
-	).toBe("> ⚠️ **Careful**");
+	).toBe("> ⚠️ Careful");
 });
 
-test("flashLine bolds only the opening clause through the first period", () => {
-	expect(
-		flashLine(
-			new URLSearchParams({
-				flash: "Auto-ring enabled. You'll ring these people.",
-				level: "success",
-			}),
-		),
-	).toBe("> ✅ **Auto-ring enabled.** You'll ring these people.");
-});
-
-test("flashLine keeps the bold lead within the first line of a multi-line flash", () => {
+test("flashLine quotes every line of a multi-line flash, icon on the first", () => {
 	expect(
 		flashLine(
 			new URLSearchParams({
@@ -78,7 +67,15 @@ test("flashLine keeps the bold lead within the first line of a multi-line flash"
 				level: "warn",
 			}),
 		),
-	).toBe("> ⚠️ **Rang @a**\n> Can't ring @b because they blocked you.");
+	).toBe("> ⚠️ Rang @a\n> Can't ring @b because they blocked you.");
+});
+
+test("flashIcon is the same icon the flash line leads with", () => {
+	expect(flashIcon("warn")).toBe("⚠️");
+	expect(flashIcon("success")).toBe("✅");
+	expect(
+		flashLine(new URLSearchParams({ flash: "Careful", level: "warn" })),
+	).toBe(`> ${flashIcon("warn")} Careful`);
 });
 
 test("flashLine returns null when no flash is present", () => {

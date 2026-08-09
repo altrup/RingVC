@@ -33,24 +33,18 @@ export const flashRedirect = (
 	return { redirect, queryParams: { flash, level, ...extraParams } };
 };
 
-// bolds the flash's opening clause (through the first period, or the whole
-// text when it has none) so the outcome reads at a glance
-const boldLead = (text: string): string => {
-	const periodIndex = text.indexOf(".");
-	if (periodIndex === -1) return `**${text}**`;
-	return `**${text.slice(0, periodIndex + 1)}**${text.slice(periodIndex + 1)}`;
-};
+// panels that render a blocked state in their own embed lead with this too,
+// so the icon for a level is decided in one place
+export const flashIcon = (level: FlashLevel): string =>
+	level === "warn" ? "⚠️" : "✅";
 
-// the flash as plain lines with the level icon and a bold lead — what the
-// notice view shows as its whole body
+// the flash as plain lines led by the level icon — what the notice view shows
+// as its whole body
 export const flashText = (queryParams: URLSearchParams): string | null => {
 	const flash = queryParams.get("flash");
 	if (!flash) return null;
-	const icon = queryParams.get("level") === "warn" ? "⚠️" : "✅";
-	// bold only the first line's lead: Discord bold can't span newlines, so
-	// the markers must open and close on one line
-	const [first = "", ...rest] = flash.split("\n");
-	return [`${icon} ${boldLead(first)}`, ...rest].join("\n");
+	const level = queryParams.get("level") === "warn" ? "warn" : "success";
+	return `${flashIcon(level)} ${flash}`;
 };
 
 // the notice a panel renders at the bottom of its embed, as a markdown

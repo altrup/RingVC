@@ -179,6 +179,9 @@ test("a selection rings the submitted users and reports per-user outcomes", asyn
 	const flashParams = new URLSearchParams(
 		result.queryParams as Record<string, string>,
 	);
-	expect(flashParams.get("flash")).toContain("Ringed <@9>");
+	// a mixed outcome marks each line, so the failure isn't filed under the
+	// success icon
+	expect(flashParams.get("flash")).toContain("✅ Ringed <@9>");
+	expect(flashParams.get("flash")).toContain("⚠️ Can't ring <@8>");
 	expect(flashParams.get("flash")).toContain("you blocked <@8>");
 });

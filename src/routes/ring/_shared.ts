@@ -7,7 +7,7 @@ import {
 	ring,
 	UserRingResult,
 } from "@main/ring";
-import { flashRedirect } from "@routes/lib/flash";
+import { flashIcon, flashRedirect } from "@routes/lib/flash";
 import { commandMention } from "@routes/lib/mentions";
 import { Globals } from "@routes/types";
 
@@ -38,13 +38,17 @@ export const ringResultsFlash = (results: UserRingResult[]) => {
 	const ringed = results
 		.filter((result) => result.status === "fulfilled")
 		.map((result) => mentionUser(result.userId));
+	// each line carries its own icon: a partly-successful ring is one flash
+	// with one level, and the failures shouldn't sit under a success icon
 	const lines = [
-		...(ringed.length > 0 ? [`Ringed ${joinWithAnd(ringed)}`] : []),
+		...(ringed.length > 0
+			? [`${flashIcon("success")} Ringed ${joinWithAnd(ringed)}`]
+			: []),
 		...results
 			.filter((result) => result.status === "rejected")
 			.map(
 				(result) =>
-					`Can't ring ${mentionUser(result.userId)} because ${result.error.message}`,
+					`${flashIcon("warn")} Can't ring ${mentionUser(result.userId)} because ${result.error.message}`,
 			),
 	];
 	return {

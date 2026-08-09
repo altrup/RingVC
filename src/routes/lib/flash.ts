@@ -33,28 +33,40 @@ export const flashRedirect = (
 	return { redirect, queryParams: { flash, level, ...extraParams } };
 };
 
+const ICONS: Record<FlashLevel, string> = { success: "✅", warn: "⚠️" };
+
 // panels that render a blocked state in their own embed lead with this too,
 // so the icon for a level is decided in one place
-export const flashIcon = (level: FlashLevel): string =>
-	level === "warn" ? "⚠️" : "✅";
+export const flashIcon = (level: FlashLevel): string => ICONS[level];
 
-// the flash as plain lines led by the level icon — what the notice view shows
-// as its whole body
+// a producer whose outcome is mixed marks each of its lines, so the flash's
+// single level can't fly a success icon over a line that failed
+const isMarked = (line: string): boolean =>
+	Object.values(ICONS).some((icon) => line.startsWith(icon));
+
+// the flash as plain lines led by an icon — what the notice view shows as its
+// whole body, where it needs no emphasis because it is the whole body
 export const flashText = (queryParams: URLSearchParams): string | null => {
 	const flash = queryParams.get("flash");
 	if (!flash) return null;
 	const level = queryParams.get("level") === "warn" ? "warn" : "success";
-	return `${flashIcon(level)} ${flash}`;
+	return flash
+		.split("\n")
+		.map((line, index) =>
+			index === 0 && !isMarked(line) ? `${flashIcon(level)} ${line}` : line,
+		)
+		.join("\n");
 };
 
 // the notice a panel renders at the bottom of its embed, as a markdown
-// blockquote so it separates from the body
+// blockquote so it separates from the body. Bold because it competes with the
+// panel above it, per line because Discord bold can't span newlines
 export const flashLine = (queryParams: URLSearchParams): string | null => {
 	const text = flashText(queryParams);
 	if (text === null) return null;
 	return text
 		.split("\n")
-		.map((line) => `> ${line}`)
+		.map((line) => `> **${line}**`)
 		.join("\n");
 };
 

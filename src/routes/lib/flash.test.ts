@@ -50,16 +50,16 @@ test("a slash-command mutation folds extra params into the notice target", () =>
 	});
 });
 
-test("flashLine renders a blockquote led by the level icon", () => {
+test("flashLine renders a bold blockquote led by the level icon", () => {
 	expect(
 		flashLine(new URLSearchParams({ flash: "Done", level: "success" })),
-	).toBe("> ✅ Done");
+	).toBe("> **✅ Done**");
 	expect(
 		flashLine(new URLSearchParams({ flash: "Careful", level: "warn" })),
-	).toBe("> ⚠️ Careful");
+	).toBe("> **⚠️ Careful**");
 });
 
-test("flashLine quotes every line of a multi-line flash, icon on the first", () => {
+test("every line of a multi-line flash is quoted and bolded", () => {
 	expect(
 		flashLine(
 			new URLSearchParams({
@@ -67,7 +67,18 @@ test("flashLine quotes every line of a multi-line flash, icon on the first", () 
 				level: "warn",
 			}),
 		),
-	).toBe("> ⚠️ Rang @a\n> Can't ring @b because they blocked you.");
+	).toBe("> **⚠️ Rang @a**\n> **Can't ring @b because they blocked you.**");
+});
+
+test("lines a producer already marked keep their own icons", () => {
+	expect(
+		flashLine(
+			new URLSearchParams({
+				flash: "✅ Ringed @a\n⚠️ Can't ring @b because you blocked them",
+				level: "success",
+			}),
+		),
+	).toBe("> **✅ Ringed @a**\n> **⚠️ Can't ring @b because you blocked them**");
 });
 
 test("flashIcon is the same icon the flash line leads with", () => {
@@ -75,7 +86,7 @@ test("flashIcon is the same icon the flash line leads with", () => {
 	expect(flashIcon("success")).toBe("✅");
 	expect(
 		flashLine(new URLSearchParams({ flash: "Careful", level: "warn" })),
-	).toBe(`> ${flashIcon("warn")} Careful`);
+	).toBe(`> **${flashIcon("warn")} Careful**`);
 });
 
 test("flashLine returns null when no flash is present", () => {

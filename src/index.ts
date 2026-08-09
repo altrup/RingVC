@@ -9,10 +9,8 @@ import {
 } from "discord.js";
 
 import { CommandName, isCommandName } from "@commands/commandNames";
-import {
-	CommandImplementation,
-	commands as commandsArray,
-} from "@commands/commands";
+import { commands as commandsArray } from "@commands/index";
+import { CommandImplementation } from "@commands/types";
 import { DISCORD_TOKEN } from "@config";
 import { recordError, recordUsage } from "@db/diagnostics";
 import { observeRouter } from "@main/diagnostics";

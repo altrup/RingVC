@@ -1,6 +1,6 @@
 import { REST, Routes } from "discord.js";
 
-import { commands } from "@commands/commands";
+import { commands } from "@commands/index";
 import { DISCORD_CLIENT_ID, DISCORD_TOKEN } from "@config";
 
 // Construct and prepare an instance of the REST module

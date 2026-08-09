@@ -1,4 +1,4 @@
-import { defaultRingeesCommand } from "@commands/defaultRingees";
+import { defaultRingeesCommand } from "@commands/slash/defaultRingees";
 
 // the pre-rename name of /default_ringees: still registered so existing muscle
 // memory works, but left out of /catalog and /help. Delete this file, its entry

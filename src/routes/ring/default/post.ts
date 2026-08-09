@@ -1,6 +1,5 @@
 import { getErrorMessage, ringDefaultUsers } from "@main/ring";
 import { flashRedirect } from "@routes/lib/flash";
-import { commandMention } from "@routes/lib/mentions";
 import { Handler } from "@routes/types";
 
 import {
@@ -40,7 +39,7 @@ export const ringDefaultPost: Handler<"POST"> = async (
 				flashRedirect(
 					interaction,
 					interaction.isChatInputCommand() ? "/recipients/global" : PANEL,
-					`You have no default ringees. Use the Default ringees panel on the home page or ${commandMention(state.globals, "default_ringees")} to add some`,
+					`You have no default ringees. Add some in the Default ringees panel`,
 					"warn",
 				)
 			: flashRedirect(

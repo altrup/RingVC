@@ -21,6 +21,7 @@ const makeInteraction = (inVoice: boolean) =>
 		user: { id: "caller" },
 		member: { voice: { channel: inVoice ? voiceChannel : null } },
 		inGuild: () => true,
+		isCommand: () => false,
 		isChatInputCommand: () => false,
 	}) as unknown as Interaction;
 
@@ -73,6 +74,7 @@ test("ringing defaults with none saved points the notice at the default ringees 
 
 	const command = {
 		...(makeInteraction(true) as object),
+		isCommand: () => true,
 		isChatInputCommand: () => true,
 	} as unknown as Interaction;
 	const result = await ringDefaultPost(
@@ -142,6 +144,7 @@ test("ringing from a DM flashes the server-only hint and rings nobody", async ()
 		user: { id: "caller" },
 		member: null,
 		inGuild: () => false,
+		isCommand: () => false,
 		isChatInputCommand: () => false,
 	} as unknown as Interaction;
 	const result = await ringUsersPost(

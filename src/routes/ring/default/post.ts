@@ -34,11 +34,11 @@ export const ringDefaultPost: Handler<"POST"> = async (
 	} catch (err) {
 		const message = getErrorMessage(err);
 		return message === "no default users to ring"
-			? // from a slash command the notice's button leads to the default-ringees
+			? // from a command the notice's button leads to the default-ringees
 				// panel, where the missing ringees get added
 				flashRedirect(
 					interaction,
-					interaction.isChatInputCommand() ? "/ringees/global" : PANEL,
+					interaction.isCommand() ? "/ringees/global" : PANEL,
 					`You have no default ringees. Add some in the Default ringees panel`,
 					"warn",
 				)

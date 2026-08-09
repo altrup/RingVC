@@ -1,6 +1,6 @@
 import { EmbedRouter } from "discord-embed-router";
 import {
-	ChatInputCommandInteraction,
+	ApplicationCommandType,
 	Client,
 	Collection,
 	GatewayIntentBits,
@@ -10,9 +10,13 @@ import {
 
 import { CommandName, isCommandName } from "@commands/commandNames";
 import {
-	CommandImplementation,
 	commands as commandsArray,
-} from "@commands/commands";
+	contextMenuCommands as contextMenuCommandsArray,
+} from "@commands/index";
+import {
+	CommandImplementation,
+	ContextMenuImplementation,
+} from "@commands/types";
 import { DISCORD_TOKEN } from "@config";
 import { recordError, recordUsage } from "@db/diagnostics";
 import { observeRouter } from "@main/diagnostics";
@@ -59,6 +63,10 @@ const commands = new Collection<string, CommandImplementation>();
 for (const command of commandsArray) {
 	commands.set(command.data.name, command);
 }
+const contextMenuCommands = new Collection<string, ContextMenuImplementation>();
+for (const command of contextMenuCommandsArray) {
+	contextMenuCommands.set(command.data.name, command);
+}
 
 // When the client is ready, set status
 client.once("clientReady", async () => {
@@ -69,6 +77,8 @@ client.once("clientReady", async () => {
 	});
 
 	(await client.application?.commands.fetch())?.forEach((command, key) => {
+		// only chat input commands are mentionable, so only they need ids
+		if (command.type !== ApplicationCommandType.ChatInput) return;
 		if (isCommandName(command.name)) {
 			commandIds.set(command.name, key);
 		} else {
@@ -93,17 +103,22 @@ client.on("shardResume", () => {
 client.on("interactionCreate", async (interaction) => {
 	if (!interaction.isCommand()) return;
 
-	const command = commands.get(interaction.commandName);
-
-	if (!command) return;
+	const label = `COMMAND ${interaction.isChatInputCommand() ? "/" : ""}${interaction.commandName}`;
 
 	try {
-		if (interaction instanceof ChatInputCommandInteraction) {
-			recordUsage(`COMMAND /${interaction.commandName}`);
+		if (interaction.isChatInputCommand()) {
+			const command = commands.get(interaction.commandName);
+			if (!command) return;
+			recordUsage(label);
+			await command.execute(router, interaction);
+		} else if (interaction.isUserContextMenuCommand()) {
+			const command = contextMenuCommands.get(interaction.commandName);
+			if (!command) return;
+			recordUsage(label);
 			await command.execute(router, interaction);
 		}
 	} catch (error) {
-		recordError(`COMMAND /${interaction.commandName}`, error);
+		recordError(label, error);
 		console.error(error);
 		await interaction
 			.reply({

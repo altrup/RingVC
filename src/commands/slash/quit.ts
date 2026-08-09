@@ -5,7 +5,7 @@ import {
 	SlashCommandBuilder,
 } from "discord.js";
 
-import { unsignup } from "@commands/unsignup";
+import { unsignup } from "@commands/slash/unsignup";
 import { RingRouter } from "@routes/types";
 
 export const quit = {

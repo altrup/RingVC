@@ -20,6 +20,7 @@ vi.mock("@db/default-ringees", () => ({
 
 const interaction = {
 	user: { id: "caller" },
+	isCommand: () => false,
 	isChatInputCommand: () => false,
 } as unknown as Interaction;
 

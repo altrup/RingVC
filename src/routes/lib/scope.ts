@@ -1,4 +1,4 @@
-// scoped panels (filter, recipients) address their scope in the path:
+// scoped panels (filter, ringees) address their scope in the path:
 // "global", or a voice channel id
 
 export const scopeOf = (

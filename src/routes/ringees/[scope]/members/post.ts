@@ -15,7 +15,7 @@ import { Handler } from "@routes/types";
 
 import { panelPath, scopeSuffix } from "../../_shared";
 
-export const recipientsMembersPost: Handler<"POST"> = async (
+export const ringeesMembersPost: Handler<"POST"> = async (
 	router,
 	interaction,
 	state,
@@ -76,8 +76,8 @@ export const recipientsMembersPost: Handler<"POST"> = async (
 		interaction,
 		panel,
 		parts.length > 0
-			? `${parts.join(". ")} (default ring recipients ${scopeSuffix(scope)})`
-			: `No changes to your default ring recipients ${scopeSuffix(scope)}`,
+			? `${parts.join(". ")} (default ringees ${scopeSuffix(scope)})`
+			: `No changes to your default ringees ${scopeSuffix(scope)}`,
 		changed ? "success" : "warn",
 		{ page: state.queryParams.get("page") ?? "0" },
 	);

@@ -21,11 +21,9 @@ export const defaultRingeesCommand = (name: string) => ({
 		),
 	async execute(router: RingRouter, interaction: ChatInputCommandInteraction) {
 		const channel = interaction.options.getChannel("channel");
-		await router.dispatch(
-			interaction,
-			`/recipients/${channel?.id ?? "global"}`,
-			{ flags: [MessageFlags.Ephemeral] },
-		);
+		await router.dispatch(interaction, `/ringees/${channel?.id ?? "global"}`, {
+			flags: [MessageFlags.Ephemeral],
+		});
 	},
 });
 

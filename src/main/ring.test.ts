@@ -298,7 +298,7 @@ test("a signed-up user with a signed-up role is pinged via the role only", async
 
 // auto-ring on voice channel join
 
-test("auto-ring rings the joiner's default recipients when enabled", async () => {
+test("auto-ring rings the joiner's default ringees when enabled", async () => {
 	vi.mocked(isAutoRingEnabled).mockResolvedValue(true);
 	vi.mocked(getAllDefaultRingees).mockResolvedValue(["d"]);
 	const channel = makeChannel({ memberIds: ["j"] });
@@ -313,7 +313,7 @@ test("auto-ring rings the joiner's default recipients when enabled", async () =>
 	);
 });
 
-test("auto-ring with no default recipients is a quiet no-op", async () => {
+test("auto-ring with no default ringees is a quiet no-op", async () => {
 	vi.mocked(isAutoRingEnabled).mockResolvedValue(true);
 	const channel = makeChannel({ memberIds: ["j"] });
 
@@ -353,7 +353,7 @@ test("a join that fails for any other reason still throws", async () => {
 	);
 });
 
-test("default recipients are not auto-rung when auto-ring is disabled", async () => {
+test("default ringees are not auto-rung when auto-ring is disabled", async () => {
 	vi.mocked(getAllDefaultRingees).mockResolvedValue(["d"]);
 	const channel = makeChannel({ memberIds: ["j"] });
 
@@ -395,7 +395,7 @@ test("a join that pings nobody counts nothing", async () => {
 	expect(recordUsage).not.toHaveBeenCalled();
 });
 
-test("an auto ring whose recipients all fail validation counts nothing", async () => {
+test("an auto ring whose ringees all fail validation counts nothing", async () => {
 	vi.mocked(isAutoRingEnabled).mockResolvedValue(true);
 	vi.mocked(getAllDefaultRingees).mockResolvedValue(["d"]);
 	const channel = makeChannel({ memberIds: ["j", "d"] });

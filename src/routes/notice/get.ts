@@ -10,7 +10,7 @@ const PANEL_NAMES = [
 	["/filter/global", "Global filter"],
 	["/signups/roles", "Role signups"],
 	["/signups", "Signups"],
-	["/recipients", "Default ringees"],
+	["/ringees", "Default ringees"],
 	["/ring", "Quick ring"],
 	["/mode", "Mode"],
 ] as const;

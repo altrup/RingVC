@@ -4,8 +4,8 @@ import { beforeEach, expect, test, vi } from "vitest";
 import { setAutoRing } from "@db/auto-ring";
 import { resetDefaultRingees } from "@db/default-ringees";
 
-import { recipientsAutoRingPost } from "./[scope]/auto-ring/post";
-import { recipientsResetPost } from "./[scope]/reset/post";
+import { ringeesAutoRingPost } from "./[scope]/auto-ring/post";
+import { ringeesResetPost } from "./[scope]/reset/post";
 
 vi.mock("@db/auto-ring", () => ({
 	getAutoRingSetting: vi.fn(),
@@ -26,25 +26,25 @@ const interaction = {
 const autoRingState = (scope: string, query: string) =>
 	({
 		params: { scope },
-		path: `/recipients/${scope}/auto-ring`,
+		path: `/ringees/${scope}/auto-ring`,
 		queryParams: new URLSearchParams(query),
 		timestamp: 0,
-	}) as unknown as Parameters<typeof recipientsAutoRingPost>[2];
+	}) as unknown as Parameters<typeof ringeesAutoRingPost>[2];
 
 const resetPost = (confirmation: string) =>
-	recipientsResetPost(undefined as never, interaction, {
+	ringeesResetPost(undefined as never, interaction, {
 		params: { scope: "global" },
-		path: "/recipients/global/reset",
+		path: "/ringees/global/reset",
 		queryParams: new URLSearchParams(),
 		timestamp: 0,
 		fields: { getTextInputValue: () => confirmation },
-	} as unknown as Parameters<typeof recipientsResetPost>[2]);
+	} as unknown as Parameters<typeof ringeesResetPost>[2]);
 
 beforeEach(() => {
 	vi.clearAllMocks();
 });
 
-test("a recipients reset with matching confirmation text clears the list", async () => {
+test("a ringees reset with matching confirmation text clears the list", async () => {
 	vi.mocked(resetDefaultRingees).mockResolvedValue(true);
 
 	const result = await resetPost("RESET");
@@ -56,7 +56,7 @@ test("a recipients reset with matching confirmation text clears the list", async
 	expect(flashParams.get("level")).toBe("success");
 });
 
-test("a recipients reset without matching confirmation text mutates nothing", async () => {
+test("a ringees reset without matching confirmation text mutates nothing", async () => {
 	const result = await resetPost("nope");
 
 	expect(resetDefaultRingees).not.toHaveBeenCalled();
@@ -67,10 +67,10 @@ test("a recipients reset without matching confirmation text mutates nothing", as
 	expect(flashParams.get("flash")).toContain("did not match");
 });
 
-test("enabling auto-ring warns that joins ring default recipients even in stealth", async () => {
+test("enabling auto-ring warns that joins ring default ringees even in stealth", async () => {
 	vi.mocked(setAutoRing).mockResolvedValue(true);
 
-	const result = await recipientsAutoRingPost(
+	const result = await ringeesAutoRingPost(
 		undefined as never,
 		interaction,
 		autoRingState("123", "enable=1"),
@@ -87,7 +87,7 @@ test("enabling auto-ring warns that joins ring default recipients even in stealt
 test("toggling auto-ring to its current value reports no change", async () => {
 	vi.mocked(setAutoRing).mockResolvedValue(false);
 
-	const result = await recipientsAutoRingPost(
+	const result = await ringeesAutoRingPost(
 		undefined as never,
 		interaction,
 		autoRingState("global", "enable=0"),

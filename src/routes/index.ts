@@ -18,15 +18,15 @@ import { modePost } from "./mode/post";
 import { noticeGet } from "./notice/get";
 import { pageJumpModal } from "./page-jump/modal";
 import { pageJumpPost } from "./page-jump/post";
-import { recipientsAutoRingPost } from "./recipients/[scope]/auto-ring/post";
-import { recipientsGet } from "./recipients/[scope]/get";
-import { recipientsMembersPost } from "./recipients/[scope]/members/post";
-import { recipientsResetModal } from "./recipients/[scope]/reset/modal";
-import { recipientsResetPost } from "./recipients/[scope]/reset/post";
 import { ringDefaultPost } from "./ring/default/post";
 import { ringGet } from "./ring/get";
 import { ringUserPost } from "./ring/user/post";
 import { ringUsersPost } from "./ring/users/post";
+import { ringeesAutoRingPost } from "./ringees/[scope]/auto-ring/post";
+import { ringeesGet } from "./ringees/[scope]/get";
+import { ringeesMembersPost } from "./ringees/[scope]/members/post";
+import { ringeesResetModal } from "./ringees/[scope]/reset/modal";
+import { ringeesResetPost } from "./ringees/[scope]/reset/post";
 import { signupsGet } from "./signups/get";
 import { signupsMembersPost } from "./signups/members/post";
 import { signupsResetModal } from "./signups/reset/modal";
@@ -62,13 +62,25 @@ export const registerRoutes = (router: RingRouter) => {
 		post: filterResetPost,
 	});
 
-	router.get(["/recipients", "/recipients/:scope"], recipientsGet);
-	router.post("/recipients/:scope/members", recipientsMembersPost);
-	router.route("/recipients/:scope/reset", {
-		modal: recipientsResetModal,
-		post: recipientsResetPost,
+	router.get(["/ringees", "/ringees/:scope"], ringeesGet);
+	router.post("/ringees/:scope/members", ringeesMembersPost);
+	router.route("/ringees/:scope/reset", {
+		modal: ringeesResetModal,
+		post: ringeesResetPost,
 	});
-	router.post("/recipients/:scope/auto-ring", recipientsAutoRingPost);
+	router.post("/ringees/:scope/auto-ring", ringeesAutoRingPost);
+
+	// the pre-rename paths, so components in panels rendered before the rename
+	// still route. Each handler re-renders through panelPath(), which is
+	// /ringees now, so a stale panel moves over on its first interaction. Delete
+	// once "/recipients" stops appearing in the usage table
+	router.get(["/recipients", "/recipients/:scope"], ringeesGet);
+	router.post("/recipients/:scope/members", ringeesMembersPost);
+	router.route("/recipients/:scope/reset", {
+		modal: ringeesResetModal,
+		post: ringeesResetPost,
+	});
+	router.post("/recipients/:scope/auto-ring", ringeesAutoRingPost);
 
 	router.route("/mode", { get: modeGet, post: modePost });
 

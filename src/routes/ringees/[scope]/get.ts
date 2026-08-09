@@ -45,7 +45,7 @@ const autoRingStatus = async (userId: string, channelId: string | null) => {
 	};
 };
 
-export const recipientsGet: Handler<"GET"> = async (
+export const ringeesGet: Handler<"GET"> = async (
 	router,
 	interaction,
 	state,
@@ -96,7 +96,7 @@ export const recipientsGet: Handler<"GET"> = async (
 						: "View a voice channel's ringees",
 				)
 				.setDefaultChannels(...(channelId ? [channelId] : []))
-				.setPattern("/recipients{/:channelId}"),
+				.setPattern("/ringees{/:channelId}"),
 		)
 		.toJSON();
 

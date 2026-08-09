@@ -87,7 +87,7 @@ test("the notice names the default ringees panel", async () => {
 	const { button } = await render({
 		flash: "x",
 		level: "warn",
-		to: "/recipients/global",
+		to: "/ringees/global",
 	});
 	expect(button.label).toBe("Open Default ringees panel");
 });

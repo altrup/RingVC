@@ -18,7 +18,7 @@ export const ringGet: Handler<"GET"> = async (router, interaction, state) => {
 	// the Ring section's two sibling views; this panel is the "Ring now" one
 	const ringViews = subNav(router, [
 		{ label: "Quick ring", path: PANEL, active: true },
-		{ label: "Default ringees", path: "/recipients/global" },
+		{ label: "Default ringees", path: "/ringees/global" },
 	]);
 
 	const channel = voiceChannelOf(interaction);

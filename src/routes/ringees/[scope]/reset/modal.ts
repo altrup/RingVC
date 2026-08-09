@@ -4,13 +4,13 @@ import { Handler } from "@routes/types";
 
 import { panelPath } from "../../_shared";
 
-export const recipientsResetModal: Handler<"MODAL"> = (
+export const ringeesResetModal: Handler<"MODAL"> = (
 	router,
 	interaction,
 	state,
 ) =>
 	confirmModal(router, {
 		to: `${panelPath(scopeOf(state.params))}/reset`,
-		title: "Reset ring recipients",
+		title: "Reset default ringees",
 		word: "RESET",
 	});

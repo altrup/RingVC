@@ -35,17 +35,17 @@ export const ringDefaultPost: Handler<"POST"> = async (
 		const message = getErrorMessage(err);
 		return message === "no default users to ring"
 			? // from a slash command the notice's button leads to the default-ringees
-				// panel, where the missing recipients get added
+				// panel, where the missing ringees get added
 				flashRedirect(
 					interaction,
-					interaction.isChatInputCommand() ? "/recipients/global" : PANEL,
+					interaction.isChatInputCommand() ? "/ringees/global" : PANEL,
 					`You have no default ringees. Add some in the Default ringees panel`,
 					"warn",
 				)
 			: flashRedirect(
 					interaction,
 					PANEL,
-					`Can't ring your default recipients because ${message}`,
+					`Can't ring your default ringees because ${message}`,
 					"warn",
 				);
 	}

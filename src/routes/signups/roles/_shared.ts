@@ -23,7 +23,7 @@ export const LEAD =
 	"When someone joins a voice channel, its signed-up roles get pinged.";
 
 // the scope carried in the path, or null when nothing is picked yet (unlike
-// filter/recipients, role signups have no global scope to fall back to)
+// filter/ringees, role signups have no global scope to fall back to)
 export const roleScopeOf = (
 	params: Partial<Record<string, string | string[]>>,
 ): string | null =>

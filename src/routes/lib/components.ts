@@ -62,7 +62,7 @@ type Tab = { emoji: string; label: string; path: string };
 // dedicated option field, not the label: labels render in the OS emoji font
 // while the emoji field gets Discord's own artwork, matching embed titles
 const SECTIONS: readonly Tab[] = [
-	{ emoji: "📣", label: "Ring", path: "/recipients/global" },
+	{ emoji: "📣", label: "Ring", path: "/ringees/global" },
 	{ emoji: "🔔", label: "Signups", path: "/signups" },
 	{ emoji: "🛡️", label: "Filters", path: "/filter/global" },
 	{ emoji: "💤", label: "Mode", path: "/mode" },
@@ -79,7 +79,7 @@ export const navBar = (
 	interaction: Interaction,
 ): APIActionRowComponent<APIComponentInMessageActionRow> => {
 	// the Ring option lands on the immediate ring action when in a voice channel,
-	// else the default-recipients settings, so it never opens the "not in VC" notice
+	// else the default-ringees settings, so it never opens the "not in VC" notice
 	const inVoice = !!(
 		interaction.member &&
 		"voice" in interaction.member &&
@@ -87,7 +87,7 @@ export const navBar = (
 	);
 
 	const option = ({ emoji, label, path }: Tab) => {
-		const target = path === "/recipients/global" && inVoice ? "/ring" : path;
+		const target = path === "/ringees/global" && inVoice ? "/ring" : path;
 		return new RouteStringSelectMenuOptionBuilder(router)
 			.setTo(target)
 			.setEmoji(emoji)

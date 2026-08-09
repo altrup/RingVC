@@ -6,7 +6,7 @@ import { Handler } from "@routes/types";
 
 import { panelPath, scopeSuffix } from "../../_shared";
 
-export const recipientsResetPost: Handler<"POST"> = async (
+export const ringeesResetPost: Handler<"POST"> = async (
 	router,
 	interaction,
 	state,
@@ -16,7 +16,7 @@ export const recipientsResetPost: Handler<"POST"> = async (
 		return flashRedirect(
 			interaction,
 			panelPath(scope),
-			"Confirmation text did not match, your recipients were not cleared",
+			"Confirmation text did not match, your default ringees were not cleared",
 			"warn",
 		);
 	const hadRingees = await resetDefaultRingees(
@@ -27,13 +27,13 @@ export const recipientsResetPost: Handler<"POST"> = async (
 		? flashRedirect(
 				interaction,
 				panelPath(scope),
-				`Cleared your default ring recipients ${scopeSuffix(scope)}`,
+				`Cleared your default ringees ${scopeSuffix(scope)}`,
 				"success",
 			)
 		: flashRedirect(
 				interaction,
 				panelPath(scope),
-				`You already have no default ring recipients ${scopeSuffix(scope)}`,
+				`You already have no default ringees ${scopeSuffix(scope)}`,
 				"warn",
 			);
 };

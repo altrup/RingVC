@@ -85,7 +85,7 @@ test("ringing defaults with none saved points the notice at the default ringees 
 		result.queryParams as Record<string, string>,
 	);
 	expect(result.redirect).toBe("/notice");
-	expect(flashParams.get("to")).toBe("/recipients/global");
+	expect(flashParams.get("to")).toBe("/ringees/global");
 	expect(flashParams.get("level")).toBe("warn");
 });
 

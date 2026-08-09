@@ -5,7 +5,7 @@ import { Handler } from "@routes/types";
 
 import { panelPath, scopeSuffix } from "../../_shared";
 
-export const recipientsAutoRingPost: Handler<"POST"> = async (
+export const ringeesAutoRingPost: Handler<"POST"> = async (
 	router,
 	interaction,
 	state,
@@ -27,7 +27,7 @@ export const recipientsAutoRingPost: Handler<"POST"> = async (
 		? flashRedirect(
 				interaction,
 				panel,
-				`Auto-ring is now enabled ${scopeSuffix(scope)}. WARNING: joining ${channelId ? `<#${channelId}>` : "a voice channel"} now rings all of your default ring recipients, even in stealth mode`,
+				`Auto-ring is now enabled ${scopeSuffix(scope)}. WARNING: joining ${channelId ? `<#${channelId}>` : "a voice channel"} now rings all of your default ringees, even in stealth mode`,
 				"warn",
 			)
 		: flashRedirect(

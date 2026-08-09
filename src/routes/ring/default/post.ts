@@ -40,7 +40,7 @@ export const ringDefaultPost: Handler<"POST"> = async (
 				flashRedirect(
 					interaction,
 					interaction.isChatInputCommand() ? "/recipients/global" : PANEL,
-					`You have no default ring recipients. Use the Ring recipients panel on the home page or ${commandMention(state.globals, "default_ring_recipients")} to add some`,
+					`You have no default ringees. Use the Default ringees panel on the home page or ${commandMention(state.globals, "default_ringees")} to add some`,
 					"warn",
 				)
 			: flashRedirect(

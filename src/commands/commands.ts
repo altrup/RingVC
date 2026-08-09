@@ -2,6 +2,7 @@ import { ChatInputCommandInteraction, SharedSlashCommand } from "discord.js";
 
 import { about } from "@commands/about";
 import { catalog } from "@commands/catalog";
+import { defaultRingees } from "@commands/defaultRingees";
 import { defaultRingRecipients } from "@commands/defaultRingRecipient";
 import { deleteData } from "@commands/deleteData";
 import { block } from "@commands/filter/block";
@@ -49,6 +50,7 @@ export const commands: CommandImplementation[] = [
 	whitelist,
 	unwhitelist,
 	filter,
-	// default ring recipients
+	// default ringees
+	defaultRingees,
 	defaultRingRecipients,
 ];

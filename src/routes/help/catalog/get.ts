@@ -57,7 +57,7 @@ export const catalogGet: Handler<"GET"> = (router, interaction, state) => {
 				["about", "project links, policies, and feedback"],
 				["signup", "your signups panel (bare, outside a voice channel)"],
 				["filter", "your filter panel"],
-				["default_ring_recipients", "ring recipients and auto-ring panel"],
+				["default_ringees", "default ringees and auto-ring panel"],
 				["mode", "mode panel"],
 				["ring", "ring panel (without a user)"],
 				["delete_data", "data deletion panel"],

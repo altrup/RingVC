@@ -1,31 +1,8 @@
-import {
-	ChannelType,
-	ChatInputCommandInteraction,
-	MessageFlags,
-	SlashCommandBuilder,
-} from "discord.js";
+import { defaultRingeesCommand } from "@commands/defaultRingees";
 
-import { RingRouter } from "@routes/types";
-
-export const defaultRingRecipients = {
-	data: new SlashCommandBuilder()
-		.setName("default_ring_recipients")
-		.setDescription("Configure your default ring recipients and auto-ring")
-		.addChannelOption((option) =>
-			option
-				.setName("channel")
-				.setDescription(
-					"The channel whose recipients to open (global if omitted)",
-				)
-				.addChannelTypes(ChannelType.GuildVoice)
-				.setRequired(false),
-		),
-	async execute(router: RingRouter, interaction: ChatInputCommandInteraction) {
-		const channel = interaction.options.getChannel("channel");
-		await router.dispatch(
-			interaction,
-			`/recipients/${channel?.id ?? "global"}`,
-			{ flags: [MessageFlags.Ephemeral] },
-		);
-	},
-};
+// the pre-rename name of /default_ringees: still registered so existing muscle
+// memory works, but left out of /catalog and /help. Delete this file, its entry
+// in commands.ts, and its name in commandNames.ts once it has been retired
+export const defaultRingRecipients = defaultRingeesCommand(
+	"default_ring_recipients",
+);

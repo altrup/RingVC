@@ -16,6 +16,7 @@ export const commandNamesList = [
 	"whitelist",
 	"unwhitelist",
 	"filter",
+	"default_ringees",
 	"default_ring_recipients",
 ] as const;
 export type CommandName = (typeof commandNamesList)[number];

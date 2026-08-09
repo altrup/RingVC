@@ -18,6 +18,7 @@ To add the bot to your server, click [here](https://discord.com/oauth2/authorize
   - un-signs you up for a voice channel, so you no longer get pinged
 - **/ring**
   - pings someone to join the voice channel you're currently in
+  - also available by right-clicking someone and picking Apps > Ring
 - **/block**
   - blocks someone, which prevents them from ringing you and makes it so you don't get pinged if they start a call
 - **/unblock**

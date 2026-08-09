@@ -129,7 +129,9 @@ export const recipientsGet: Handler<"GET"> = async (
 			new EmbedBuilder()
 				.setColor(COLOR)
 				.setTitle(
-					scope === "global" ? "📣 Default ringees" : "📣 Channel ringees",
+					scope === "global"
+						? "📣 Global default ringees"
+						: "📣 Channel default ringees",
 				)
 				.setDescription(description),
 		],

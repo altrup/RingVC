@@ -24,6 +24,7 @@ vi.mock("@db/filters", async (importOriginal) => ({
 
 const interaction = {
 	user: { id: "caller" },
+	isCommand: () => false,
 	isChatInputCommand: () => false,
 } as unknown as Interaction;
 

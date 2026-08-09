@@ -4,9 +4,18 @@ import { expect, test } from "vitest";
 import { flashIcon, flashLine, flashRedirect, NOTICE } from "@routes/lib/flash";
 
 const component = {
+	isCommand: () => false,
 	isChatInputCommand: () => false,
 } as unknown as Interaction;
-const command = { isChatInputCommand: () => true } as unknown as Interaction;
+const command = {
+	isCommand: () => true,
+	isChatInputCommand: () => true,
+} as unknown as Interaction;
+// no panel behind it either, so its outcome belongs on the notice
+const contextMenuCommand = {
+	isCommand: () => true,
+	isChatInputCommand: () => false,
+} as unknown as Interaction;
 
 test("flashRedirect carries the flash text and level as redirect query params", () => {
 	expect(
@@ -31,6 +40,15 @@ test("flashRedirect merges extra params like the page to stay on", () => {
 test("a slash-command mutation redirects to the notice with the panel as target", () => {
 	expect(
 		flashRedirect(command, "/ring", "Ringed <@1>", "success"),
+	).toStrictEqual({
+		redirect: NOTICE,
+		queryParams: { flash: "Ringed <@1>", level: "success", to: "/ring" },
+	});
+});
+
+test("a context-menu mutation redirects to the notice like a slash command", () => {
+	expect(
+		flashRedirect(contextMenuCommand, "/ring", "Ringed <@1>", "success"),
 	).toStrictEqual({
 		redirect: NOTICE,
 		queryParams: { flash: "Ringed <@1>", level: "success", to: "/ring" },

@@ -5,6 +5,7 @@ import { pageJumpPost } from "./post";
 
 const interaction = {
 	user: { id: "caller" },
+	isCommand: () => false,
 	isChatInputCommand: () => false,
 } as unknown as Interaction;
 

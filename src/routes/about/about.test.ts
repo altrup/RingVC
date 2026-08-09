@@ -11,6 +11,7 @@ vi.mock("@db/feedback", () => ({
 
 const interaction = {
 	user: { id: "caller" },
+	isCommand: () => false,
 	isChatInputCommand: () => false,
 } as unknown as Interaction;
 

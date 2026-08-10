@@ -55,6 +55,14 @@ The bot stores its data in a [Supabase](https://supabase.com) Postgres database,
 - Use the instance's API URL and service role key (from your Supabase Docker `.env`) as `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` below
   - Note: the bot runs in its own container, so `SUPABASE_URL` must be reachable from inside it (use the host's address or a shared Docker network, not `127.0.0.1`)
 
+#### Trimming the stack
+
+The bot only needs Postgres and PostgREST, so you can delete the services it does not use from Supabase's `docker-compose.yml` ([system requirements](https://supabase.com/docs/guides/self-hosting/docker#system-requirements)). Keep `db`, `rest`, `kong`, `meta` and `studio` (the last three only for the dashboard); drop `realtime`, `storage`, `imgproxy`, `functions`, `auth` and `supavisor`
+
+- `functions` is Deno Edge Functions, unrelated to this repository's SQL functions, which run inside Postgres
+- `supavisor` publishes the Postgres port, so add a `ports` entry to `db` to keep `supabase db push --db-url` working
+- `kong` waits on `studio`, so also remove that `depends_on` if you drop the dashboard
+
 ### Migrating from data.txt
 
 Older versions of the bot stored data in `data/data.txt`. To import it into your Supabase database, run

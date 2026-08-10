@@ -9,7 +9,6 @@
 		"build": "tsup src/index.ts --minify && tsup src/deploy-commands.ts --minify",
 		"start": "node dist/index.js",
 		"deploy-commands:production": "node dist/deploy-commands.js",
-		"deploy-and-start": "pnpm run deploy-commands && pnpm run start",
 		"format": "prettier src scripts .github *.json *.md *.yaml *.mts --write",
 		"format:check": "prettier src scripts .github *.json *.md *.yaml *.mts --check"
 	},
